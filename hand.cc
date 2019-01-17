@@ -49,3 +49,13 @@ ostream& operator<<(ostream& os, const Hand& hand) {
 
   return os;
 }
+
+vector< vector<int> > toIntegerRepresentation (Hand &h) {
+  vector< vector<int> > out(3, vector<int>());
+
+  for (auto &card : h.top) { out[0].push_back(card.getVal()); }
+  for (auto &card : h.middle) { out[1].push_back(card.getVal()); }
+  for (auto &card : h.bottom) { out[2].push_back(card.getVal()); }
+
+  return out;
+}

@@ -30,9 +30,9 @@ int main(int argc, char *argv[]) {
   Pull myPull = {parseCards("Ah 2s 3d")};
 
   Decision decision1 = {
-    Placement(Card("Ah"), Position::top), 
-    Placement(Card("2s"), Position::middle), 
-    Placement(Card("3d"), Position::dead)};
+    Placement(Card("Ah"), Hand::Position::Top), 
+    Placement(Card("2s"), Hand::Position::Middle), 
+    Placement(Card("3d"), Hand::Position::Dead)};
 
   vector<Decision> decisions = {decision1};
   vector<Hand> otherHands = {otherHand};

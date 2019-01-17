@@ -2,7 +2,6 @@
 #include "deck.h"
 #include <cassert>
 #include <algorithm>
-
 using namespace std;
 
 Solver::Solver(Method _method): method{_method} {}
@@ -23,7 +22,6 @@ Decision Solver::solve(Hand &myHand, Pull &myPull, vector<Hand> otherHands,
     for (auto &card : hand.middle) { deck.remove(card); }
     for (auto &card : hand.bottom) { deck.remove(card); }
   }
-
   for (auto &card : deadCards) { deck.remove(card); }
 
   cout << "Deck now has " << deck.size() << " cards." << endl;
@@ -42,6 +40,7 @@ Decision Solver::solve(Hand &myHand, Pull &myPull, vector<Hand> otherHands,
   // average hand values over all iterations
   for (int i = 0; i < 10000; i++) {
     // sample cards from deck
+    vector<int> drawnCards = deck.select(totalCardsNeeded);
     // add cards to each hand
     // estimate ev
   }
@@ -51,9 +50,9 @@ Decision Solver::solve(Hand &myHand, Pull &myPull, vector<Hand> otherHands,
 
 ostream& operator<<(ostream& os, const Placement &p) {
   string pos = "top";
-  if (p.position == Position::middle) { pos = "middle"; }
-  if (p.position == Position::bottom) { pos = "bottom"; }
-  if (p.position == Position::dead) { pos = "dead"; }
+  if (p.position == Hand::Position::Middle) { pos = "middle"; }
+  if (p.position == Hand::Position::Bottom) { pos = "bottom"; }
+  if (p.position == Hand::Position::Dead) { pos = "dead"; }
 
   os << p.card << " " << pos;
   return os;

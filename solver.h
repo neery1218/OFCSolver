@@ -9,13 +9,6 @@
 #include "pull.h"
 #include "hand.h"
 
-enum Position {
-  top = 0,
-  middle = 1,
-  bottom = 2,
-  dead = 3
-};
-
 enum Method {
   CPU = 0,
   GPU = 1
@@ -23,8 +16,8 @@ enum Method {
 
 struct Placement {
   Card card;
-  Position position;
-  Placement(Card _card, Position _position): card{_card}, position{_position} {}
+  Hand::Position position;
+  Placement(Card _card, Hand::Position _position): card{_card}, position{_position} {}
 };
 
 std::ostream& operator<<(std::ostream& os, const Placement &p);

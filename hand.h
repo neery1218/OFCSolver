@@ -6,6 +6,13 @@
 #include "card.h"
 
 struct Hand {
+  enum Position { // TODO: add Placement::Position and then remove dead from here.
+    Top = 0,
+    Middle = 1,
+    Bottom = 2,
+    Dead = 3
+  };
+
   std::vector<Card> top;
   std::vector<Card> middle;
   std::vector<Card> bottom;
@@ -19,4 +26,5 @@ struct Hand {
   friend std::ostream& operator<<(std::ostream& os, const Hand& c);
 };
 
+std::vector<std::vector<int>> toIntegerRepresentation (Hand &h);
 #endif
