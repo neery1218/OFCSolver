@@ -6,6 +6,8 @@ Card::Card(std::string token) {
 
 Card::Card(int _val): val{_val} {}
 
+int Card::getVal() const { return val; }
+
 int Card::parseSuit(char suit) {
   switch(suit) {
     case 'c': 

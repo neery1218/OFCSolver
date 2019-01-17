@@ -16,6 +16,11 @@ enum Position {
   dead = 3
 };
 
+enum Method {
+  CPU = 0,
+  GPU = 1
+};
+
 struct Placement {
   Card card;
   Position position;
@@ -31,10 +36,11 @@ struct Decision {
 std::ostream& operator<<(std::ostream& os, const Decision &d);
 
 class Solver { // maybe this should be a standalone function?
+  Method method;
   public:
-    Solver();
+    Solver(Method method);
     Decision solve(Hand &myHand, Pull &myPull, std::vector<Hand> otherHands, 
-        std::vector<Decision> decisions, GameType type);
+        std::vector<Decision> decisions, GameType type, std::vector<Card> deadCards);
 };
 
 #endif

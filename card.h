@@ -11,6 +11,7 @@ class Card {
     Card(std::string token);
     Card(int val);
     friend std::ostream& operator<<(std::ostream& os, const Card& c);
+    int getVal() const;
 
   private:
     int parseSuit(char suit);

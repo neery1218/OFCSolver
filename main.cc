@@ -36,7 +36,10 @@ int main(int argc, char *argv[]) {
 
   vector<Decision> decisions = {decision1};
   vector<Hand> otherHands = {otherHand};
+  vector<Card> deadCards;
 
-  Decision answer = Solver().solve(myHand, myPull, otherHands, decisions, GameType::regular);
-  cout << answer;
+  Decision answer = Solver(Method::CPU).solve(
+      myHand, myPull, otherHands, 
+      decisions, GameType::regular, deadCards);
+  cout << answer << endl;
 }

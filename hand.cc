@@ -4,21 +4,30 @@
 
 using namespace std;
 
-Hand::Hand(vector<Card> _top, vector<Card> _middle, vector<Card> _bottom): top{_top}, middle{_middle}, bottom{_bottom}  {}
+Hand::Hand(vector<Card> _top, vector<Card> _middle, vector<Card> _bottom): top{_top}, middle{_middle}, bottom{_bottom} {
+  _size = _top.size() + _middle.size() + _bottom.size();
+}
 
 void Hand::addTop(Card card) { 
   assert(top.size() < 3);
   top.push_back(card); 
+  _size++;
 }
 
 void Hand::addMiddle(Card card) { 
   assert(middle.size() < 5);
   middle.push_back(card); 
+  _size++;
 }
 
 void Hand::addBottom(Card card) { 
   assert(bottom.size() < 5);
   bottom.push_back(card); 
+  _size++;
+}
+
+int Hand::size() {
+  return _size;
 }
 
 ostream& operator<<(ostream& os, const Hand& hand) {
