@@ -4,7 +4,8 @@
 enum GameType {
   regular = 0,
   progressive = 1,
-  ultimate = 2
+  ultimate = 2,
+  joker = 3,
 };
 
 #endif

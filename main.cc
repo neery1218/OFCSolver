@@ -3,11 +3,16 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <vector>
+#include <utility>
 #include "hand.h"
 #include "pull.h"
 #include "gametype.h"
 #include "solver.h"
 #include "card.h"
+#include "position.h"
+#include "decision.h"
+#include "placement.h"
 
 using namespace std;
 
@@ -30,16 +35,15 @@ int main(int argc, char *argv[]) {
   Pull myPull = {parseCards("Ah 2s 3d")};
 
   Decision decision1 = {
-    Placement(Card("Ah"), Hand::Position::Top), 
-    Placement(Card("2s"), Hand::Position::Middle), 
-    Placement(Card("3d"), Hand::Position::Dead)};
+    Placement(Card("Ah"), Position::Top), 
+    Placement(Card("2s"), Position::Middle), 
+    Placement(Card("3d"), Position::Dead)};
 
   vector<Decision> decisions = {decision1};
   vector<Hand> otherHands = {otherHand};
   vector<Card> deadCards;
 
-  Decision answer = Solver(Method::CPU).solve(
+  vector<pair<Decision, double>> answer = Solver(Method::CPU, GameType::progressive, 10000).solve(
       myHand, myPull, otherHands, 
-      decisions, GameType::regular, deadCards);
-  cout << answer << endl;
+      decisions, deadCards);
 }

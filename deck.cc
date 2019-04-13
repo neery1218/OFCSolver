@@ -12,7 +12,7 @@ Deck::Deck() {
 }
 
 void Deck::remove(Card card) {
-  remove(card.getVal());
+  deck.erase(card.getVal());
 }
 
 void Deck::remove(int val) {
@@ -23,11 +23,15 @@ int Deck::size() {
   return deck.size();
 }
 
-vector<int> Deck::select(int k) {
-  vector<int> out;
+const vector<Card> Deck::select(int k) {
+  vector<int> tmp;
+  vector<Card> out;
   experimental::sample(
       deck.begin(), deck.end(), 
-      back_inserter(out), k, 
+      back_inserter(tmp), k, 
       std::mt19937{std::random_device{}()});
+  transform(
+      tmp.begin(), tmp.end(), back_inserter(out), 
+      [] (int val) { return Card(val); });
   return out;
 }

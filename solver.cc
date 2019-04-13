@@ -2,63 +2,84 @@
 #include "deck.h"
 #include <cassert>
 #include <algorithm>
+#include <boost/range/irange.hpp>
 using namespace std;
 
-Solver::Solver(Method _method): method{_method} {}
+Solver::Solver(Method _method, GameType _type, int _numIterations): method{_method}, type{_type}, numIterations{_numIterations} {}
 
-Decision Solver::solve(Hand &myHand, Pull &myPull, vector<Hand> otherHands, 
-    vector<Decision> decisions, GameType type, vector<Card> deadCards) {
+vector<pair<Decision, double>> Solver::solve(Hand &myHand, Pull &myPull, vector<Hand> otherHands, 
+    vector<Decision> decisions,  vector<Card> deadCards) {
+
+  // Create deck, and remove known cards.
   Deck deck;
-  vector<Hand> hands;
-  hands.push_back(myHand);
-  hands.insert(hands.end(), otherHands.begin(), otherHands.end());
-
-  assert(hands.size() == 1 + otherHands.size());
-
-  // remove known cards from deck
   for (auto &card : myPull.cards) { deck.remove(card); }
-  for (auto &hand: hands) {
+  for (auto &hand: otherHands) {
     for (auto &card : hand.top) { deck.remove(card); }
     for (auto &card : hand.middle) { deck.remove(card); }
     for (auto &card : hand.bottom) { deck.remove(card); }
   }
+  for (auto &card : myHand.top) { deck.remove(card); }
+  for (auto &card : myHand.middle) { deck.remove(card); }
+  for (auto &card : myHand.bottom) { deck.remove(card); }
   for (auto &card : deadCards) { deck.remove(card); }
-
   cout << "Deck now has " << deck.size() << " cards." << endl;
+
+  vector<pair<Decision, double>> evs;
+  for (auto &decision : decisions) {
+    double ev = estimateEV(myHand, decision, otherHands, deck);
+    cout << "done 1" << endl;
+    //evs.emplace_back(decision, 0.0);
+  }
+
+  return evs;
+}
+
+double Solver::estimateEV(Hand &myCurHand, Decision decision, vector<Hand> otherHands,
+    Deck &deck) {
+
+  // apply decision to myHand
+  Hand myHand = myCurHand.applyDecision(decision);
+
+  // Create allHands structure for simplicity. 
+  // myHand is inserted first and that is an invariant.
+  vector<Hand> allHands;
+  allHands.push_back(myHand);
+  allHands.insert(allHands.end(), otherHands.begin(), otherHands.end());
+  assert(allHands.size() == 1 + otherHands.size());
 
   // how many cards does each hand need?
   vector<int> cardsNeeded;
-  for (auto &hand : hands) {
-    int cards = (13 - hand.size()) / 2 * 3;
-    cardsNeeded.push_back(cards);
-    cout << cards << " needed for hand." << endl;
-  }
+  transform(allHands.begin(), allHands.end(), back_inserter(cardsNeeded), 
+      [] (Hand h) { return (13 - h.size()) / 2 * 3; });
 
+  cout << "Size of allHands: " << allHands.size() << endl;
+  for (auto &numCards : cardsNeeded) { cout << numCards << " needed for hand." << endl; }
   int totalCardsNeeded = accumulate(cardsNeeded.begin(), cardsNeeded.end(), 0);
-  cout << totalCardsNeeded << " total cards needed." << endl;
 
+  cout << "Total cards needed: " << totalCardsNeeded << endl;
   // average hand values over all iterations
-  for (int i = 0; i < 10000; i++) {
+  double total = 0;
+  for (int i : boost::irange(1, numIterations)) {
     // sample cards from deck
-    vector<int> drawnCards = deck.select(totalCardsNeeded);
+    vector<Card> drawnCards = deck.select(totalCardsNeeded);
+
     // add cards to each hand
-    // estimate ev
+    unsigned int counter = 0;
+    vector<Hand> optimalOtherHands;
+    for (int i = 1; i < allHands.size(); ++i) {
+      cout << "Counter: " << counter;
+      vector<Card> cards(
+          drawnCards.begin() + counter,
+          drawnCards.begin() + counter + cardsNeeded[i]);
+      counter += cardsNeeded[i];
+      optimalOtherHands.push_back(allHands[i].constructOptimalHand(cards));
+    }
+
+    vector<Card> cards(drawnCards.begin() + counter, drawnCards.end());
+    Hand myOptimalHand = myHand.constructOptimalHand(cards);
+
+    total += myOptimalHand.calculatePoints(optimalOtherHands);
   }
 
-  return decisions[0];
-}
-
-ostream& operator<<(ostream& os, const Placement &p) {
-  string pos = "top";
-  if (p.position == Hand::Position::Middle) { pos = "middle"; }
-  if (p.position == Hand::Position::Bottom) { pos = "bottom"; }
-  if (p.position == Hand::Position::Dead) { pos = "dead"; }
-
-  os << p.card << " " << pos;
-  return os;
-}
-
-ostream& operator<<(ostream& os, const Decision &d) {
-  os << d.placements.at(0) << endl << d.placements.at(1)  << endl << d.placements.at(2);
-  return os;
+  return total / numIterations;
 }

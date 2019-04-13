@@ -8,6 +8,12 @@ Hand::Hand(vector<Card> _top, vector<Card> _middle, vector<Card> _bottom): top{_
   _size = _top.size() + _middle.size() + _bottom.size();
 }
 
+Hand::Hand(const Hand &obj) {
+  top = obj.top;
+  middle = obj.middle;
+  bottom = obj.bottom;
+}
+
 void Hand::addTop(Card card) { 
   assert(top.size() < 3);
   top.push_back(card); 
@@ -28,6 +34,17 @@ void Hand::addBottom(Card card) {
 
 int Hand::size() {
   return _size;
+}
+
+Hand Hand::applyDecision(Decision decision) {
+  Hand newHand(*this);
+  for (auto &placement : decision.placements) {
+    if (placement.position == Position::Top) { newHand.addTop(placement.card); }
+    else if (placement.position == Position::Middle) { newHand.addBottom(placement.card); }
+    else if (placement.position == Position::Bottom) { newHand.addBottom(placement.card); }
+  }
+
+  return newHand;
 }
 
 ostream& operator<<(ostream& os, const Hand& hand) {
@@ -59,3 +76,18 @@ vector< vector<int> > toIntegerRepresentation (Hand &h) {
 
   return out;
 }
+
+Hand Hand::constructOptimalHand(vector<Card> cards) {
+  return *this;
+}
+
+int Hand::calculatePoints(std::vector<Hand> otherHands) {
+  int total = 0;
+  for (auto &hand : otherHands) {
+    total += calculatePoints(hand);
+  }
+
+  return total;
+}
+
+int Hand::calculatePoints(Hand otherHand) { return 0; } // TODO: finish dat shit
