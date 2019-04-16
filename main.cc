@@ -35,15 +35,24 @@ int main(int argc, char *argv[]) {
   Pull myPull = {parseCards("Ah 2s 3d")};
 
   Decision decision1 = {
-    Placement(Card("Ah"), Position::Top), 
-    Placement(Card("2s"), Position::Middle), 
-    Placement(Card("3d"), Position::Dead)};
+    Placement(Card("Ah"), Position::top), 
+    Placement(Card("2s"), Position::middle), 
+    Placement(Card("3d"), Position::dead)};
 
-  vector<Decision> decisions = {decision1};
+  Decision decision2 = {
+    Placement(Card("Ah"), Position::top), 
+    Placement(Card("2s"), Position::dead), 
+    Placement(Card("3d"), Position::middle)};
+
+  vector<Decision> decisions = {decision1, decision2};
   vector<Hand> otherHands = {otherHand};
   vector<Card> deadCards;
 
-  vector<pair<Decision, double>> answer = Solver(Method::CPU, GameType::progressive, 10000).solve(
+  vector<pair<Decision, double>> answer = Solver(Method::CPU, GameType::progressive, 1000).solve(
       myHand, myPull, otherHands, 
       decisions, deadCards);
+
+  for (auto &p : answer) {
+    cout << p.first << " : " << p.second << endl;
+  }
 }

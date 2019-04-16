@@ -2,10 +2,10 @@
 #define _POSITION_H_
 
 enum Position {
-  Top = 0, 
-  Middle = 1,
-  Bottom = 2,
-  Dead = 3
+  top = 0, 
+  middle = 1,
+  bottom = 2,
+  dead = 3
 };
 
 #endif

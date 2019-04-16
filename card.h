@@ -4,20 +4,21 @@
 #include <string>
 #include <iostream>
 
-class Card {
-  int val;
+struct Card {
+  std::string val;
 
   public:
     Card(std::string token);
-    Card(int val);
     friend std::ostream& operator<<(std::ostream& os, const Card& c);
-    int getVal() const;
+    friend std::string to_string(Card c);
+    bool operator <(const Card &obj) const;
 
   private:
+    /*
     int parseSuit(char suit);
     int parseRank(char rank);
     char toSuit() const;
     char toRank() const;
+    */
 };
-
 #endif

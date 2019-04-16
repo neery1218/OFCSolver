@@ -2,10 +2,11 @@
 #include "deck.h"
 #include <cassert>
 #include <algorithm>
+#include <numeric>
 #include <boost/range/irange.hpp>
 using namespace std;
 
-Solver::Solver(Method _method, GameType _type, int _numIterations): method{_method}, type{_type}, numIterations{_numIterations} {}
+Solver::Solver(Method _method, GameType _type, int _numIterations): method{_method}, type{_type}, numIterations{_numIterations}, pokerHandEvaluator{PokerHandEvaluator(_type)} {}
 
 vector<pair<Decision, double>> Solver::solve(Hand &myHand, Pull &myPull, vector<Hand> otherHands, 
     vector<Decision> decisions,  vector<Card> deadCards) {
@@ -27,8 +28,7 @@ vector<pair<Decision, double>> Solver::solve(Hand &myHand, Pull &myPull, vector<
   vector<pair<Decision, double>> evs;
   for (auto &decision : decisions) {
     double ev = estimateEV(myHand, decision, otherHands, deck);
-    cout << "done 1" << endl;
-    //evs.emplace_back(decision, 0.0);
+    evs.emplace_back(decision, ev);
   }
 
   return evs;
@@ -57,6 +57,7 @@ double Solver::estimateEV(Hand &myCurHand, Decision decision, vector<Hand> other
   int totalCardsNeeded = accumulate(cardsNeeded.begin(), cardsNeeded.end(), 0);
 
   cout << "Total cards needed: " << totalCardsNeeded << endl;
+
   // average hand values over all iterations
   double total = 0;
   for (int i : boost::irange(1, numIterations)) {
@@ -64,21 +65,19 @@ double Solver::estimateEV(Hand &myCurHand, Decision decision, vector<Hand> other
     vector<Card> drawnCards = deck.select(totalCardsNeeded);
 
     // add cards to each hand
-    unsigned int counter = 0;
-    vector<Hand> optimalOtherHands;
+    unsigned int counter = cardsNeeded[0];
+
+    vector<Card> cards(drawnCards.begin(), drawnCards.begin() + cardsNeeded[0]);
+    CompletedHand myOptimalHand = myHand.constructOptimalHand(cards, &pokerHandEvaluator);
+
     for (int i = 1; i < allHands.size(); ++i) {
-      cout << "Counter: " << counter;
       vector<Card> cards(
           drawnCards.begin() + counter,
           drawnCards.begin() + counter + cardsNeeded[i]);
       counter += cardsNeeded[i];
-      optimalOtherHands.push_back(allHands[i].constructOptimalHand(cards));
+      CompletedHand otherHand = allHands[i].constructOptimalHand(cards, &pokerHandEvaluator);
+      total += myOptimalHand.calculatePoints(otherHand);
     }
-
-    vector<Card> cards(drawnCards.begin() + counter, drawnCards.end());
-    Hand myOptimalHand = myHand.constructOptimalHand(cards);
-
-    total += myOptimalHand.calculatePoints(optimalOtherHands);
   }
 
   return total / numIterations;

@@ -12,6 +12,7 @@ Hand::Hand(const Hand &obj) {
   top = obj.top;
   middle = obj.middle;
   bottom = obj.bottom;
+  _size = obj._size;
 }
 
 void Hand::addTop(Card card) { 
@@ -39,9 +40,9 @@ int Hand::size() {
 Hand Hand::applyDecision(Decision decision) {
   Hand newHand(*this);
   for (auto &placement : decision.placements) {
-    if (placement.position == Position::Top) { newHand.addTop(placement.card); }
-    else if (placement.position == Position::Middle) { newHand.addBottom(placement.card); }
-    else if (placement.position == Position::Bottom) { newHand.addBottom(placement.card); }
+    if (placement.position == Position::top) { newHand.addTop(placement.card); }
+    else if (placement.position == Position::middle) { newHand.addMiddle(placement.card); }
+    else if (placement.position == Position::bottom) { newHand.addBottom(placement.card); }
   }
 
   return newHand;
@@ -67,27 +68,63 @@ ostream& operator<<(ostream& os, const Hand& hand) {
   return os;
 }
 
-vector< vector<int> > toIntegerRepresentation (Hand &h) {
-  vector< vector<int> > out(3, vector<int>());
+CompletedHand Hand::constructOptimalHand(vector<Card> &cards, PokerHandEvaluator * pokerHandEvaluator) {
+  /* This is inefficient af. More research needs to be done here. */
+  sort(cards.begin(), cards.end()); // must sort to use next_permutation.
 
-  for (auto &card : h.top) { out[0].push_back(card.getVal()); }
-  for (auto &card : h.middle) { out[1].push_back(card.getVal()); }
-  for (auto &card : h.bottom) { out[2].push_back(card.getVal()); }
+  int topCardsMissing  = 3 - top.size();
+  int middleCardsMissing  = 5 - middle.size();
+  int bottomCardsMissing  = 5 - bottom.size();
 
-  return out;
+  CompletedHand bestHand;
+  int highestRoyalties = -1;
+
+  do {
+    Hand tmp(*this); // expensive copy.
+
+    tmp.top.insert(tmp.top.end(), cards.begin(), cards.begin() + topCardsMissing);
+    tmp.middle.insert(tmp.middle.end(), cards.begin() + topCardsMissing,
+       cards.begin() + topCardsMissing + middleCardsMissing);
+       
+
+    PokerHandInfo topInfo = pokerHandEvaluator->eval(tmp.top, Position::top);
+    PokerHandInfo middleInfo = pokerHandEvaluator->eval(tmp.middle, Position::middle);
+    if (middleInfo.overallRank < topInfo.overallRank) continue; // fouled hand
+
+    tmp.bottom.insert(tmp.bottom.end(), cards.begin() + topCardsMissing + middleCardsMissing,
+        cards.begin() + topCardsMissing + middleCardsMissing + bottomCardsMissing);     
+
+    PokerHandInfo bottomInfo = pokerHandEvaluator->eval(tmp.bottom, Position::bottom);
+    if (bottomInfo.overallRank < middleInfo.overallRank) continue; // fouled hand
+
+    int royalties = topInfo.royalties + middleInfo.royalties + bottomInfo.royalties;
+    if (royalties > highestRoyalties) {
+      highestRoyalties = royalties;
+      bestHand = CompletedHand(tmp, topInfo, middleInfo, bottomInfo);
+    }
+  } while (next_permutation(cards.begin(), cards.end()));
+
+  return bestHand;
 }
 
-Hand Hand::constructOptimalHand(vector<Card> cards) {
-  return *this;
+int CompletedHand::calculatePoints(const CompletedHand &otherHand) {
+  int royaltyPoints = topInfo.royalties + middleInfo.royalties + bottomInfo.royalties - otherHand.topInfo.royalties - otherHand.middleInfo.royalties - otherHand.bottomInfo.royalties;
+
+  int gtBonus = 0;
+
+  if (topInfo.overallRank < otherHand.topInfo.overallRank) gtBonus -= 1;
+  else if (otherHand.topInfo.overallRank < topInfo.overallRank) gtBonus += 1;
+  
+  if (middleInfo.overallRank < otherHand.middleInfo.overallRank) gtBonus -= 1;
+  else if (otherHand.middleInfo.overallRank < middleInfo.overallRank) gtBonus += 1;
+
+  if (bottomInfo.overallRank < otherHand.bottomInfo.overallRank) gtBonus -= 1;
+  else if (otherHand.bottomInfo.overallRank < bottomInfo.overallRank) gtBonus += 1;
+
+  if (gtBonus == -3) gtBonus = -6;
+  if (gtBonus == 3) gtBonus = 6;
+
+  return royaltyPoints + gtBonus;
 }
 
-int Hand::calculatePoints(std::vector<Hand> otherHands) {
-  int total = 0;
-  for (auto &hand : otherHands) {
-    total += calculatePoints(hand);
-  }
-
-  return total;
-}
-
-int Hand::calculatePoints(Hand otherHand) { return 0; } // TODO: finish dat shit
+  

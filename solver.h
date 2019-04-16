@@ -28,6 +28,8 @@ class Solver { // maybe this should be a standalone function?
   Method method;
   GameType type;
   int numIterations;
+  PokerHandEvaluator pokerHandEvaluator;
+
   public:
     Solver(Method method, GameType type, int numIterations);
     std::vector<std::pair<Decision, double>> solve(Hand &myHand, Pull &myPull, std::vector<Hand> otherHands, 

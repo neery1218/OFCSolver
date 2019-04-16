@@ -1,13 +1,9 @@
 #include "card.h"
 
-Card::Card(std::string token) {
-  val = 13 * parseSuit(token[1]) + parseRank(token[0]);
-}
+using namespace std; 
 
-Card::Card(int _val): val{_val} {}
-
-int Card::getVal() const { return val; }
-
+Card::Card(string _val): val{_val} {}
+/*
 int Card::parseSuit(char suit) {
   switch(suit) {
     case 'c': 
@@ -57,12 +53,12 @@ int Card::parseRank(char rank) {
 }
 
 char Card::toSuit() const {
-  int quot = val / 13;
+  int quot = val % 4;
   switch (quot) {
     case 0:
-      return 'c';
-    case 1:
       return 'd';
+    case 1:
+      return 'c';
     case 2:
       return 'h';
     case 3:
@@ -73,7 +69,7 @@ char Card::toSuit() const {
 }
 
 char Card::toRank() const {
-  int rem = val % 13;
+  int rem = val / 4;
   if (rem <= 8) {
     return '0' + rem + 2;
   }
@@ -91,8 +87,16 @@ char Card::toRank() const {
       throw 1;
   }
 }
+*/
+bool Card::operator <(const Card &obj) const {
+  return val < obj.val;
+}
 
 std::ostream& operator<<(std::ostream& os, const Card& c) {
-  os << " " << c.toRank() << c.toSuit();
+  os << " " << c.val;
   return os;
+}
+
+string to_string(Card c) {
+  return c.val;
 }

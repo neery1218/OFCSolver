@@ -14,9 +14,9 @@ struct Placement {
 
 inline std::ostream& operator<<(std::ostream& os, const Placement &p) {
   std::string pos = "top";
-  if (p.position == Position::Middle) { pos = "middle"; }
-  if (p.position == Position::Bottom) { pos = "bottom"; }
-  if (p.position == Position::Dead) { pos = "dead"; }
+  if (p.position == Position::middle) { pos = "middle"; }
+  if (p.position == Position::bottom) { pos = "bottom"; }
+  if (p.position == Position::dead) { pos = "dead"; }
 
   os << p.card << " " << pos;
   return os;
