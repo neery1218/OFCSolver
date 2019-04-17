@@ -6,5 +6,8 @@ all:
 debug:
 	g++ -g -std=c++17 $(INC) $(SRCS) -o maindebug
 
+profile:
+	g++ -pg -O3 -std=c++17 $(INC) $(SRCS) -o mainprof
+
 clean:
 	rm -f main maindebug 

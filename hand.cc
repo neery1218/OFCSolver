@@ -6,6 +6,9 @@ using namespace std;
 
 Hand::Hand(vector<Card> _top, vector<Card> _middle, vector<Card> _bottom): top{_top}, middle{_middle}, bottom{_bottom} {
   _size = _top.size() + _middle.size() + _bottom.size();
+  top.reserve(3);
+  middle.reserve(5);
+  bottom.reserve(5);
 }
 
 Hand::Hand(const Hand &obj) {

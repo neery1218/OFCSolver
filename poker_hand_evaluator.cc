@@ -69,7 +69,7 @@ PokerHandInfo PokerHandEvaluator::eval(vector<Card> &cards, Position pos) {
 
   string joined = boost::algorithm::join(cardStr, "");
 
-  if (pos == Position::top) return topEvalInfo.at(joined);
-  else if (pos == Position::middle) return middleEvalInfo.at(joined);
-  else return bottomEvalInfo.at(joined);
+  if (pos == Position::top) return topEvalInfo[joined];
+  else if (pos == Position::middle) return middleEvalInfo[joined];
+  else return bottomEvalInfo[joined];
 }
