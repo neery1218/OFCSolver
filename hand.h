@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 #include "card.h"
 #include "decision.h"
 #include "poker_hand_evaluator.h"
@@ -12,12 +13,12 @@ class Decision;
 struct CompletedHand;
 
 struct Hand {
-  std::vector<Card> top;
-  std::vector<Card> middle;
-  std::vector<Card> bottom;
+  std::set<Card> top;
+  std::set<Card> middle;
+  std::set<Card> bottom;
   int _size;
 
-  Hand(std::vector<Card> top, std::vector<Card> middle, std::vector<Card> bottom);
+  Hand(std::set<Card> top, std::set<Card> middle, std::set<Card> bottom);
   Hand(const Hand &obj);
   Hand() {}
 
@@ -27,19 +28,19 @@ struct Hand {
 
   int size();
   Hand applyDecision(Decision decision);
-  CompletedHand constructOptimalHand(std::vector<Card> &cards, PokerHandEvaluator * pokerHandEvaluator);
+  CompletedHand constructOptimalHand(std::set<Card> &cards, PokerHandEvaluator * pokerHandEvaluator);
 
   friend std::ostream& operator<<(std::ostream& os, const Hand& c);
 };
 
 struct CompletedHand {
   Hand h;
-  PokerHandInfo topInfo;
-  PokerHandInfo middleInfo;
-  PokerHandInfo bottomInfo;
+  PokerHandInfo *topInfo;
+  PokerHandInfo *middleInfo;
+  PokerHandInfo *bottomInfo;
   
   CompletedHand() {};
-  CompletedHand(Hand _h, PokerHandInfo top, PokerHandInfo mid, PokerHandInfo bot): h{_h}, topInfo{top}, middleInfo{mid}, bottomInfo{bot} {}
+  CompletedHand(Hand _h, PokerHandInfo *top, PokerHandInfo *mid, PokerHandInfo *bot): h{_h}, topInfo{top}, middleInfo{mid}, bottomInfo{bot} {}
   int calculatePoints(const CompletedHand &other);
 };
 #endif

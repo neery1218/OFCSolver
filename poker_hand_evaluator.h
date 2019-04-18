@@ -2,6 +2,7 @@
 #define _POKER_HAND_EVALUATOR_
 
 #include <vector>
+#include <set>
 #include <utility>
 #include <unordered_map>
 #include "card.h"
@@ -32,11 +33,12 @@ class PokerHandEvaluator {
 
   public: 
     PokerHandEvaluator(GameType type);
-    PokerHandInfo eval(std::vector<Card> &cards, Position pos);
+    PokerHandInfo * eval(std::set<Card> &completedRow, Position pos);
+    PokerHandInfo * eval(std::set<Card> &partialRow, std::set<Card> &cards, Position pos);
 
   private:
-    std::unordered_map<std::string, PokerHandInfo> topEvalInfo;
-    std::unordered_map<std::string, PokerHandInfo> middleEvalInfo;
-    std::unordered_map<std::string, PokerHandInfo> bottomEvalInfo;
+    std::unordered_map<std::string, PokerHandInfo*> topEvalInfo;
+    std::unordered_map<std::string, PokerHandInfo*> middleEvalInfo;
+    std::unordered_map<std::string, PokerHandInfo*> bottomEvalInfo;
 };
 #endif

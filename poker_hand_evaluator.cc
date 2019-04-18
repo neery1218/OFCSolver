@@ -10,6 +10,10 @@ PokerHandEvaluator::PokerHandEvaluator(GameType _gameType): gameType{_gameType} 
   ifstream f("hand_strength.csv");
   string line;
 
+  topEvalInfo.reserve(22100);
+  middleEvalInfo.reserve(3000000);
+  bottomEvalInfo.reserve(3000000);
+
   unordered_map<int, PokerHandType> intToPokerHandType = {
     {0, PokerHandType::HIGH_CARD},
     {1, PokerHandType::PAIR},
@@ -47,29 +51,35 @@ PokerHandEvaluator::PokerHandEvaluator(GameType _gameType): gameType{_gameType} 
         }
       }
 
-      topEvalInfo[tokens[0]] = PokerHandInfo{overallRank, handType, royalties};
+      topEvalInfo[tokens[0]] = new PokerHandInfo{overallRank, handType, royalties};
     } 
     else {
-      bottomEvalInfo[tokens[0]] = PokerHandInfo{overallRank, handType, royalties};
+      bottomEvalInfo[tokens[0]] = new PokerHandInfo{overallRank, handType, royalties};
 
       if (handType == PokerHandType::TRIPS) royalties = 1; // special case...this feels bad
-      middleEvalInfo[tokens[0]] = PokerHandInfo{overallRank, handType, royalties * 2};
+      middleEvalInfo[tokens[0]] = new PokerHandInfo{overallRank, handType, royalties * 2};
     }
   }
 
   f.close();
 }
 
-PokerHandInfo PokerHandEvaluator::eval(vector<Card> &cards, Position pos) {
-  sort(cards.begin(), cards.end());
+PokerHandInfo * PokerHandEvaluator::eval(set<Card> &completedRow, Position pos) {
+  string joined = "";
+  for (auto &c : completedRow) { joined += c.val; }
+  if (pos == Position::top) return topEvalInfo.at(joined);
+  else if (pos == Position::middle) return middleEvalInfo.at(joined);
+  else return bottomEvalInfo.at(joined);
+}
 
-  vector<string> cardStr;
-  transform(cards.begin(), cards.end(), back_inserter(cardStr),
-      [] (Card c) { return c.val; });
+PokerHandInfo * PokerHandEvaluator::eval(set<Card> &partialRow, set<Card> &cards, Position pos) {
+  vector<Card> tmp;
 
-  string joined = boost::algorithm::join(cardStr, "");
+  std::merge(partialRow.begin(), partialRow.end(), cards.begin(), cards.end(), back_inserter(tmp));
+  string joined = "";
+  for (auto &c : tmp) { joined += c.val; }
 
-  if (pos == Position::top) return topEvalInfo[joined];
-  else if (pos == Position::middle) return middleEvalInfo[joined];
-  else return bottomEvalInfo[joined];
+  if (pos == Position::top) return topEvalInfo.at(joined);
+  else if (pos == Position::middle) return middleEvalInfo.at(joined);
+  else return bottomEvalInfo.at(joined);
 }

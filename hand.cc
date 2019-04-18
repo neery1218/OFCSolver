@@ -4,11 +4,8 @@
 
 using namespace std;
 
-Hand::Hand(vector<Card> _top, vector<Card> _middle, vector<Card> _bottom): top{_top}, middle{_middle}, bottom{_bottom} {
+Hand::Hand(set<Card> _top, set<Card> _middle, set<Card> _bottom): top{_top}, middle{_middle}, bottom{_bottom} {
   _size = _top.size() + _middle.size() + _bottom.size();
-  top.reserve(3);
-  middle.reserve(5);
-  bottom.reserve(5);
 }
 
 Hand::Hand(const Hand &obj) {
@@ -20,19 +17,19 @@ Hand::Hand(const Hand &obj) {
 
 void Hand::addTop(Card card) { 
   assert(top.size() < 3);
-  top.push_back(card); 
+  top.insert(card); 
   _size++;
 }
 
 void Hand::addMiddle(Card card) { 
   assert(middle.size() < 5);
-  middle.push_back(card); 
+  middle.insert(card); 
   _size++;
 }
 
 void Hand::addBottom(Card card) { 
   assert(bottom.size() < 5);
-  bottom.push_back(card); 
+  bottom.insert(card); 
   _size++;
 }
 
@@ -71,10 +68,28 @@ ostream& operator<<(ostream& os, const Hand& hand) {
   return os;
 }
 
-CompletedHand Hand::constructOptimalHand(vector<Card> &cards, PokerHandEvaluator * pokerHandEvaluator) {
-  /* This is inefficient af. More research needs to be done here. */
-  sort(cards.begin(), cards.end()); // must sort to use next_permutation.
+vector<set<Card>> comb(set<Card> &_cards, int K)
+{
+    vector<Card> cards(_cards.begin(), _cards.end());
+    std::string bitmask(K, 1); // K leading 1's
+    bitmask.resize(cards.size(), 0); // N-K trailing 0's
 
+    vector<set<Card>> out;
+    // print integers and permute bitmask
+    do {
+      set<Card> tmp; 
+
+      for (int i = 0; i < cards.size(); ++i) // [0..N-1] integers
+      {
+          if (bitmask[i]) tmp.insert(cards[i]);
+      }
+      out.emplace_back(tmp); // TODO: verify move semantics
+    } while (std::prev_permutation(bitmask.begin(), bitmask.end()));
+
+    return out; // TODO: move semantics?
+}
+
+CompletedHand Hand::constructOptimalHand(set<Card> &cards, PokerHandEvaluator * pokerHandEvaluator) {
   int topCardsMissing  = 3 - top.size();
   int middleCardsMissing  = 5 - middle.size();
   int bottomCardsMissing  = 5 - bottom.size();
@@ -82,47 +97,60 @@ CompletedHand Hand::constructOptimalHand(vector<Card> &cards, PokerHandEvaluator
   CompletedHand bestHand;
   int highestRoyalties = -1;
 
-  do {
-    Hand tmp(*this); // expensive copy.
+  vector< set<Card> > topCombos = comb(cards, topCardsMissing);
+  if (topCombos.empty()) topCombos.push_back(set<Card>());
 
-    tmp.top.insert(tmp.top.end(), cards.begin(), cards.begin() + topCardsMissing);
-    tmp.middle.insert(tmp.middle.end(), cards.begin() + topCardsMissing,
-       cards.begin() + topCardsMissing + middleCardsMissing);
-       
+  for (auto &topCombo : topCombos) {
 
-    PokerHandInfo topInfo = pokerHandEvaluator->eval(tmp.top, Position::top);
-    PokerHandInfo middleInfo = pokerHandEvaluator->eval(tmp.middle, Position::middle);
-    if (middleInfo.overallRank < topInfo.overallRank) continue; // fouled hand
+    PokerHandInfo * topInfo = topCardsMissing > 0 ? pokerHandEvaluator->eval(top, topCombo, Position::top) : pokerHandEvaluator->eval(top, Position::top);
+    set<Card> remainingCards;
 
-    tmp.bottom.insert(tmp.bottom.end(), cards.begin() + topCardsMissing + middleCardsMissing,
-        cards.begin() + topCardsMissing + middleCardsMissing + bottomCardsMissing);     
+    set_difference(cards.begin(), cards.end(), topCombo.begin(), topCombo.end(), inserter(remainingCards, remainingCards.begin()));
 
-    PokerHandInfo bottomInfo = pokerHandEvaluator->eval(tmp.bottom, Position::bottom);
-    if (bottomInfo.overallRank < middleInfo.overallRank) continue; // fouled hand
+    vector< set<Card> > midCombos = comb(remainingCards, middleCardsMissing);
+    if (midCombos.empty()) midCombos.push_back(set<Card>());
 
-    int royalties = topInfo.royalties + middleInfo.royalties + bottomInfo.royalties;
-    if (royalties > highestRoyalties) {
-      highestRoyalties = royalties;
-      bestHand = CompletedHand(tmp, topInfo, middleInfo, bottomInfo);
+    for (auto &midCombo : midCombos) {
+
+      PokerHandInfo * middleInfo = pokerHandEvaluator->eval(middle, midCombo, Position::middle);
+      if (middleInfo->overallRank < topInfo->overallRank) continue; // fouled hand
+
+      set<Card> bottomRemainingCards;
+      set_difference(remainingCards.begin(), remainingCards.end(), midCombo.begin(), 
+          midCombo.end(), inserter(bottomRemainingCards, bottomRemainingCards.begin()));
+
+      vector< set<Card> > botCombos = comb(bottomRemainingCards, bottomCardsMissing);
+      if (botCombos.empty()) botCombos.push_back(set<Card>());
+
+      for (auto &botCombo : botCombos) {
+        PokerHandInfo * bottomInfo = pokerHandEvaluator->eval(bottom, botCombo, Position::bottom);
+        if (bottomInfo->overallRank < middleInfo->overallRank) continue; // fouled hand
+
+        int royalties = topInfo->royalties + middleInfo->royalties + bottomInfo->royalties;
+        if (royalties > highestRoyalties) {
+          highestRoyalties = royalties;
+          bestHand = CompletedHand(*this, topInfo, middleInfo, bottomInfo);
+        }
+      }
     }
-  } while (next_permutation(cards.begin(), cards.end()));
+  }
 
   return bestHand;
 }
 
 int CompletedHand::calculatePoints(const CompletedHand &otherHand) {
-  int royaltyPoints = topInfo.royalties + middleInfo.royalties + bottomInfo.royalties - otherHand.topInfo.royalties - otherHand.middleInfo.royalties - otherHand.bottomInfo.royalties;
+  int royaltyPoints = topInfo->royalties + middleInfo->royalties + bottomInfo->royalties - otherHand.topInfo->royalties - otherHand.middleInfo->royalties - otherHand.bottomInfo->royalties;
 
   int gtBonus = 0;
 
-  if (topInfo.overallRank < otherHand.topInfo.overallRank) gtBonus -= 1;
-  else if (otherHand.topInfo.overallRank < topInfo.overallRank) gtBonus += 1;
+  if (topInfo->overallRank < otherHand.topInfo->overallRank) gtBonus -= 1;
+  else if (otherHand.topInfo->overallRank < topInfo->overallRank) gtBonus += 1;
   
-  if (middleInfo.overallRank < otherHand.middleInfo.overallRank) gtBonus -= 1;
-  else if (otherHand.middleInfo.overallRank < middleInfo.overallRank) gtBonus += 1;
+  if (middleInfo->overallRank < otherHand.middleInfo->overallRank) gtBonus -= 1;
+  else if (otherHand.middleInfo->overallRank < middleInfo->overallRank) gtBonus += 1;
 
-  if (bottomInfo.overallRank < otherHand.bottomInfo.overallRank) gtBonus -= 1;
-  else if (otherHand.bottomInfo.overallRank < bottomInfo.overallRank) gtBonus += 1;
+  if (bottomInfo->overallRank < otherHand.bottomInfo->overallRank) gtBonus -= 1;
+  else if (otherHand.bottomInfo->overallRank < bottomInfo->overallRank) gtBonus += 1;
 
   if (gtBonus == -3) gtBonus = -6;
   if (gtBonus == 3) gtBonus = 6;

@@ -67,11 +67,11 @@ double Solver::estimateEV(Hand &myCurHand, Decision decision, vector<Hand> other
     // add cards to each hand
     unsigned int counter = cardsNeeded[0];
 
-    vector<Card> cards(drawnCards.begin(), drawnCards.begin() + cardsNeeded[0]);
+    set<Card> cards(drawnCards.begin(), drawnCards.begin() + cardsNeeded[0]);
     CompletedHand myOptimalHand = myHand.constructOptimalHand(cards, &pokerHandEvaluator);
 
     for (int i = 1; i < allHands.size(); ++i) {
-      vector<Card> cards(
+      set<Card> cards(
           drawnCards.begin() + counter,
           drawnCards.begin() + counter + cardsNeeded[i]);
       counter += cardsNeeded[i];
