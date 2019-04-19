@@ -129,7 +129,7 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, PokerHandEvaluator * 
         int royalties = topInfo->royalties + middleInfo->royalties + bottomInfo->royalties;
         if (royalties > highestRoyalties) {
           highestRoyalties = royalties;
-          bestHand = CompletedHand(*this, topInfo, middleInfo, bottomInfo);
+          bestHand = CompletedHand(topInfo, middleInfo, bottomInfo);
         }
       }
     }

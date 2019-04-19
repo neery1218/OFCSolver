@@ -34,13 +34,12 @@ struct Hand {
 };
 
 struct CompletedHand {
-  Hand h;
   PokerHandInfo *topInfo;
   PokerHandInfo *middleInfo;
   PokerHandInfo *bottomInfo;
   
   CompletedHand() {};
-  CompletedHand(Hand _h, PokerHandInfo *top, PokerHandInfo *mid, PokerHandInfo *bot): h{_h}, topInfo{top}, middleInfo{mid}, bottomInfo{bot} {}
+  CompletedHand(PokerHandInfo *top, PokerHandInfo *mid, PokerHandInfo *bot): topInfo{top}, middleInfo{mid}, bottomInfo{bot} {}
   int calculatePoints(const CompletedHand &other);
 };
 #endif

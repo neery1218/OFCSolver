@@ -1,13 +1,21 @@
 INC = -I /usr/local/include/boost/
-SRCS = main.cc hand.cc solver.cc card.cc pull.cc deck.cc poker_hand_evaluator.cc
+SRCS = hand.cc solver.cc card.cc pull.cc deck.cc poker_hand_evaluator.cc
+DRIVER = main.cc
+TESTS = test_hand.cc
 all: 
-	g++ -std=c++14 -O3 $(INC) $(SRCS) -o main
+	g++ -std=c++17 -O3 $(INC) $(SRCS) $(DRIVER) -o main
+
+test: testmain
+	g++ -std=c++17 -O3 test_main.o $(INC) $(SRCS) $(TESTS) -o maintest
 
 debug:
-	g++ -g -std=c++17 $(INC) $(SRCS) -o maindebug
+	g++ -g -std=c++17 $(INC) $(SRCS) $(DRIVER) -o maindebug
 
 profile:
-	g++ -pg -O3 -std=c++17 $(INC) $(SRCS) -o mainprof
+	g++ -pg -O3 -std=c++17 $(INC) $(SRCS) $(DRIVER) -o mainprof
 
 clean:
 	rm -f main maindebug 
+
+testmain:
+	g++ -std=c++17 -O3 test_main.cc -c
