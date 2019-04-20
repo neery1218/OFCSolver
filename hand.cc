@@ -1,6 +1,7 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 #include "hand.h"
+#include "include/discreture.hpp"
 
 using namespace std;
 
@@ -70,23 +71,14 @@ ostream& operator<<(ostream& os, const Hand& hand) {
 
 vector<set<Card>> comb(set<Card> &_cards, int K)
 {
-    vector<Card> cards(_cards.begin(), _cards.end());
-    std::string bitmask(K, 1); // K leading 1's
-    bitmask.resize(cards.size(), 0); // N-K trailing 0's
-
-    vector<set<Card>> out;
-    // print integers and permute bitmask
-    do {
-      set<Card> tmp; 
-
-      for (int i = 0; i < cards.size(); ++i) // [0..N-1] integers
-      {
-          if (bitmask[i]) tmp.insert(cards[i]);
-      }
-      out.emplace_back(tmp); // TODO: verify move semantics
-    } while (std::prev_permutation(bitmask.begin(), bitmask.end()));
-
-    return out; // TODO: move semantics?
+  vector<Card> cards(_cards.begin(), _cards.end());
+  vector<set<Card>> out;
+  for (auto&& x : discreture::combinations_stack((int)cards.size(), K)) {
+    set<Card> tmp;
+    for (auto &i : x) { tmp.insert(cards[i]); }
+    out.emplace_back(tmp);
+  }
+  return out;
 }
 
 CompletedHand Hand::constructOptimalHand(set<Card> &cards, PokerHandEvaluator * pokerHandEvaluator) {
