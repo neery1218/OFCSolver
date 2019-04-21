@@ -89,39 +89,45 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, PokerHandEvaluator * 
   CompletedHand bestHand;
   int highestRoyalties = -1;
 
-  vector< set<Card> > topCombos = comb(cards, topCardsMissing);
-  if (topCombos.empty()) topCombos.push_back(set<Card>());
+  vector< set<Card> > botCombos = comb(cards, bottomCardsMissing);
+  if (botCombos.empty()) botCombos.push_back(set<Card>());
 
-  for (auto &topCombo : topCombos) {
+  for (auto &botCombo : botCombos) {
 
-    PokerHandInfo * topInfo = topCardsMissing > 0 ? pokerHandEvaluator->eval(top, topCombo, Position::top) : pokerHandEvaluator->eval(top, Position::top);
+    PokerHandInfo *botInfo = bottomCardsMissing > 0 ? pokerHandEvaluator->eval(bottom, botCombo, Position::bottom) : pokerHandEvaluator->eval(bottom, Position::bottom);
+
+    if (highestRoyalties >= 0 && botInfo->overallRank < 16215) continue; // don't continue if bottom is less than KK
+
     set<Card> remainingCards;
-
-    set_difference(cards.begin(), cards.end(), topCombo.begin(), topCombo.end(), inserter(remainingCards, remainingCards.begin()));
+    set_difference(
+        cards.begin(), cards.end(), 
+        botCombo.begin(), botCombo.end(), 
+        inserter(remainingCards, remainingCards.begin()));
 
     vector< set<Card> > midCombos = comb(remainingCards, middleCardsMissing);
     if (midCombos.empty()) midCombos.push_back(set<Card>());
 
     for (auto &midCombo : midCombos) {
 
-      PokerHandInfo * middleInfo = pokerHandEvaluator->eval(middle, midCombo, Position::middle);
-      if (middleInfo->overallRank < topInfo->overallRank) continue; // fouled hand
+      PokerHandInfo * midInfo = pokerHandEvaluator->eval(middle, midCombo, Position::middle);
+      if (botInfo->overallRank < midInfo->overallRank) continue; // fouled hand
+      if (highestRoyalties > botInfo->royalties + midInfo->royalties && midInfo->overallRank < 6891) continue; // don't continue if mid is less than 66
 
-      set<Card> bottomRemainingCards;
+      set<Card> topRemainingCards;
       set_difference(remainingCards.begin(), remainingCards.end(), midCombo.begin(), 
-          midCombo.end(), inserter(bottomRemainingCards, bottomRemainingCards.begin()));
+          midCombo.end(), inserter(topRemainingCards, topRemainingCards.begin()));
 
-      vector< set<Card> > botCombos = comb(bottomRemainingCards, bottomCardsMissing);
-      if (botCombos.empty()) botCombos.push_back(set<Card>());
+      vector< set<Card> > topCombos = comb(topRemainingCards, topCardsMissing);
+      if (topCombos.empty()) topCombos.push_back(set<Card>());
 
-      for (auto &botCombo : botCombos) {
-        PokerHandInfo * bottomInfo = pokerHandEvaluator->eval(bottom, botCombo, Position::bottom);
-        if (bottomInfo->overallRank < middleInfo->overallRank) continue; // fouled hand
+      for (auto &topCombo : topCombos) {
+        PokerHandInfo * topInfo = pokerHandEvaluator->eval(top, topCombo, Position::top);
+        if (midInfo->overallRank < topInfo->overallRank) continue; // fouled hand
 
-        int royalties = topInfo->royalties + middleInfo->royalties + bottomInfo->royalties;
+        int royalties = topInfo->royalties + midInfo->royalties + botInfo->royalties;
         if (royalties > highestRoyalties) {
           highestRoyalties = royalties;
-          bestHand = CompletedHand(topInfo, middleInfo, bottomInfo);
+          bestHand = CompletedHand(topInfo, midInfo, botInfo);
         }
       }
     }
