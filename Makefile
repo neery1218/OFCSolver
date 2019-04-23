@@ -15,7 +15,13 @@ profile:
 	g++ -pg -O3 -std=c++17 $(INC) $(SRCS) $(DRIVER) -o mainprof
 
 clean:
-	rm -f main maindebug 
+	rm -f main maindebug mainprof maintest
 
 testmain:
 	g++ -std=c++17 -O3 test_main.cc -c
+
+fantasysolver: all
+	g++ -std=c++17 -O3 $(INC) $(SRCS) fantasy_simulator.cc -o fantasysolver
+
+fantasysolverdebug:
+	g++ -g -std=c++17 -O3 $(INC) $(SRCS) fantasy_simulator.cc -o fantasysolverdebug

@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
   vector<Hand> otherHands = {otherHand};
   vector<Card> deadCards;
 
-  vector<pair<Decision, double>> answer = Solver(Method::CPU, GameType::progressive, 100).solve(
+  vector<pair<Decision, double>> answer = Solver(GameType::progressive, 100).solve(
       myHand, myPull, otherHands, 
       decisions, deadCards);
 

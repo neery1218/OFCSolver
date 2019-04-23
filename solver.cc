@@ -6,7 +6,7 @@
 #include <boost/range/irange.hpp>
 using namespace std;
 
-Solver::Solver(Method _method, GameType _type, int _numIterations): method{_method}, type{_type}, numIterations{_numIterations}, pokerHandEvaluator{PokerHandEvaluator(_type)} {}
+Solver::Solver(GameType _type, int _numIterations): type{_type}, numIterations{_numIterations}, pokerHandEvaluator{PokerHandEvaluator(_type)} {}
 
 vector<pair<Decision, double>> Solver::solve(Hand &myHand, Pull &myPull, vector<Hand> otherHands, 
     vector<Decision> decisions,  vector<Card> deadCards) {

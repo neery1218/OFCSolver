@@ -19,19 +19,13 @@
  * */
 
 
-enum Method {
-  CPU = 0,
-  GPU = 1
-};
-
-class Solver { // maybe this should be a standalone function?
-  Method method;
+class Solver {
   GameType type;
   int numIterations;
   PokerHandEvaluator pokerHandEvaluator;
 
   public:
-    Solver(Method method, GameType type, int numIterations);
+    Solver(GameType type, int numIterations);
     std::vector<std::pair<Decision, double>> solve(Hand &myHand, Pull &myPull, std::vector<Hand> otherHands, 
         std::vector<Decision> decisions, std::vector<Card> deadCards);
   private:

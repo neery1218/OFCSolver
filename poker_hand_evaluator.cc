@@ -42,15 +42,6 @@ PokerHandEvaluator::PokerHandEvaluator(GameType _gameType): gameType{_gameType} 
     int royalties = stoi(tokens[3]);
 
     if (tokens[0].size() == 6) { // top row
-      if (overallRank >= 14883) { // fantasy land bonus
-        if (gameType == GameType::regular) royalties += 7.5; 
-        else if (gameType == GameType::progressive) {
-          if (overallRank < 16215) royalties += 7.5; // Queens fantasy
-          else if (overallRank < 17547) royalties += 10; // Kings fantasy
-          else royalties += 20; // Aces fantasy
-        }
-      }
-
       topEvalInfo[tokens[0]] = new PokerHandInfo{overallRank, handType, royalties};
     } 
     else {

@@ -6,6 +6,8 @@ enum GameType {
   progressive = 1,
   ultimate = 2,
   joker = 3,
+  fantasy = 4,
+  nobonus = 5,
 };
 
 #endif
