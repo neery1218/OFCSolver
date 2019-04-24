@@ -28,12 +28,8 @@ PokerHandEvaluator::PokerHandEvaluator(GameType _gameType): gameType{_gameType} 
   };
 
   cout << "Starting..." << endl;
-  int counter = 0;
 
   while (getline(f, line)) {
-    ++counter;
-    if (counter % 10000 == 0) cout << counter << endl;
-
     vector<string> tokens;
     boost::split(tokens, line, boost::is_any_of(","));
 
@@ -53,6 +49,12 @@ PokerHandEvaluator::PokerHandEvaluator(GameType _gameType): gameType{_gameType} 
   }
 
   f.close();
+}
+
+PokerHandEvaluator::~PokerHandEvaluator() {
+  /*for (auto &tup : topEvalInfo) { 
+    delete tup.second; 
+  }*/
 }
 
 PokerHandInfo * PokerHandEvaluator::eval(set<Card> &completedRow, Position pos) {

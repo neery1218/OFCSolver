@@ -15,22 +15,16 @@
 #include "decision.h"
 
 /*
- * tldr: Pass possible decisions to the solver, and the solver picks the best decision.
+ * tldr: Pass hands to solver, solver estimates EV of hand. Used by DecisionFinder
  * */
 
 
 class Solver {
-  GameType type;
-  int numIterations;
-  PokerHandEvaluator pokerHandEvaluator;
+  PokerHandEvaluator *evaluator;
 
   public:
-    Solver(GameType type, int numIterations);
-    std::vector<std::pair<Decision, double>> solve(Hand &myHand, Pull &myPull, std::vector<Hand> otherHands, 
-        std::vector<Decision> decisions, std::vector<Card> deadCards);
-  private:
-    double estimateEV(Hand &myHand, Decision decision, 
-        std::vector<Hand> otherHands, Deck &deck);
+    Solver(PokerHandEvaluator &evaluator);
+    double solve(int numIterations, Hand &myHand, const Pull &myPull, std::vector<Hand> &otherHands, std::vector<Card> &deadCards);
 };
 
 #endif

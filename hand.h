@@ -26,20 +26,20 @@ struct Hand {
   void addMiddle(Card card);
   void addBottom(Card card);
 
-  int size();
-  Hand applyDecision(Decision decision);
+  int size() const;
+  Hand applyDecision(Decision decision) const;
   CompletedHand constructOptimalHand(std::set<Card> &cards, PokerHandEvaluator * pokerHandEvaluator);
 
   friend std::ostream& operator<<(std::ostream& os, const Hand& c);
 };
 
 struct CompletedHand {
-  PokerHandInfo *topInfo;
-  PokerHandInfo *middleInfo;
-  PokerHandInfo *bottomInfo;
+  PokerHandInfo topInfo;
+  PokerHandInfo middleInfo;
+  PokerHandInfo bottomInfo;
   
   CompletedHand() {};
-  CompletedHand(PokerHandInfo *top, PokerHandInfo *mid, PokerHandInfo *bot): topInfo{top}, middleInfo{mid}, bottomInfo{bot} {}
-  int calculatePoints(const CompletedHand &other);
+  CompletedHand(PokerHandInfo top, PokerHandInfo mid, PokerHandInfo bot): topInfo{top}, middleInfo{mid}, bottomInfo{bot} {}
+  int calculatePoints(const CompletedHand &other) const;
 };
 #endif

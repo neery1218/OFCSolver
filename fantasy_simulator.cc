@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 #include <boost/range/irange.hpp>
+#include <future>
 
 using namespace std;
 
@@ -40,6 +41,19 @@ double FantasySimulator::run(int numCards, int numIterations) {
 
 int main () {
   FantasySimulator simulator;
-  double out = simulator.run(14, 1000);
-  cout << out << endl;
+
+
+  vector<future<double>> l;
+  for (int i : boost::irange(1, 2)) {
+    l.push_back(async(simulator.run, 14, 500));
+  }
+
+  double out = 0;
+  for (int i : boost::irange(1, 2)) {
+    int tmp = l[i].get();
+    out += tmp;
+  }
+
+  int avg = out / l.size();
+  cout << avg << endl;
 }

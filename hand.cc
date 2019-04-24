@@ -34,11 +34,11 @@ void Hand::addBottom(Card card) {
   _size++;
 }
 
-int Hand::size() {
+int Hand::size() const {
   return _size;
 }
 
-Hand Hand::applyDecision(Decision decision) {
+Hand Hand::applyDecision(Decision decision) const {
   Hand newHand(*this);
   for (auto &placement : decision.placements) {
     if (placement.position == Position::top) { newHand.addTop(placement.card); }
@@ -127,7 +127,7 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, PokerHandEvaluator * 
         int royalties = topInfo->royalties + midInfo->royalties + botInfo->royalties;
         if (royalties > highestRoyalties) {
           highestRoyalties = royalties;
-          bestHand = CompletedHand(topInfo, midInfo, botInfo);
+          bestHand = CompletedHand(*topInfo, *midInfo, *botInfo);
         }
       }
     }
@@ -136,19 +136,19 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, PokerHandEvaluator * 
   return bestHand;
 }
 
-int CompletedHand::calculatePoints(const CompletedHand &otherHand) {
-  int royaltyPoints = topInfo->royalties + middleInfo->royalties + bottomInfo->royalties - otherHand.topInfo->royalties - otherHand.middleInfo->royalties - otherHand.bottomInfo->royalties;
+int CompletedHand::calculatePoints(const CompletedHand &otherHand) const {
+  int royaltyPoints = topInfo.royalties + middleInfo.royalties + bottomInfo.royalties - otherHand.topInfo.royalties - otherHand.middleInfo.royalties - otherHand.bottomInfo.royalties;
 
   int gtBonus = 0;
 
-  if (topInfo->overallRank < otherHand.topInfo->overallRank) gtBonus -= 1;
-  else if (otherHand.topInfo->overallRank < topInfo->overallRank) gtBonus += 1;
+  if (topInfo.overallRank < otherHand.topInfo.overallRank) gtBonus -= 1;
+  else if (otherHand.topInfo.overallRank < topInfo.overallRank) gtBonus += 1;
   
-  if (middleInfo->overallRank < otherHand.middleInfo->overallRank) gtBonus -= 1;
-  else if (otherHand.middleInfo->overallRank < middleInfo->overallRank) gtBonus += 1;
+  if (middleInfo.overallRank < otherHand.middleInfo.overallRank) gtBonus -= 1;
+  else if (otherHand.middleInfo.overallRank < middleInfo.overallRank) gtBonus += 1;
 
-  if (bottomInfo->overallRank < otherHand.bottomInfo->overallRank) gtBonus -= 1;
-  else if (otherHand.bottomInfo->overallRank < bottomInfo->overallRank) gtBonus += 1;
+  if (bottomInfo.overallRank < otherHand.bottomInfo.overallRank) gtBonus -= 1;
+  else if (otherHand.bottomInfo.overallRank < bottomInfo.overallRank) gtBonus += 1;
 
   if (gtBonus == -3) gtBonus = -6;
   if (gtBonus == 3) gtBonus = 6;

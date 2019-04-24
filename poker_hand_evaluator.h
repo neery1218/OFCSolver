@@ -33,6 +33,7 @@ class PokerHandEvaluator {
 
   public: 
     PokerHandEvaluator(GameType type);
+    ~PokerHandEvaluator();
     PokerHandInfo * eval(std::set<Card> &completedRow, Position pos);
     PokerHandInfo * eval(std::set<Card> &partialRow, std::set<Card> &cards, Position pos);
 

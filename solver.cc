@@ -6,10 +6,10 @@
 #include <boost/range/irange.hpp>
 using namespace std;
 
-Solver::Solver(GameType _type, int _numIterations): type{_type}, numIterations{_numIterations}, pokerHandEvaluator{PokerHandEvaluator(_type)} {}
+Solver::Solver(PokerHandEvaluator &_evaluator): evaluator{&_evaluator} {}
 
-vector<pair<Decision, double>> Solver::solve(Hand &myHand, Pull &myPull, vector<Hand> otherHands, 
-    vector<Decision> decisions,  vector<Card> deadCards) {
+double Solver::solve(int numIterations, Hand &myHand, const Pull &myPull, vector<Hand> &otherHands, 
+    vector<Card> &deadCards) {
 
   // Create deck, and remove known cards.
   Deck deck;
@@ -24,21 +24,6 @@ vector<pair<Decision, double>> Solver::solve(Hand &myHand, Pull &myPull, vector<
   for (auto &card : myHand.bottom) { deck.remove(card); }
   for (auto &card : deadCards) { deck.remove(card); }
   cout << "Deck now has " << deck.size() << " cards." << endl;
-
-  vector<pair<Decision, double>> evs;
-  for (auto &decision : decisions) {
-    double ev = estimateEV(myHand, decision, otherHands, deck);
-    evs.emplace_back(decision, ev);
-  }
-
-  return evs;
-}
-
-double Solver::estimateEV(Hand &myCurHand, Decision decision, vector<Hand> otherHands,
-    Deck &deck) {
-
-  // apply decision to myHand
-  Hand myHand = myCurHand.applyDecision(decision);
 
   // Create allHands structure for simplicity. 
   // myHand is inserted first and that is an invariant.
@@ -68,14 +53,14 @@ double Solver::estimateEV(Hand &myCurHand, Decision decision, vector<Hand> other
     unsigned int counter = cardsNeeded[0];
 
     set<Card> cards(drawnCards.begin(), drawnCards.begin() + cardsNeeded[0]);
-    CompletedHand myOptimalHand = myHand.constructOptimalHand(cards, &pokerHandEvaluator);
+    CompletedHand myOptimalHand = myHand.constructOptimalHand(cards, evaluator);
 
     for (int i = 1; i < allHands.size(); ++i) {
       set<Card> cards(
           drawnCards.begin() + counter,
           drawnCards.begin() + counter + cardsNeeded[i]);
       counter += cardsNeeded[i];
-      CompletedHand otherHand = allHands[i].constructOptimalHand(cards, &pokerHandEvaluator);
+      CompletedHand otherHand = allHands[i].constructOptimalHand(cards, evaluator);
       total += myOptimalHand.calculatePoints(otherHand);
     }
   }

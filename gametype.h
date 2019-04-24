@@ -2,12 +2,12 @@
 #define _GAMETYPE_H_
 
 enum GameType {
-  regular = 0,
-  progressive = 1,
-  ultimate = 2,
-  joker = 3,
-  fantasy = 4,
-  nobonus = 5,
+  Regular = 0,
+  Progressive = 1,
+  Ultimate = 2,
+  Joker = 3,
+  Fantasy = 4,
+  NoBonus = 5,
 };
 
 #endif
