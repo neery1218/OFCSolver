@@ -20,22 +20,24 @@ Decision DecisionFinder::findBestDecision(const Hand &h, const Pull &myPull, vec
     double estimated_ev = Solver(evaluator).solve(numIterations, candidate, myPull, otherHands, deadCards);
     evToDecision.emplace_back(estimated_ev, d);
 
-    cout << d << " : " << estimated_ev << "\n\n";
+    //cout << d << " : " << estimated_ev << "\n\n";
   }
 
-  cout << "sorted: \n\n";
   sort(evToDecision.begin(), evToDecision.end(), 
-      [](auto &left, auto &right) { return left.first < right.first; });
+      [](auto &left, auto &right) { return right.first < left.first; });
 
-  for (int i = evToDecision.size() - 1; i >= 0; --i) {
+  for (int i = 0; i < evToDecision.size(); ++i) {
     cout << evToDecision[i].first << " : " << evToDecision[i].second << "\n\n";
   }
+
+  return evToDecision[0].second;
 }
 
 int DecisionFinder::findIterationsRequired(const Hand &h) {
-  if (h.size() == 5) return 100;
-  else if (h.size() == 7) return 100;
-  else if (h.size() == 9) return 100;
+  if (h.size() == 5) return 1000;
+  else if (h.size() == 7) return 1000;
+  else if (h.size() == 9) return 1000;
+  return 1000;
 }
 
 vector<Decision> DecisionFinder::findAllDecisions(const Hand &h, const Pull &myPull) {

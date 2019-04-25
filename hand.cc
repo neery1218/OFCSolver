@@ -96,7 +96,7 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, PokerHandEvaluator * 
 
     PokerHandInfo *botInfo = bottomCardsMissing > 0 ? pokerHandEvaluator->eval(bottom, botCombo, Position::bottom) : pokerHandEvaluator->eval(bottom, Position::bottom);
 
-    if (highestRoyalties >= 0 && botInfo->overallRank < 16215) continue; // don't continue if bottom is less than KK
+    if (highestRoyalties >= 0 && botInfo->overallRank < 4346) continue; // don't continue if bottom is less than KK
 
     set<Card> remainingCards;
     set_difference(
@@ -111,7 +111,7 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, PokerHandEvaluator * 
 
       PokerHandInfo * midInfo = pokerHandEvaluator->eval(middle, midCombo, Position::middle);
       if (botInfo->overallRank < midInfo->overallRank) continue; // fouled hand
-      if (highestRoyalties > botInfo->royalties + midInfo->royalties && midInfo->overallRank < 6891) continue; // don't continue if mid is less than 66
+      if (highestRoyalties > botInfo->royalties + midInfo->royalties && midInfo->overallRank < 2722) continue; // don't continue if mid is less than 66
 
       set<Card> topRemainingCards;
       set_difference(remainingCards.begin(), remainingCards.end(), midCombo.begin(), 
@@ -133,10 +133,18 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, PokerHandEvaluator * 
     }
   }
 
+  if (highestRoyalties == -1) { // all possible hands are fouled
+    return CompletedHand{
+      PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0},
+      PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0},
+      PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0}};
+  }
+
   return bestHand;
 }
 
 int CompletedHand::calculatePoints(const CompletedHand &otherHand) const {
+
   int royaltyPoints = topInfo.royalties + middleInfo.royalties + bottomInfo.royalties - otherHand.topInfo.royalties - otherHand.middleInfo.royalties - otherHand.bottomInfo.royalties;
 
   int gtBonus = 0;
@@ -155,5 +163,3 @@ int CompletedHand::calculatePoints(const CompletedHand &otherHand) const {
 
   return royaltyPoints + gtBonus;
 }
-
-  

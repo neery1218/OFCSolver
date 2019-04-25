@@ -44,7 +44,7 @@ double Solver::solve(int numIterations, Hand &myHand, const Pull &myPull, vector
   cout << "Total cards needed: " << totalCardsNeeded << endl;
 
   // average hand values over all iterations
-  double total = 0;
+  int total = 0;
   for (int i : boost::irange(1, numIterations)) {
     // sample cards from deck
     vector<Card> drawnCards = deck.select(totalCardsNeeded);
@@ -65,5 +65,5 @@ double Solver::solve(int numIterations, Hand &myHand, const Pull &myPull, vector
     }
   }
 
-  return total / numIterations;
+  return total * 1.0 / numIterations;
 }
