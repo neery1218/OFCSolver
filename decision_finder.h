@@ -15,7 +15,7 @@ class DecisionFinder {
   public:
     DecisionFinder(GameType _type);
 
-    Decision findBestDecision(const Hand &h, const Pull &myPull, std::vector<Hand> &otherHands, std::vector<Card> &deadCards);
+    Decision findBestDecision(const Hand &h, const Pull &myPull, const std::vector<Hand> &otherHands, const std::vector<Card> &deadCards);
   private:
     std::vector<Decision> findAllDecisions(const Hand &h, const Pull &myPull);
     int findIterationsRequired(const Hand &h);

@@ -81,7 +81,7 @@ vector<set<Card>> comb(set<Card> &_cards, int K)
   return out;
 }
 
-CompletedHand Hand::constructOptimalHand(set<Card> &cards, PokerHandEvaluator * pokerHandEvaluator) {
+CompletedHand Hand::constructOptimalHand(set<Card> &cards, const PokerHandEvaluator *evaluator) const {
   int topCardsMissing  = 3 - top.size();
   int middleCardsMissing  = 5 - middle.size();
   int bottomCardsMissing  = 5 - bottom.size();
@@ -94,7 +94,7 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, PokerHandEvaluator * 
 
   for (auto &botCombo : botCombos) {
 
-    PokerHandInfo *botInfo = bottomCardsMissing > 0 ? pokerHandEvaluator->eval(bottom, botCombo, Position::bottom) : pokerHandEvaluator->eval(bottom, Position::bottom);
+    PokerHandInfo *botInfo = bottomCardsMissing > 0 ? evaluator->eval(bottom, botCombo, Position::bottom) : evaluator->eval(bottom, Position::bottom);
 
     if (highestRoyalties >= 0 && botInfo->overallRank < 4346) continue; // don't continue if bottom is less than KK
 
@@ -109,7 +109,8 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, PokerHandEvaluator * 
 
     for (auto &midCombo : midCombos) {
 
-      PokerHandInfo * midInfo = pokerHandEvaluator->eval(middle, midCombo, Position::middle);
+      PokerHandInfo * midInfo = middleCardsMissing > 0 ? evaluator->eval(middle, midCombo, Position::middle) : evaluator->eval(middle, Position::middle);
+
       if (botInfo->overallRank < midInfo->overallRank) continue; // fouled hand
       if (highestRoyalties > botInfo->royalties + midInfo->royalties && midInfo->overallRank < 2722) continue; // don't continue if mid is less than 66
 
@@ -121,7 +122,8 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, PokerHandEvaluator * 
       if (topCombos.empty()) topCombos.push_back(set<Card>());
 
       for (auto &topCombo : topCombos) {
-        PokerHandInfo * topInfo = pokerHandEvaluator->eval(top, topCombo, Position::top);
+        PokerHandInfo * topInfo = topCardsMissing > 0 ? evaluator->eval(top, topCombo, Position::top) : evaluator->eval(top, Position::top);
+
         if (midInfo->overallRank < topInfo->overallRank) continue; // fouled hand
 
         int royalties = topInfo->royalties + midInfo->royalties + botInfo->royalties;

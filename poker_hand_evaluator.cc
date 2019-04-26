@@ -52,7 +52,7 @@ PokerHandEvaluator::PokerHandEvaluator(GameType _gameType): gameType{_gameType} 
   f.close();
 }
 
-int PokerHandEvaluator::calculateFantasyBonus(int overallRank) {
+int PokerHandEvaluator::calculateFantasyBonus(int overallRank) const {
   if (overallRank >= 3833) {
     if (gameType == GameType::Regular) return 7.5;
     else if (gameType == GameType::Progressive) {
@@ -75,7 +75,7 @@ PokerHandEvaluator::~PokerHandEvaluator() {
   }*/
 }
 
-PokerHandInfo * PokerHandEvaluator::eval(set<Card> &completedRow, Position pos) {
+PokerHandInfo * PokerHandEvaluator::eval(const set<Card> &completedRow, Position pos) const {
   string joined = "";
   for (auto &c : completedRow) { joined += c.val; }
   if (pos == Position::top) return topEvalInfo.at(joined);
@@ -83,7 +83,7 @@ PokerHandInfo * PokerHandEvaluator::eval(set<Card> &completedRow, Position pos) 
   else return bottomEvalInfo.at(joined);
 }
 
-PokerHandInfo * PokerHandEvaluator::eval(set<Card> &partialRow, set<Card> &cards, Position pos) {
+PokerHandInfo * PokerHandEvaluator::eval(const set<Card> &partialRow, const set<Card> &cards, Position pos) const {
   vector<Card> tmp;
 
   std::merge(partialRow.begin(), partialRow.end(), cards.begin(), cards.end(), back_inserter(tmp));

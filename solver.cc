@@ -6,10 +6,9 @@
 #include <boost/range/irange.hpp>
 using namespace std;
 
-Solver::Solver(PokerHandEvaluator &_evaluator): evaluator{&_evaluator} {}
+Solver::Solver(const PokerHandEvaluator *_evaluator): evaluator{_evaluator} {}
 
-double Solver::solve(int numIterations, Hand &myHand, const Pull &myPull, vector<Hand> &otherHands, 
-    vector<Card> &deadCards) {
+double Solver::solve(int numIterations, const Hand &myHand, const Pull &myPull, const vector<Hand> &otherHands, const vector<Card> &deadCards) const {
 
   // Create deck, and remove known cards.
   Deck deck;

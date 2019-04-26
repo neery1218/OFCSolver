@@ -11,30 +11,31 @@ using namespace std;
 
 DecisionFinder::DecisionFinder(GameType _type): evaluator{PokerHandEvaluator(_type)} {}
 
-Decision DecisionFinder::findBestDecision(const Hand &h, const Pull &myPull, vector<Hand> &otherHands, vector<Card> &deadCards) { 
+Decision DecisionFinder::findBestDecision(const Hand &h, const Pull &myPull, const vector<Hand> &otherHands, const vector<Card> &deadCards) { 
   // how many iterations do we need?
   int numIterations = findIterationsRequired(h);
 
   vector<pair<double, Decision>> evToDecision;
-  vector < future<double> > futures;
 
   vector<Decision> allDecisions = findAllDecisions(h, myPull);
+  vector< future<double> > futures;
 
   for (auto &d : allDecisions) {
-    Hand candidate = h.applyDecision(d);
-    Solver s(evaluator);
-    futures.push_back(async(
-        std::launch::async, 
-        &Solver::solve,
-        s,
-        numIterations, candidate, myPull, otherHands, deadCards));
-    //double estimated_ev = Solver(evaluator).solve(numIterations, candidate, myPull, otherHands, deadCards);
-    //evToDecision.emplace_back(estimated_ev, d);
-
-    //cout << d << " : " << estimated_ev << "\n\n";
+    const PokerHandEvaluator *localEval = &evaluator;
+    futures.push_back(
+        async(
+          std::launch::async,
+          [d, &h, localEval, numIterations, myPull, otherHands, deadCards] () {
+            return Solver(localEval).solve(
+                numIterations, 
+                h.applyDecision(d),
+                myPull,
+                otherHands,
+                deadCards); 
+          }));
   }
 
-  for (int i = 0; i < allDecisions.size(); ++i) {
+  for (int i = 0; i < futures.size(); ++i) {
     evToDecision.emplace_back(futures[i].get(), allDecisions[i]);
   }
 

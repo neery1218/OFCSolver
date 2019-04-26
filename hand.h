@@ -28,7 +28,7 @@ struct Hand {
 
   int size() const;
   Hand applyDecision(Decision decision) const;
-  CompletedHand constructOptimalHand(std::set<Card> &cards, PokerHandEvaluator * pokerHandEvaluator);
+  CompletedHand constructOptimalHand(std::set<Card> &cards, const PokerHandEvaluator *evaluator) const;
 
   friend std::ostream& operator<<(std::ostream& os, const Hand& c);
 };

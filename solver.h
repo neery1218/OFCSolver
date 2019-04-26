@@ -20,11 +20,11 @@
 
 
 class Solver {
-  PokerHandEvaluator *evaluator;
+  const PokerHandEvaluator *evaluator;
 
   public:
-    Solver(PokerHandEvaluator &evaluator);
-    double solve(int numIterations, Hand &myHand, const Pull &myPull, std::vector<Hand> &otherHands, std::vector<Card> &deadCards);
+    Solver(const PokerHandEvaluator *evaluator);
+    double solve(int numIterations, const Hand &myHand, const Pull &myPull, const std::vector<Hand> &otherHands, const std::vector<Card> &deadCards) const;
 };
 
 #endif

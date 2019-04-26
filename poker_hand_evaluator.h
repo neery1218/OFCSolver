@@ -34,11 +34,11 @@ class PokerHandEvaluator {
   public: 
     PokerHandEvaluator(GameType type);
     ~PokerHandEvaluator();
-    PokerHandInfo * eval(std::set<Card> &completedRow, Position pos);
-    PokerHandInfo * eval(std::set<Card> &partialRow, std::set<Card> &cards, Position pos);
+    PokerHandInfo * eval(const std::set<Card> &completedRow, Position pos) const;
+    PokerHandInfo * eval(const std::set<Card> &partialRow, const std::set<Card> &cards, Position pos) const;
 
   private:
-    int calculateFantasyBonus(int overallRank);
+    int calculateFantasyBonus(int overallRank) const;
     std::unordered_map<std::string, PokerHandInfo*> topEvalInfo;
     std::unordered_map<std::string, PokerHandInfo*> middleEvalInfo;
     std::unordered_map<std::string, PokerHandInfo*> bottomEvalInfo;
