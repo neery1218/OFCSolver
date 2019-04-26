@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <utility>
+#include <future>
 
 using namespace std;
 
@@ -15,12 +16,26 @@ Decision DecisionFinder::findBestDecision(const Hand &h, const Pull &myPull, vec
   int numIterations = findIterationsRequired(h);
 
   vector<pair<double, Decision>> evToDecision;
-  for (auto &d : findAllDecisions(h, myPull)) {
+  vector < future<double> > futures;
+
+  vector<Decision> allDecisions = findAllDecisions(h, myPull);
+
+  for (auto &d : allDecisions) {
     Hand candidate = h.applyDecision(d);
-    double estimated_ev = Solver(evaluator).solve(numIterations, candidate, myPull, otherHands, deadCards);
-    evToDecision.emplace_back(estimated_ev, d);
+    Solver s(evaluator);
+    futures.push_back(async(
+        std::launch::async, 
+        &Solver::solve,
+        s,
+        numIterations, candidate, myPull, otherHands, deadCards));
+    //double estimated_ev = Solver(evaluator).solve(numIterations, candidate, myPull, otherHands, deadCards);
+    //evToDecision.emplace_back(estimated_ev, d);
 
     //cout << d << " : " << estimated_ev << "\n\n";
+  }
+
+  for (int i = 0; i < allDecisions.size(); ++i) {
+    evToDecision.emplace_back(futures[i].get(), allDecisions[i]);
   }
 
   sort(evToDecision.begin(), evToDecision.end(), 

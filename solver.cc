@@ -23,7 +23,6 @@ double Solver::solve(int numIterations, Hand &myHand, const Pull &myPull, vector
   for (auto &card : myHand.middle) { deck.remove(card); }
   for (auto &card : myHand.bottom) { deck.remove(card); }
   for (auto &card : deadCards) { deck.remove(card); }
-  cout << "Deck now has " << deck.size() << " cards." << endl;
 
   // Create allHands structure for simplicity. 
   // myHand is inserted first and that is an invariant.
@@ -37,11 +36,8 @@ double Solver::solve(int numIterations, Hand &myHand, const Pull &myPull, vector
   transform(allHands.begin(), allHands.end(), back_inserter(cardsNeeded), 
       [] (Hand h) { return (13 - h.size()) / 2 * 3; });
 
-  cout << "Size of allHands: " << allHands.size() << endl;
   for (auto &numCards : cardsNeeded) { cout << numCards << " needed for hand." << endl; }
   int totalCardsNeeded = accumulate(cardsNeeded.begin(), cardsNeeded.end(), 0);
-
-  cout << "Total cards needed: " << totalCardsNeeded << endl;
 
   // average hand values over all iterations
   int total = 0;

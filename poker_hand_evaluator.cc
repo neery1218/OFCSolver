@@ -38,6 +38,7 @@ PokerHandEvaluator::PokerHandEvaluator(GameType _gameType): gameType{_gameType} 
     int royalties = stoi(tokens[3]);
 
     if (tokens[0].size() == 6) { // top row
+      if (overallRank >= 3883) { royalties += calculateFantasyBonus(overallRank); }
       topEvalInfo[tokens[0]] = new PokerHandInfo{overallRank, handType, royalties};
     } 
     else {
@@ -49,6 +50,23 @@ PokerHandEvaluator::PokerHandEvaluator(GameType _gameType): gameType{_gameType} 
   }
 
   f.close();
+}
+
+int PokerHandEvaluator::calculateFantasyBonus(int overallRank) {
+  if (overallRank >= 3833) {
+    if (gameType == GameType::Regular) return 7.5;
+    else if (gameType == GameType::Progressive) {
+      if (overallRank < 4115) return 7.5;
+      else if (overallRank < 4347) return 10;
+      else return 20;
+    } 
+    else if (gameType == GameType::Ultimate) {
+      if (overallRank < 4115) return 7.5;
+      else if (overallRank < 4347)return 20;
+      else return 30;
+    }
+  }
+  return 0;
 }
 
 PokerHandEvaluator::~PokerHandEvaluator() {

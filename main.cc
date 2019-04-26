@@ -39,5 +39,5 @@ int main(int argc, char *argv[]) {
   vector<Hand> otherHands = {otherHand};
   vector<Card> deadCards;
 
-  Decision d = DecisionFinder(GameType::Progressive).findBestDecision(myHand, myPull, otherHands, deadCards);
+  Decision d = DecisionFinder(GameType::Ultimate).findBestDecision(myHand, myPull, otherHands, deadCards);
 }
