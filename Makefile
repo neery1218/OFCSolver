@@ -1,5 +1,5 @@
 INC = -I /usr/local/include/boost/
-SRCS = hand.cc solver.cc card.cc pull.cc deck.cc poker_hand_evaluator.cc decision_finder.cc fantasy_solver.cc
+SRCS = hand.cc solver.cc card.cc pull.cc deck.cc poker_hand_evaluator.cc decision_finder.cc fantasy_solver.cc set_decision_finder.cc
 DRIVER = main.cc
 TESTS = test_hand.cc test_decision_finder.cc
 all: 
@@ -9,7 +9,7 @@ test: test_main.o
 	g++ -std=c++17 -O3 test_main.o $(INC) $(SRCS) $(TESTS) -o maintest
 
 debug:
-	g++ -g -O2 -std=c++17 $(INC) $(SRCS) $(DRIVER) -o maindebug
+	g++ -g -O2 -std=c++17 $(INC) $(SRCS) $(DRIVER) -o maindebug -lpthread
 
 profile:
 	g++ -pg -O3 -std=c++17 $(INC) $(SRCS) $(DRIVER) -o mainprof

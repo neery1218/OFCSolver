@@ -16,6 +16,10 @@ Hand::Hand(const Hand &obj) {
   _size = obj._size;
 }
 
+Hand::Hand() {
+  _size = 0;
+}
+
 void Hand::addTop(Card card) { 
   assert(top.size() < 3);
   top.insert(card); 
@@ -143,6 +147,10 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, const PokerHandEvalua
   }
 
   return bestHand;
+}
+
+int CompletedHand::calculatePoints() const { // note: can't call this with a fouled hand. tightly coupled with solver.h
+  return topInfo.royalties + middleInfo.royalties + bottomInfo.royalties;
 }
 
 int CompletedHand::calculatePoints(const CompletedHand &otherHand) const {

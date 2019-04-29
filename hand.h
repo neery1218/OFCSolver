@@ -20,7 +20,7 @@ struct Hand {
 
   Hand(std::set<Card> top, std::set<Card> middle, std::set<Card> bottom);
   Hand(const Hand &obj);
-  Hand() {}
+  Hand();
 
   void addTop(Card card);
   void addMiddle(Card card);
@@ -41,5 +41,6 @@ struct CompletedHand {
   CompletedHand() {};
   CompletedHand(PokerHandInfo top, PokerHandInfo mid, PokerHandInfo bot): topInfo{top}, middleInfo{mid}, bottomInfo{bot} {}
   int calculatePoints(const CompletedHand &other) const;
+  int calculatePoints() const;
 };
 #endif

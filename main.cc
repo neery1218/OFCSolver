@@ -15,6 +15,7 @@
 #include "decision.h"
 #include "placement.h"
 #include "decision_finder.h"
+#include "set_decision_finder.h"
 
 using namespace std;
 
@@ -32,12 +33,26 @@ set<Card> parseCards(string cards) {
 
 int main(int argc, char *argv[]) {
   // create ofc hands
-  Hand myHand(parseCards("Ac"), parseCards("2c 2d"), parseCards("9h 9d 7d 7s"));
-  Hand otherHand(parseCards("As Qc Qd"), parseCards("3c 3d 3s"), parseCards("Th Td Ts"));
+  /*
+  Hand myHand(
+      parseCards("Ac"), 
+      parseCards("2c 2d"), 
+      parseCards("9h 9d 7d 7s"));
+
+  Hand otherHand(
+      parseCards("As Qc Qd"), 
+      parseCards("3c 3d 3s"), 
+      parseCards("Th Td Ts"));
+
   Pull myPull = {parseCards("Ah 2s 9s")};
 
   vector<Hand> otherHands = {otherHand};
-  vector<Card> deadCards;
+  vector<Card> deadCards = {Card("Kd")};
 
-  Decision d = DecisionFinder(GameType::Ultimate).findBestDecision(myHand, myPull, otherHands, deadCards);
+  Decision d = DecisionFinder(GameType::Regular).findBestDecision(myHand, myPull, otherHands, deadCards);
+  */
+
+  Decision d = SetDecisionFinder(GameType::Progressive).findBestDecision(
+      Pull{parseCards("Qs 4s 5s 9s Ad")},
+      vector<Hand> ());
 }

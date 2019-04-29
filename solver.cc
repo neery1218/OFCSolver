@@ -50,7 +50,8 @@ double Solver::solve(int numIterations, const Hand &myHand, const Pull &myPull, 
     set<Card> cards(drawnCards.begin(), drawnCards.begin() + cardsNeeded[0]);
     CompletedHand myOptimalHand = myHand.constructOptimalHand(cards, evaluator);
 
-    for (int i = 1; i < allHands.size(); ++i) {
+    if (allHands.size() == 1) total += myOptimalHand.calculatePoints();
+    else for (int i = 1; i < allHands.size(); ++i) {
       set<Card> cards(
           drawnCards.begin() + counter,
           drawnCards.begin() + counter + cardsNeeded[i]);

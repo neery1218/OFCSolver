@@ -50,10 +50,10 @@ Decision DecisionFinder::findBestDecision(const Hand &h, const Pull &myPull, con
 }
 
 int DecisionFinder::findIterationsRequired(const Hand &h) {
-  if (h.size() == 5) return 1000;
-  else if (h.size() == 7) return 1000;
-  else if (h.size() == 9) return 1000;
-  return 1000;
+  if (h.size() == 5) return 10000;
+  else if (h.size() == 7) return 10000;
+  else if (h.size() == 9) return 10000;
+  return 10000;
 }
 
 vector<Decision> DecisionFinder::findAllDecisions(const Hand &h, const Pull &myPull) {
