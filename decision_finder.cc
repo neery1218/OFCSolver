@@ -43,8 +43,8 @@ Decision DecisionFinder::findBestDecision(const Hand &h, const Pull &myPull, con
   sort(evToDecision.begin(), evToDecision.end(), 
       [](auto &left, auto &right) { return right.first < left.first; });
 
-  for (int i = 0; i < 5; ++i) {
-    cout << evToDecision[i].first << " : " << evToDecision[i].second << "\n\n";
+  for (int i = 0; i < 10; ++i) {
+    cout << evToDecision[i].first << " : " << evToDecision[i].second;
   }
 
   return evToDecision[0].second;
