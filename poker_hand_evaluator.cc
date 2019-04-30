@@ -52,6 +52,12 @@ PokerHandEvaluator::PokerHandEvaluator(GameType _gameType): gameType{_gameType} 
   f.close();
 }
 
+PokerHandEvaluator::~PokerHandEvaluator() {
+  for ( const auto& n : topEvalInfo ) { delete n.second; }
+  for ( const auto& n : middleEvalInfo) { delete n.second; }
+  for ( const auto& n : bottomEvalInfo ) { delete n.second; }
+}
+
 int PokerHandEvaluator::calculateFantasyBonus(int overallRank) const {
   if (overallRank >= 3833) {
     if (gameType == GameType::Regular) return 7.5;
@@ -67,12 +73,6 @@ int PokerHandEvaluator::calculateFantasyBonus(int overallRank) const {
     }
   }
   return 0;
-}
-
-PokerHandEvaluator::~PokerHandEvaluator() {
-  /*for (auto &tup : topEvalInfo) { 
-    delete tup.second; 
-  }*/
 }
 
 PokerHandInfo * PokerHandEvaluator::eval(const set<Card> &completedRow, Position pos) const {

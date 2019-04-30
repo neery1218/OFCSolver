@@ -13,7 +13,7 @@
 class DecisionFinder {
   const PokerHandEvaluator *evaluator;
   public:
-    DecisionFinder(const PokerHandEvaluator *evaluator);
+    DecisionFinder(const PokerHandEvaluator &evaluator);
 
     Decision findBestDecision(const Hand &h, const Pull &myPull, const std::vector<Hand> &otherHands, const std::vector<Card> &deadCards);
   private:

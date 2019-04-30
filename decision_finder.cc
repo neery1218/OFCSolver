@@ -9,7 +9,7 @@
 
 using namespace std;
 
-DecisionFinder::DecisionFinder(const PokerHandEvaluator *t_evaluator): evaluator{t_evaluator} {}
+DecisionFinder::DecisionFinder(const PokerHandEvaluator &t_evaluator): evaluator{&t_evaluator} {}
 
 Decision DecisionFinder::findBestDecision(const Hand &h, const Pull &myPull, const vector<Hand> &otherHands, const vector<Card> &deadCards) { 
   // how many iterations do we need?

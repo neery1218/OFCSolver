@@ -7,14 +7,14 @@
 
 using namespace std;
 
-SetDecisionFinder::SetDecisionFinder(const PokerHandEvaluator *t_evaluator): evaluator{t_evaluator} {}
+SetDecisionFinder::SetDecisionFinder(const PokerHandEvaluator &t_evaluator): evaluator{&t_evaluator} {}
 
 Decision SetDecisionFinder::findBestDecision(const Pull &myPull, const vector<Hand> &otherHands) {
   set<Card> cards(myPull.cards.begin(), myPull.cards.end());
 
   vector<Decision> allDecisions = findAllDecisions(cards);
   vector< future<double> > futures;
-  int numIterations = 100;
+  int numIterations = 10;
   vector<pair<double, Decision>> evToDecision;
 
   cout << "size : " << allDecisions.size() << "\n\n";
@@ -40,8 +40,8 @@ Decision SetDecisionFinder::findBestDecision(const Pull &myPull, const vector<Ha
   sort(evToDecision.begin(), evToDecision.end(),
       [](auto &left, auto &right) { return right.first < left.first; });
 
-  for (int i = 0; i < evToDecision.size(); ++i) {
-    cout << evToDecision[i].first << " : " << evToDecision[i].second << "\n\n";
+  for (int i = 0; i < 10; ++i) {
+    cout << evToDecision[i].first << " : " << evToDecision[i].second;
   }
 
   return evToDecision[0].second;

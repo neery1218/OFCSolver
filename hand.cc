@@ -78,7 +78,7 @@ vector<set<Card>> comb(set<Card> &_cards, int K)
 {
   vector<Card> cards(_cards.begin(), _cards.end());
   vector<set<Card>> out;
-  for (auto&& x : discreture::combinations_stack((int)cards.size(), K)) {
+  for (auto&& x : discreture::combinations((int)cards.size(), K)) {
     set<Card> tmp;
     for (auto &i : x) { tmp.insert(cards[i]); }
     out.emplace_back(tmp);

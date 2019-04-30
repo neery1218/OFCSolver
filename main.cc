@@ -17,6 +17,7 @@
 #include "decision_finder.h"
 #include "set_decision_finder.h"
 #include <fstream>
+#include <cassert>
 
 using namespace std;
 
@@ -26,6 +27,7 @@ set<Card> parseCards(string cards) {
 
   boost::split(tokens, cards, boost::is_any_of(" "));
   for (auto token : tokens) {
+    assert(token.size() == 2);
     parsedCards.insert(Card(token));
   }
 
@@ -33,7 +35,6 @@ set<Card> parseCards(string cards) {
 }
 
 int main(int argc, char *argv[]) {
-  ifstream f("input.txt");
   int command;
   char game_mode;
   GameType type;
@@ -46,12 +47,13 @@ int main(int argc, char *argv[]) {
   else if (game_mode == 'u') type = GameType::Ultimate;
   else throw "wtf";
 
-  const PokerHandEvaluator *evaluator = new PokerHandEvaluator(type);
+  PokerHandEvaluator evaluator = PokerHandEvaluator(type);
 
   cout << "Enter number of players : ";
   cin >> command;
 
   while (command) {
+    ifstream f("input.txt");
     string line;
 
     // parse pull
@@ -85,9 +87,11 @@ int main(int argc, char *argv[]) {
 
       getline(f, line);
       set<Card> o_bot = line == "x" ? set<Card>() : parseCards(line);
-
-      other_hands.push_back(Hand(o_top, o_mid, o_bot));
-      cout << "Other hand " << i + 1 << " : \n" << other_hands[i] << "\n\n";
+      
+      if (o_top.size() + o_mid.size() + o_bot.size() > 0) {
+        other_hands.push_back(Hand(o_top, o_mid, o_bot));
+        cout << "Other hand " << i + 1 << " : \n" << other_hands[i] << "\n\n";
+      }
     }
 
     getline(f, line);
