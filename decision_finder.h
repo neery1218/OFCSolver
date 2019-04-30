@@ -11,9 +11,9 @@
 
 /* Makes all draw decisions */
 class DecisionFinder {
-  PokerHandEvaluator evaluator;
+  const PokerHandEvaluator *evaluator;
   public:
-    DecisionFinder(GameType _type);
+    DecisionFinder(const PokerHandEvaluator *evaluator);
 
     Decision findBestDecision(const Hand &h, const Pull &myPull, const std::vector<Hand> &otherHands, const std::vector<Card> &deadCards);
   private:

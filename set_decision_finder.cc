@@ -7,7 +7,7 @@
 
 using namespace std;
 
-SetDecisionFinder::SetDecisionFinder(GameType _type): evaluator{PokerHandEvaluator(_type)} {}
+SetDecisionFinder::SetDecisionFinder(const PokerHandEvaluator *t_evaluator): evaluator{t_evaluator} {}
 
 Decision SetDecisionFinder::findBestDecision(const Pull &myPull, const vector<Hand> &otherHands) {
   set<Card> cards(myPull.cards.begin(), myPull.cards.end());
@@ -19,8 +19,7 @@ Decision SetDecisionFinder::findBestDecision(const Pull &myPull, const vector<Ha
 
   cout << "size : " << allDecisions.size() << "\n\n";
   for (Decision d : allDecisions) {
-    cout << d << "\n\n";
-    const PokerHandEvaluator *localEval = &evaluator;
+    const PokerHandEvaluator *localEval = evaluator;
     futures.push_back(
         async(
           std::launch::async,

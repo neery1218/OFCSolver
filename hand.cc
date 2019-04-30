@@ -57,18 +57,19 @@ ostream& operator<<(ostream& os, const Hand& hand) {
   for (const Card &c : hand.top) {
     os << c;
   }
-
+  if (hand.top.empty()) os << "x";
   os << endl;
 
   for (const Card &c : hand.middle) {
     os << c;
   }
-
+  if (hand.middle.empty()) os << "x";
   os << endl;
 
   for (const Card &c : hand.bottom) {
     os << c;
   }
+  if (hand.bottom.empty()) os << "x";
 
   return os;
 }

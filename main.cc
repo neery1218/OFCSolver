@@ -16,6 +16,7 @@
 #include "placement.h"
 #include "decision_finder.h"
 #include "set_decision_finder.h"
+#include <fstream>
 
 using namespace std;
 
@@ -32,6 +33,92 @@ set<Card> parseCards(string cards) {
 }
 
 int main(int argc, char *argv[]) {
+  ifstream f("input.txt");
+  int command;
+  char game_mode;
+  GameType type;
+
+  cout << "Game mode? (r, p, u) : ";
+  cin >> game_mode;
+
+  if (game_mode == 'r') type = GameType::Regular;
+  else if (game_mode == 'p') type = GameType::Progressive;
+  else if (game_mode == 'u') type = GameType::Ultimate;
+  else throw "wtf";
+
+  const PokerHandEvaluator *evaluator = new PokerHandEvaluator(type);
+
+  cout << "Enter number of players : ";
+  cin >> command;
+
+  while (command) {
+    string line;
+
+    // parse pull
+    getline(f, line);
+    Pull pull{parseCards(line)};
+    cout << "My pull :" <<  pull << "\n\n";
+
+    getline(f, line);
+
+    // parse my hand
+    getline(f, line);
+    set<Card> m_top = line == "x" ? set<Card>() : parseCards(line);
+
+    getline(f, line);
+    set<Card> m_mid = line == "x" ? set<Card>() : parseCards(line);
+
+    getline(f, line);
+    set<Card> m_bot = line == "x" ? set<Card>() : parseCards(line);
+
+    Hand myHand(m_top, m_mid, m_bot);
+    cout << "My hand: \n" << myHand << "\n\n";
+
+    getline(f, line);
+    vector<Hand> other_hands;
+    for (int i = 0; i < command - 1; ++i) {
+      getline(f, line);
+      set<Card> o_top = line == "x" ? set<Card>() : parseCards(line);
+
+      getline(f, line);
+      set<Card> o_mid = line == "x" ? set<Card>() : parseCards(line);
+
+      getline(f, line);
+      set<Card> o_bot = line == "x" ? set<Card>() : parseCards(line);
+
+      other_hands.push_back(Hand(o_top, o_mid, o_bot));
+      cout << "Other hand " << i + 1 << " : \n" << other_hands[i] << "\n\n";
+    }
+
+    getline(f, line);
+
+    // parse dead cards
+    getline(f, line);
+    vector<Card> deadCards;
+    if (line != "x") {
+      set<Card> tmp = parseCards(line);
+      deadCards.insert(deadCards.end(), tmp.begin(), tmp.end());
+    }
+    cout << deadCards.size() << " dead cards. \n";
+
+    // evaluate decisions
+    // set solver
+    if (myHand.size() == 0) {
+      cout << "Set finder.\n";
+      Decision d = SetDecisionFinder(evaluator).findBestDecision(
+          pull, other_hands);
+      cout << "Best decision is: " << d << "\n";
+    } else {
+      cout << "Draw Decision finder.\n";
+      Decision d = DecisionFinder(evaluator).findBestDecision(
+          myHand, pull, other_hands, deadCards); 
+      cout << "Best decision is: " << d << "\n";
+    }
+
+    cout << "Enter number of players : ";
+    cin >> command;
+    if (command == 0) return 0;
+  }
   // create ofc hands
   /*
   Hand myHand(
@@ -51,8 +138,9 @@ int main(int argc, char *argv[]) {
 
   Decision d = DecisionFinder(GameType::Regular).findBestDecision(myHand, myPull, otherHands, deadCards);
   */
-
+  /*
   Decision d = SetDecisionFinder(GameType::Progressive).findBestDecision(
-      Pull{parseCards("Qs 4s 5s 9s Ad")},
+      Pull{parseCards("Qd 4s 5s 9s As")},
       vector<Hand> ());
+  */
 }

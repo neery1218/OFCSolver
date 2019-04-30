@@ -11,9 +11,9 @@
 #include "card.h"
 
 class SetDecisionFinder {
-  PokerHandEvaluator evaluator;
+  const PokerHandEvaluator *evaluator;
   public:
-    SetDecisionFinder(GameType _type);
+    SetDecisionFinder(const PokerHandEvaluator *evaluator);
     Decision findBestDecision(const Pull &myPull, const std::vector<Hand> &otherHands);
 
   private:
