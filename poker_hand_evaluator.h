@@ -33,6 +33,8 @@ class PokerHandEvaluator {
 
   public: 
     PokerHandEvaluator(GameType type);
+    PokerHandEvaluator(const PokerHandEvaluator&) = delete;
+    PokerHandEvaluator& operator=(PokerHandEvaluator&) = delete;
     ~PokerHandEvaluator();
     PokerHandInfo * eval(const std::set<Card> &completedRow, Position pos) const;
     PokerHandInfo * eval(const std::set<Card> &partialRow, const std::set<Card> &cards, Position pos) const;

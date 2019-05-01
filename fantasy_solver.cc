@@ -2,7 +2,7 @@
 
 using namespace std;
 
-FantasySolver::FantasySolver(): evaluator{PokerHandEvaluator(GameType::NoBonus)} {}
+FantasySolver::FantasySolver(): evaluator{GameType::NoBonus} {}
 
 CompletedHand FantasySolver::solve(GameType type, set<Card> &cards) {
   return Hand().constructOptimalHand(cards, &evaluator); // doesn't take scooping into account

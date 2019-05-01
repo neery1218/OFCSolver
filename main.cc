@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
   else if (game_mode == 'u') type = GameType::Ultimate;
   else throw "wtf";
 
-  PokerHandEvaluator evaluator = PokerHandEvaluator(type);
+  PokerHandEvaluator evaluator(type);
 
   cout << "Enter number of players : ";
   cin >> command;
