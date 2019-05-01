@@ -9,42 +9,90 @@ using namespace std;
 
 SetDecisionFinder::SetDecisionFinder(const PokerHandEvaluator &t_evaluator): evaluator{&t_evaluator} {}
 
-Decision SetDecisionFinder::findBestDecision(const Pull &myPull, const vector<Hand> &otherHands) {
-  set<Card> cards(myPull.cards.begin(), myPull.cards.end());
+Decision SetDecisionFinder::findBestDecision(const Pull &my_pull, const vector<Hand> &other_hands) {
+  set<Card> cards(my_pull.cards.begin(), my_pull.cards.end());
 
-  vector<Decision> allDecisions = findAllDecisions(cards);
+  vector<Decision> all_decisions = findAllDecisions(cards);
+
+  vector<Decision> top_n_decisions_stage_one = stageOneEvaluation(all_decisions, 20, my_pull, 100);
+  Decision best_decision = stageTwoEvaluation(top_n_decisions_stage_one, my_pull, 1000, other_hands);
+
+  return best_decision;
+}
+
+vector<Decision> SetDecisionFinder::stageOneEvaluation(const vector<Decision> &all_decisions, int n, const Pull &my_pull, 
+    int num_iterations) {
   vector< future<double> > futures;
-  int numIterations = 10;
-  vector<pair<double, Decision>> evToDecision;
+  vector<pair<double, Decision>> ev_to_decision;
 
-  cout << "size : " << allDecisions.size() << "\n\n";
-  for (Decision d : allDecisions) {
-    const PokerHandEvaluator *localEval = evaluator;
+  cout << "size : " << all_decisions.size() << "\n\n";
+
+  for (Decision d : all_decisions) {
+    const PokerHandEvaluator *local_eval = evaluator;
     futures.push_back(
         async(
           std::launch::async,
-          [d, localEval, numIterations, myPull, otherHands] () {
-          return Solver(localEval).solve(
-              numIterations,
+          [d, local_eval, num_iterations, my_pull] () {
+          return Solver(local_eval).solve(
+              num_iterations,
               Hand().applyDecision(d),
-              myPull,
-              otherHands,
+              my_pull,
+              vector<Hand>(),
               vector<Card>());
           }));
   }
 
-  for (int i = 0; i < futures.size(); ++i) {
-    evToDecision.emplace_back(futures[i].get(), allDecisions[i]);
+  for (unsigned int i = 0; i < futures.size(); ++i) {
+    ev_to_decision.emplace_back(futures[i].get(), all_decisions[i]);
   }
 
-  sort(evToDecision.begin(), evToDecision.end(),
+  sort(ev_to_decision.begin(), ev_to_decision.end(),
       [](auto &left, auto &right) { return right.first < left.first; });
 
-  for (int i = 0; i < 10; ++i) {
-    cout << evToDecision[i].first << " : " << evToDecision[i].second;
+  vector<Decision> top_n_decisions;
+  cout << "Stage one: \n";
+  for (unsigned int i = 0; i < n; ++i) { 
+    cout << ev_to_decision[i].first << " : " << ev_to_decision[i].second;
+    top_n_decisions.emplace_back(ev_to_decision[i].second);
   }
 
-  return evToDecision[0].second;
+  return top_n_decisions;
+}
+
+Decision SetDecisionFinder::stageTwoEvaluation(const vector<Decision> &all_decisions, const Pull &my_pull, 
+    int num_iterations, const vector<Hand> &other_hands) {
+
+  vector< future<double> > futures;
+  vector< pair<double, Decision> > ev_to_decision;
+
+  for (Decision d : all_decisions) {
+    const PokerHandEvaluator *local_eval = evaluator;
+    futures.push_back(
+        async(
+          std::launch::async,
+          [d, local_eval, num_iterations, my_pull, other_hands] () {
+          return Solver(local_eval).solve(
+              num_iterations,
+              Hand().applyDecision(d),
+              my_pull,
+              other_hands,
+              vector<Card>());
+          }));
+  }
+
+  for (unsigned int i = 0; i < futures.size(); ++i) {
+    ev_to_decision.emplace_back(futures[i].get(), all_decisions[i]);
+  }
+
+  sort(ev_to_decision.begin(), ev_to_decision.end(),
+      [](auto &left, auto &right) { return right.first < left.first; });
+
+  cout << "Stage two: \n";
+  for (unsigned int i = 0; i < ev_to_decision.size(); ++i) { 
+    cout << ev_to_decision[i].first << " : " << ev_to_decision[i].second;
+  }
+
+  return ev_to_decision[0].second;
 }
 
 vector<Decision> SetDecisionFinder::findAllDecisionsHelper(const set<Card> &cards, const vector<Placement> &acc) {
