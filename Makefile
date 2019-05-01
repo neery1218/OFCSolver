@@ -1,5 +1,5 @@
 INC = -I /usr/local/include/boost/
-SRCS = hand.cc solver.cc card.cc pull.cc deck.cc poker_hand_evaluator.cc decision_finder.cc fantasy_solver.cc set_decision_finder.cc
+SRCS = hand.cc solver.cc card.cc pull.cc deck.cc poker_hand_evaluator.cc decision_finder.cc fantasy_solver.cc
 DRIVER = main.cc
 TESTS = test_hand.cc test_decision_finder.cc
 all: 

@@ -15,7 +15,6 @@
 #include "decision.h"
 #include "placement.h"
 #include "decision_finder.h"
-#include "set_decision_finder.h"
 #include <fstream>
 #include <cassert>
 
@@ -58,8 +57,8 @@ int main(int argc, char *argv[]) {
 
     // parse pull
     getline(f, line);
-    Pull pull{parseCards(line)};
-    cout << "My pull :" <<  pull << "\n\n";
+    Pull my_pull{parseCards(line)};
+    cout << "My pull :" << my_pull << "\n\n";
 
     getline(f, line);
 
@@ -73,8 +72,8 @@ int main(int argc, char *argv[]) {
     getline(f, line);
     set<Card> m_bot = line == "x" ? set<Card>() : parseCards(line);
 
-    Hand myHand(m_top, m_mid, m_bot);
-    cout << "My hand: \n" << myHand << "\n\n";
+    Hand my_hand(m_top, m_mid, m_bot);
+    cout << "My hand: \n" << my_hand << "\n\n";
 
     getline(f, line);
     vector<Hand> other_hands;
@@ -98,26 +97,18 @@ int main(int argc, char *argv[]) {
 
     // parse dead cards
     getline(f, line);
-    vector<Card> deadCards;
+    vector<Card> dead_cards;
     if (line != "x") {
       set<Card> tmp = parseCards(line);
-      deadCards.insert(deadCards.end(), tmp.begin(), tmp.end());
+      dead_cards.insert(dead_cards.end(), tmp.begin(), tmp.end());
     }
-    cout << deadCards.size() << " dead cards. \n";
+    cout << dead_cards.size() << " dead cards. \n";
 
     // evaluate decisions
     // set solver
-    if (myHand.size() == 0) {
-      cout << "Set finder.\n";
-      Decision d = SetDecisionFinder(evaluator).findBestDecision(
-          pull, other_hands);
-      cout << "Best decision is: " << d << "\n";
-    } else {
-      cout << "Draw Decision finder.\n";
-      Decision d = DecisionFinder(evaluator).findBestDecision(
-          myHand, pull, other_hands, deadCards); 
-      cout << "Best decision is: " << d << "\n";
-    }
+    GameState game_state{my_hand, other_hands, my_pull, dead_cards};
+    Decision d = DecisionFinder(evaluator).findBestDecision(game_state);
+    cout << "Best decision is: " << d << "\n";
 
     cout << "Enter number of players : ";
     cin >> command;
@@ -138,9 +129,9 @@ int main(int argc, char *argv[]) {
   Pull myPull = {parseCards("Ah 2s 9s")};
 
   vector<Hand> otherHands = {otherHand};
-  vector<Card> deadCards = {Card("Kd")};
+  vector<Card> dead_cards = {Card("Kd")};
 
-  Decision d = DecisionFinder(GameType::Regular).findBestDecision(myHand, myPull, otherHands, deadCards);
+  Decision d = DecisionFinder(GameType::Regular).findBestDecision(myHand, myPull, otherHands, dead_cards);
   */
   /*
   Decision d = SetDecisionFinder(GameType::Progressive).findBestDecision(

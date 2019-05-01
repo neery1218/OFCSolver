@@ -9,7 +9,7 @@
 #include "decision.h"
 #include "poker_hand_evaluator.h"
 
-class Decision;
+struct Decision;
 struct CompletedHand;
 
 struct Hand {

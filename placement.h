@@ -4,7 +4,7 @@
 #include "position.h"
 #include "card.h"
 
-class Hand;
+struct Hand;
 
 struct Placement {
   Card card;
