@@ -14,7 +14,7 @@ Decision SetDecisionFinder::findBestDecision(const Pull &my_pull, const vector<H
 
   vector<Decision> all_decisions = findAllDecisions(cards);
 
-  vector<Decision> top_n_decisions_stage_one = stageOneEvaluation(all_decisions, 20, my_pull, 100);
+  vector<Decision> top_n_decisions_stage_one = stageOneEvaluation(all_decisions, 24, my_pull, 100);
   Decision best_decision = stageTwoEvaluation(top_n_decisions_stage_one, my_pull, 1000, other_hands);
 
   return best_decision;
@@ -66,22 +66,27 @@ Decision SetDecisionFinder::stageTwoEvaluation(const vector<Decision> &all_decis
   vector< pair<double, Decision> > ev_to_decision;
 
   for (Decision d : all_decisions) {
-    const PokerHandEvaluator *local_eval = evaluator;
-    futures.push_back(
-        async(
-          std::launch::async,
-          [d, local_eval, num_iterations, my_pull, other_hands] () {
-          return Solver(local_eval).solve(
-              num_iterations,
-              Hand().applyDecision(d),
-              my_pull,
-              other_hands,
-              vector<Card>());
-          }));
+    for (int i = 0; i < 4; ++i) {
+      const PokerHandEvaluator *local_eval = evaluator;
+      int num_iterations_split = num_iterations / 4;
+      futures.push_back(
+          async(
+            std::launch::async,
+            [d, local_eval, num_iterations_split, my_pull, other_hands] () {
+            return Solver(local_eval).solve(
+                num_iterations_split,
+                Hand().applyDecision(d),
+                my_pull,
+                other_hands,
+                vector<Card>());
+            }));
+    }
   }
 
-  for (unsigned int i = 0; i < futures.size(); ++i) {
-    ev_to_decision.emplace_back(futures[i].get(), all_decisions[i]);
+  for (unsigned int i = 0; i < all_decisions.size(); ++i) {
+    double total = 0;
+    for (int j = 0; i < 4; ++j) { total += futures[4 * i + j].get(); }
+    ev_to_decision.emplace_back(total / 4, all_decisions[i]);
   }
 
   sort(ev_to_decision.begin(), ev_to_decision.end(),
