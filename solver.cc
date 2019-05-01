@@ -35,7 +35,7 @@ double Solver::solve(int numIterations, const Hand &myHand, const Pull &myPull, 
   transform(allHands.begin(), allHands.end(), back_inserter(cardsNeeded), 
       [] (Hand h) { return (13 - h.size()) / 2 * 3; });
 
-  /* for (auto &numCards : cardsNeeded) { cout << numCards << " needed for hand." << endl; } */
+  for (auto &numCards : cardsNeeded) { cout << numCards << " needed for hand." << endl; }
   int totalCardsNeeded = accumulate(cardsNeeded.begin(), cardsNeeded.end(), 0);
 
   // average hand values over all iterations
