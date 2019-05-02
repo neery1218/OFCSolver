@@ -75,9 +75,10 @@ int main(int argc, char *argv[]) {
     Hand my_hand(m_top, m_mid, m_bot);
     cout << "My hand: \n" << my_hand << "\n\n";
 
-    getline(f, line);
     vector<Hand> other_hands;
     for (int i = 0; i < command - 1; ++i) {
+      getline(f, line);
+
       getline(f, line);
       set<Card> o_top = line == "x" ? set<Card>() : parseCards(line);
 
