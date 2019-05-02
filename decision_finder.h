@@ -16,6 +16,8 @@ class DecisionFinder {
   public:
     DecisionFinder(const PokerHandEvaluator &evaluator);
     Decision findBestDecision(const GameState &game_state);
+    DecisionFinder(const DecisionFinder&) = delete;
+    DecisionFinder& operator=(DecisionFinder&) = delete;
 
   private:
     std::vector<Decision> stageOneEvaluation(const std::vector<Decision> &all_decisions, int n, const GameState &game_state,
