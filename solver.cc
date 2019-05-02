@@ -13,6 +13,7 @@ unsigned int Solver::findCardsNeeded(const Hand &h) const {
   if (h.size() == 7) return 9;
   if (h.size() == 9) return 6;
   if (h.size() == 11) return 3;
+  throw "wtf";
 }
 
 double Solver::solve(int numIterations, const Hand &myHand, const Pull &myPull, const vector<Hand> &otherHands, const vector<Card> &deadCards) const {
@@ -41,7 +42,7 @@ double Solver::solve(int numIterations, const Hand &myHand, const Pull &myPull, 
   vector<unsigned int> cardsNeeded;
   for (const auto &h : allHands) { cardsNeeded.push_back(findCardsNeeded(h)); }
 
-  for (auto &numCards : cardsNeeded) { cout << numCards << " needed for hand." << endl; }
+  /* for (auto &numCards : cardsNeeded) { cout << numCards << " needed for hand." << endl; } */
   int totalCardsNeeded = accumulate(cardsNeeded.begin(), cardsNeeded.end(), 0);
 
   // average hand values over all iterations
