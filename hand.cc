@@ -74,15 +74,24 @@ ostream& operator<<(ostream& os, const Hand& hand) {
   return os;
 }
 
-vector<set<Card>> comb(set<Card> &_cards, int K)
+vector<set<Card>> comb(const set<Card> &_cards, int K)
 {
   vector<Card> cards(_cards.begin(), _cards.end());
+  std::string bitmask(K, 1); // K leading 1's
+  bitmask.resize(cards.size(), 0); // N-K trailing 0's
+
   vector<set<Card>> out;
-  for (auto&& x : discreture::combinations((int)cards.size(), K)) {
+  // print integers and permute bitmask
+  do {
     set<Card> tmp;
-    for (auto &i : x) { tmp.insert(cards[i]); }
-    out.emplace_back(tmp);
-  }
+
+    for (int i = 0; i < cards.size(); ++i) // [0..N-1] integers
+    {
+      if (bitmask[i]) tmp.insert(cards[i]);
+    }
+    out.emplace_back(tmp); // TODO: verify move semantics
+  } while (std::prev_permutation(bitmask.begin(), bitmask.end()));
+
   return out;
 }
 
@@ -143,8 +152,8 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, const PokerHandEvalua
   if (highestRoyalties == -1) { // all possible hands are fouled
     return CompletedHand{
       PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0},
-      PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0},
-      PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0}};
+        PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0},
+        PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0}};
   }
 
   return bestHand;
@@ -162,7 +171,7 @@ int CompletedHand::calculatePoints(const CompletedHand &otherHand) const {
 
   if (topInfo.overallRank < otherHand.topInfo.overallRank) gtBonus -= 1;
   else if (otherHand.topInfo.overallRank < topInfo.overallRank) gtBonus += 1;
-  
+
   if (middleInfo.overallRank < otherHand.middleInfo.overallRank) gtBonus -= 1;
   else if (otherHand.middleInfo.overallRank < middleInfo.overallRank) gtBonus += 1;
 
