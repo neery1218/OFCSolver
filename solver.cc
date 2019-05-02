@@ -8,6 +8,13 @@ using namespace std;
 
 Solver::Solver(const PokerHandEvaluator *_evaluator): evaluator{_evaluator} {}
 
+unsigned int Solver::findCardsNeeded(const Hand &h) const {
+  if (h.size() == 5) return 9; // not a typo
+  if (h.size() == 7) return 9;
+  if (h.size() == 9) return 6;
+  if (h.size() == 11) return 3;
+}
+
 double Solver::solve(int numIterations, const Hand &myHand, const Pull &myPull, const vector<Hand> &otherHands, const vector<Card> &deadCards) const {
 
   // Create deck, and remove known cards.
@@ -31,9 +38,8 @@ double Solver::solve(int numIterations, const Hand &myHand, const Pull &myPull, 
   assert(allHands.size() == 1 + otherHands.size());
 
   // how many cards does each hand need?
-  vector<int> cardsNeeded;
-  transform(allHands.begin(), allHands.end(), back_inserter(cardsNeeded), 
-      [] (Hand h) { return (13 - h.size()) / 2 * 3; });
+  vector<unsigned int> cardsNeeded;
+  for (const auto &h : allHands) { cardsNeeded.push_back(findCardsNeeded(h)); }
 
   for (auto &numCards : cardsNeeded) { cout << numCards << " needed for hand." << endl; }
   int totalCardsNeeded = accumulate(cardsNeeded.begin(), cardsNeeded.end(), 0);

@@ -24,7 +24,9 @@ class Solver {
 
   public:
     Solver(const PokerHandEvaluator *evaluator);
-    double solve(int numIterations, const Hand &myHand, const Pull &myPull, const std::vector<Hand> &otherHands, const std::vector<Card> &deadCards) const;
+    double solve(int numIterations, const Hand &my_hand, const Pull &my_pull, const std::vector<Hand> &other_hands, const std::vector<Card> &dead_cards) const;
+  private:
+    unsigned int findCardsNeeded(const Hand &my_hand) const;
 };
 
 #endif
