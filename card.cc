@@ -97,6 +97,6 @@ std::ostream& operator<<(std::ostream& os, const Card& c) {
   return os;
 }
 
-string to_string(Card c) {
+string to_string(const Card &c) {
   return c.val;
 }

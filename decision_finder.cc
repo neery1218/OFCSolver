@@ -7,7 +7,7 @@
 
 using namespace std;
 
-DecisionFinder::DecisionFinder(const PokerHandEvaluator &t_evaluator): evaluator{&t_evaluator} {}
+DecisionFinder::DecisionFinder(const PokerHandEvaluator *t_evaluator): evaluator{t_evaluator} {}
 
 Decision DecisionFinder::findBestDecision(const GameState &game_state) {
 
@@ -15,7 +15,7 @@ Decision DecisionFinder::findBestDecision(const GameState &game_state) {
     findAllDrawDecisions(game_state) : findAllSetDecisions(game_state);
 
   int n = (all_decisions.size() > 24) ? 24 : all_decisions.size();
-  vector<Decision> top_n_decisions_stage_one = stageOneEvaluation(all_decisions, n, game_state, 10);
+  vector<Decision> top_n_decisions_stage_one = stageOneEvaluation(all_decisions, n, game_state, 50);
   Decision best_decision = stageTwoEvaluation(top_n_decisions_stage_one, game_state, 50);
 
   return best_decision;

@@ -14,7 +14,7 @@
 class DecisionFinder {
   const PokerHandEvaluator *evaluator;
   public:
-    DecisionFinder(const PokerHandEvaluator &evaluator);
+    DecisionFinder(const PokerHandEvaluator *evaluator);
     Decision findBestDecision(const GameState &game_state);
     DecisionFinder(const DecisionFinder&) = delete;
     DecisionFinder& operator=(DecisionFinder&) = delete;

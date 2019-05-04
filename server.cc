@@ -16,8 +16,8 @@
 #include "placement.h"
 #include "decision_finder.h"
 #include <fstream>
-#include <cassert>
 #include <httplib.h>
+#include <stdexcept>
 
 using namespace std;
 
@@ -27,129 +27,79 @@ set<Card> parseCards(string cards) {
 
   boost::split(tokens, cards, boost::is_any_of(" "));
   for (auto token : tokens) {
-    assert(token.size() == 2);
+    if (token.size() != 2) throw runtime_error("card size has to be 2 u fool");
     parsedCards.insert(Card(token));
   }
 
   return parsedCards;
 }
 
+Hand parseHand(string hand_str) {
+  vector<string> tokens;
+  boost::split(tokens, hand_str, boost::is_any_of("/"));
+  if (tokens.size() != 3) throw runtime_error("Must be exactly 2 forward slashes in hand");
+
+  set<Card> top = (tokens[0].size() > 0) ? parseCards(tokens[0]) : set<Card>();
+  set<Card> mid = (tokens[1].size() > 0) ? parseCards(tokens[1]) : set<Card>();
+  set<Card> bot = (tokens[2].size() > 0) ? parseCards(tokens[2]) : set<Card>();
+
+  return Hand{top, mid, bot};
+}
+
 int main(int argc, char *argv[]) {
   using namespace httplib;
 
   Server svr;
+  PokerHandEvaluator *eval_progressive = new PokerHandEvaluator(GameType::Progressive);
+  PokerHandEvaluator *eval_regular = new PokerHandEvaluator(GameType::Regular);
+  PokerHandEvaluator *eval_ultimate = new PokerHandEvaluator(GameType::Ultimate);
+  cout << "Ready!\n\n";
 
-  svr.Get("/eval", [] (const Request & req, Response &res) {
-      PokerHandEvaluator evaluator(GameType::Progressive);
-      evaluator.
-      res.set_content("Hello World!", "text/plain");
-  });
-  svr.listen("localhost", 8080);
-  /*
-  int command;
-  char game_mode;
-  GameType type;
+  svr.Get("/eval", [eval_regular, eval_progressive, eval_ultimate] (const Request & req, Response &res) {
+    try {
+      string eval_type = req.params.find("type")->second;
+      PokerHandEvaluator *eval = eval_regular;
 
-  cout << "Game mode? (r, p, u) : ";
-  cin >> game_mode;
-
-  if (game_mode == 'r') type = GameType::Regular;
-  else if (game_mode == 'p') type = GameType::Progressive;
-  else if (game_mode == 'u') type = GameType::Ultimate;
-  else throw "wtf";
-
-  PokerHandEvaluator evaluator(type);
-
-  cout << "Enter number of players : ";
-  cin >> command;
-
-  while (command) {
-    ifstream f("input.txt");
-    string line;
-
-    // parse pull
-    getline(f, line);
-    Pull my_pull{parseCards(line)};
-    cout << "My pull :" << my_pull << "\n\n";
-
-    getline(f, line);
-
-    // parse my hand
-    getline(f, line);
-    set<Card> m_top = line == "x" ? set<Card>() : parseCards(line);
-
-    getline(f, line);
-    set<Card> m_mid = line == "x" ? set<Card>() : parseCards(line);
-
-    getline(f, line);
-    set<Card> m_bot = line == "x" ? set<Card>() : parseCards(line);
-
-    Hand my_hand(m_top, m_mid, m_bot);
-    cout << "My hand: \n" << my_hand << "\n\n";
-
-    vector<Hand> other_hands;
-    for (int i = 0; i < command - 1; ++i) {
-      getline(f, line);
-
-      getline(f, line);
-      set<Card> o_top = line == "x" ? set<Card>() : parseCards(line);
-
-      getline(f, line);
-      set<Card> o_mid = line == "x" ? set<Card>() : parseCards(line);
-
-      getline(f, line);
-      set<Card> o_bot = line == "x" ? set<Card>() : parseCards(line);
-      
-      if (o_top.size() + o_mid.size() + o_bot.size() > 0) {
-        other_hands.push_back(Hand(o_top, o_mid, o_bot));
-        cout << "Other hand " << i + 1 << " : \n" << other_hands[i] << "\n\n";
+      if (eval_type == "progressive") {
+        eval = eval_progressive;
+        cout << "Progressive\n";
       }
-    }
+      else if (eval_type == "ultimate") {
+        eval = eval_ultimate;
+        cout << "Ultimate\n";
+      }
 
-    getline(f, line);
+      Pull my_pull = Pull{parseCards(req.params.find("pull")->second)};
+      cout << "Pull: " << my_pull << "\n";
 
-    // parse dead cards
-    getline(f, line);
-    vector<Card> dead_cards;
-    if (line != "x") {
-      set<Card> tmp = parseCards(line);
-      dead_cards.insert(dead_cards.end(), tmp.begin(), tmp.end());
-    }
-    cout << dead_cards.size() << " dead cards. \n";
+      string my_hand_str = req.params.find("my_hand")->second;
+      Hand my_hand = parseHand(my_hand_str);
+      cout << "My hand: " << my_hand << "\n";
 
-    // evaluate decisions
-    // set solver
-    GameState game_state{my_hand, other_hands, my_pull, dead_cards};
-    Decision d = DecisionFinder(evaluator).findBestDecision(game_state);
-    cout << "Best decision is: " << d << "\n";
+      vector<Hand> other_hands;
+      auto ret = req.params.equal_range("other_hand");
+      for (auto it = ret.first; it != ret.second; it++) {
+        cout <<"candidate: " << it->second;
+        Hand other_hand = parseHand(it->second);
+        if (other_hand.size() > 0) {
+          other_hands.push_back(other_hand);
+          cout << "Other hand: " << other_hand << "\n";
+        }
+      }
 
-    cout << "Enter number of players : ";
-    cin >> command;
-    if (command == 0) return 0;
-  }
-  */
-  // create ofc hands
-  /*
-  Hand myHand(
-      parseCards("Ac"), 
-      parseCards("2c 2d"), 
-      parseCards("9h 9d 7d 7s"));
+      vector<Card> dead_cards;
+      auto it = req.params.find("dead_cards");
+      if (it != req.params.end()) {
+        set<Card> tmp = parseCards(it->second);
+        dead_cards.insert(dead_cards.end(), tmp.begin(), tmp.end());
+      }
+      cout << dead_cards.size() << "dead cards. \n";
 
-  Hand otherHand(
-      parseCards("As Qc Qd"), 
-      parseCards("3c 3d 3s"), 
-      parseCards("Th Td Ts"));
-
-  Pull myPull = {parseCards("Ah 2s 9s")};
-
-  vector<Hand> otherHands = {otherHand};
-  vector<Card> dead_cards = {Card("Kd")};
-
-  Decision d = DecisionFinder(GameType::Regular).findBestDecision(myHand, myPull, otherHands, dead_cards);
-  */
-  /*
-  Decision d = SetDecisionFinder(GameType::Progressive).findBestDecision(
-      Pull{parseCards("Qd 4s 5s 9s As")},
-      vector<Hand> ());
-  */
+      GameState game_state{my_hand, other_hands, my_pull, dead_cards};
+      Decision d = DecisionFinder(eval).findBestDecision(game_state);
+      cout << "Best decision is: " << d << "\n";
+    } catch (const std::exception &e) { cout << e.what() << "\n"; }
+  });
+  svr.listen("0.0.0.0", 8080);
+  cout << "Done.\n";
 }

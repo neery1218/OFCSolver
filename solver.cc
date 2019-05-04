@@ -4,16 +4,17 @@
 #include <algorithm>
 #include <numeric>
 #include <boost/range/irange.hpp>
+#include <stdexcept>
 using namespace std;
 
 Solver::Solver(const PokerHandEvaluator *_evaluator): evaluator{_evaluator} {}
 
 unsigned int Solver::findCardsNeeded(const Hand &h) const {
-  if (h.size() == 5) return 9; // not a typo
-  if (h.size() == 7) return 9;
-  if (h.size() == 9) return 6;
+  if (h.size() == 5) return 8; // not a typo
+  if (h.size() == 7) return 7;
+  if (h.size() == 9) return 5;
   if (h.size() == 11) return 3;
-  throw "wtf";
+  throw runtime_error("Hand size is not valid!");
 }
 
 double Solver::solve(int numIterations, const Hand &myHand, const Pull &myPull, const vector<Hand> &otherHands, const vector<Card> &deadCards) const {

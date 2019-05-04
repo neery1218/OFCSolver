@@ -10,7 +10,7 @@ struct Card {
   public:
     Card(std::string token);
     friend std::ostream& operator<<(std::ostream& os, const Card& c);
-    friend std::string to_string(Card c);
+    friend std::string to_string(const Card &c);
     bool operator <(const Card &obj) const;
 
   private:
