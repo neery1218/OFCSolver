@@ -14,6 +14,7 @@ unsigned int Solver::findCardsNeeded(const Hand &h) const {
   if (h.size() == 7) return 7;
   if (h.size() == 9) return 5;
   if (h.size() == 11) return 3;
+  if (h.size() == 13) return 1;
   throw runtime_error("Hand size is not valid!");
 }
 
