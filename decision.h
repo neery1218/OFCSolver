@@ -3,6 +3,7 @@
 
 #include "placement.h"
 #include <vector>
+#include <string>
 
 struct Decision {
   std::vector<Placement> placements;
@@ -18,5 +19,4 @@ inline std::ostream& operator<<(std::ostream& os, const Decision &d) {
   os << "\n\n";
   return os;
 }
-
 #endif

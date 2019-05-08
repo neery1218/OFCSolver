@@ -21,6 +21,7 @@
 using namespace std;
 
 set<Card> parseCards(string cards) {
+  if (cards.empty()) return set<Card> ();
   vector<string> tokens;
   set<Card> parsedCards;
 

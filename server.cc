@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <map>
 #include <vector>
 #include <set>
@@ -22,6 +23,7 @@
 using namespace std;
 
 set<Card> parseCards(string cards) {
+  if (cards.empty()) return set<Card>();
   vector<string> tokens;
   set<Card> parsedCards;
 
@@ -97,6 +99,12 @@ int main(int argc, char *argv[]) {
 
       GameState game_state{my_hand, other_hands, my_pull, dead_cards};
       Decision d = DecisionFinder(eval).findBestDecision(game_state);
+
+      stringstream ss;
+      string out;
+      ss << d;
+      out = ss.str();
+      res.set_content(out, "text/plain");
       cout << "Best decision is: " << d << "\n";
     } catch (const std::exception &e) { cout << e.what() << "\n"; }
   });
