@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
     // evaluate decisions
     // set solver
     GameState game_state{my_hand, other_hands, my_pull, dead_cards};
-    Decision d = DecisionFinder(evaluator).findBestDecision(game_state);
+    Decision d = DecisionFinder(&evaluator).findBestDecision(game_state);
     cout << "Best decision is: " << d << "\n";
 
     cout << "Enter number of players : ";
