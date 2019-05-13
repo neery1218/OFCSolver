@@ -24,7 +24,8 @@ set<Card> parse(string cards) {
 TEST_CASE( "calculate all decisisions", "[DecisionFinder]" ) {
   Hand myHand(parse("Ac"), parse("2c 2d"), parse("9h 9d"));
   Pull myPull = {parse("Ah As Kd")};
-
+  /*
   DecisionFinder().findBestDecision(myHand, myPull);
+  */
 
 }

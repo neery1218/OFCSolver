@@ -8,7 +8,7 @@
 
 using namespace std;
 
-PokerHandEvaluator evaluator(GameType::progressive);
+PokerHandEvaluator evaluator(GameType::Progressive);
 
 set<Card> parseCards(string cards) {
   vector<string> tokens;
@@ -32,8 +32,8 @@ TEST_CASE( "CompletedHand::calculatePoints", "[CompletedHand]" ) {
   PokerHandInfo yourMid{5, PokerHandType::PAIR, 0};
   PokerHandInfo yourBot{90, PokerHandType::FLUSH, 4};
 
-  CompletedHand myHand{&myTop, &myMid, &myBot};
-  CompletedHand yourHand{&yourTop, &yourMid, &yourBot};
+  CompletedHand myHand{myTop, myMid, myBot};
+  CompletedHand yourHand{yourTop, yourMid, yourBot};
 
   REQUIRE( myHand.calculatePoints(yourHand) == -1 );
   REQUIRE( yourHand.calculatePoints(myHand) == 1 );
@@ -50,8 +50,8 @@ TEST_CASE( "CompletedHand::calculatePointsScooped", "[CompletedHand]" ) {
   PokerHandInfo yourMid{25, PokerHandType::TRIPS, 2};
   PokerHandInfo yourBot{90, PokerHandType::FLUSH, 4};
 
-  CompletedHand myHand{&myTop, &myMid, &myBot};
-  CompletedHand yourHand{&yourTop, &yourMid, &yourBot};
+  CompletedHand myHand{myTop, myMid, myBot};
+  CompletedHand yourHand{yourTop, yourMid, yourBot};
 
   REQUIRE( myHand.calculatePoints(yourHand) == -8 );
   REQUIRE( yourHand.calculatePoints(myHand) == 8 );
@@ -66,8 +66,56 @@ TEST_CASE( "CompletedHand::constructOptimalHand", "[CompletedHand]" ) {
   set<Card> cards = parseCards("Ad Kc Ks 2s 3s 4d");
   CompletedHand completedHand = hand.constructOptimalHand(cards, &evaluator);
 
-  REQUIRE( completedHand.topInfo->royalties == 29 );
-  REQUIRE( completedHand.middleInfo->royalties == 2 );
-  REQUIRE( completedHand.bottomInfo->royalties == 10 );
+  REQUIRE( completedHand.topInfo.royalties == 29 );
+  REQUIRE( completedHand.middleInfo.royalties == 2 );
+  REQUIRE( completedHand.bottomInfo.royalties == 10 );
+
+}
+
+TEST_CASE( "CompletedHand::constructOptimalHand2", "[CompletedHand]" ) {
+  Hand hand(
+      parseCards("Ad"),
+      parseCards("5s 2c"),
+      parseCards("Td 9d"));
+
+  set<Card> cards = parseCards("Kd Qd 4d 5c 2s Kh Ks Jh As");
+  CompletedHand completedHand = hand.constructOptimalHand(cards, &evaluator);
+
+  REQUIRE( completedHand.topInfo.royalties == 29 );
+  REQUIRE( completedHand.middleInfo.royalties == 0 );
+  REQUIRE( completedHand.bottomInfo.royalties == 4 );
+
+}
+
+TEST_CASE( "CompletedHand::constructOptimalHand3", "[CompletedHand]" ) {
+  Hand hand(
+      parseCards("Ad"),
+      parseCards("5s 2c"),
+      parseCards("Td 9d"));
+
+  set<Card> cards = parseCards("Kd Qd 4s 5c 2s Kh Ks Jh As");
+  CompletedHand completedHand = hand.constructOptimalHand(cards, &evaluator);
+
+  REQUIRE( completedHand.topInfo.royalties == 29 );
+  REQUIRE( completedHand.middleInfo.royalties == 0 );
+  REQUIRE( completedHand.bottomInfo.royalties == 2 );
+
+}
+
+TEST_CASE( "CompletedHand::constructOptimalHandFouled", "[CompletedHand]" ) {
+  Hand hand(
+      parseCards("Ad Ac Qh"),
+      parseCards("5s 2c 2d 3s 4s"),
+      parseCards("Td"));
+
+  set<Card> cards = parseCards("Kd Qd 4d 5c 2s Kh Ks Jh As");
+  CompletedHand completedHand = hand.constructOptimalHand(cards, &evaluator);
+
+  REQUIRE( completedHand.topInfo.royalties == 0 );
+  REQUIRE( completedHand.topInfo.overallRank == -1 );
+  REQUIRE( completedHand.middleInfo.royalties == 0 );
+  REQUIRE( completedHand.middleInfo.overallRank == -1 );
+  REQUIRE( completedHand.bottomInfo.royalties == 0 );
+  REQUIRE( completedHand.bottomInfo.overallRank == -1 );
 
 }

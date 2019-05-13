@@ -41,19 +41,54 @@ double FantasySimulator::run(int numCards, int numIterations) {
 
 int main () {
   FantasySimulator simulator;
+  int iterations = 10;
+  int fantasy_n = 14;
+  // each iteration:
+  // make a fantasy hand
+  // make a regular hand
+  // calculate ev
+  PokerHandEvaluator *eval_regular = new PokerHandEvaluator(GameType::Regular);
+
+  double total = 0;
+  for (int i : boost::irange(iterations)) {
+
+    Deck deck;
+
+    // pre generate pulls
+    vector< vector<Card> > pulls;
+    pulls[0] = deck.select(5);
+    deck.remove(pulls[0]);
+
+    for (int i = 1; i <= 4; ++i) {
+      pulls[i] = deck.select(3);
+      deck.remove(pulls[i]);
+    }
+
+    // make hand
+    vector<Hand> hands;
+    hands.emplace_back(Hand());
+    vector<Card> dead_cards;
+
+    for (int i = 0; i < 5; ++i) {
+      GameState state{hands[i], vector<Hand> (), pull[i], dead_cards};
+      for (Card c : pull[i]) { dead_cards.push_back(c); }
+      Decision d = DecisionFinder(eval_regular).findBestDecision(game_state);
+      hands.push_back(hands[i].applyDecision(d);
+    }
 
 
-  vector<future<double>> l;
-  for (int i : boost::irange(1, 2)) {
-    l.push_back(async(simulator.run, 14, 500));
+    vector<Card> fantasy_pull = deck.select(14);
+    set<Card> card_set(fantasy_pull.begin(), fantasy_pull.end());
+    CompletedHand myOptimalHand = Hand().constructOptimalHand(cardSet, &evaluator);
+
+    myOptimalHand.calculatePoints
+    double sum = myOptimalHand.topInfo->royalties + myOptimalHand.middleInfo->royalties + myOptimalHand.bottomInfo->royalties;
+    if (myOptimalHand.topInfo->handType == PokerHandType::TRIPS ||
+        myOptimalHand.bottomInfo->handType == PokerHandType::QUADS ||
+        myOptimalHand.bottomInfo->handType == PokerHandType::STRAIGHT_FLUSH ||
+        myOptimalHand.bottomInfo->handType == PokerHandType::ROYAL_FLUSH) ++numRefantasy;
+
+
+    
   }
-
-  double out = 0;
-  for (int i : boost::irange(1, 2)) {
-    int tmp = l[i].get();
-    out += tmp;
-  }
-
-  int avg = out / l.size();
-  cout << avg << endl;
 }

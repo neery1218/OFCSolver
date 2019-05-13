@@ -49,7 +49,7 @@ double Solver::solve(int numIterations, const Hand &myHand, const Pull &myPull, 
 
   // average hand values over all iterations
   int total = 0;
-  for (int i : boost::irange(1, numIterations)) {
+  for (int it = 0; it < numIterations; ++it) {
     // sample cards from deck
     vector<Card> drawnCards = deck.select(totalCardsNeeded);
 

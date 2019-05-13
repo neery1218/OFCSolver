@@ -12,6 +12,7 @@ class Deck {
   public:
     Deck();
     void remove(Card card);
+    void remove(const std::vector<Card> &cards);
     const std::vector<Card> select(int k);
     int size();
 };

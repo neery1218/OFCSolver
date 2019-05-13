@@ -110,7 +110,7 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, const PokerHandEvalua
 
     PokerHandInfo *botInfo = bottomCardsMissing > 0 ? evaluator->eval(bottom, botCombo, Position::bottom) : evaluator->eval(bottom, Position::bottom);
 
-    if (highestRoyalties >= 0 && botInfo->overallRank < 4346) continue; // don't continue if bottom is less than KK
+    if (_size <= 7 && highestRoyalties >= 0 && botInfo->overallRank < 4346) continue; // don't continue if bottom is less than KK
 
     set<Card> remainingCards;
     set_difference(
@@ -126,7 +126,7 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, const PokerHandEvalua
       PokerHandInfo * midInfo = middleCardsMissing > 0 ? evaluator->eval(middle, midCombo, Position::middle) : evaluator->eval(middle, Position::middle);
 
       if (botInfo->overallRank < midInfo->overallRank) continue; // fouled hand
-      if (highestRoyalties > botInfo->royalties + midInfo->royalties && midInfo->overallRank < 2722) continue; // don't continue if mid is less than 66
+      if (_size <= 7 && highestRoyalties > botInfo->royalties + midInfo->royalties && midInfo->overallRank < 2722) continue; // don't continue if mid is less than 66
 
       set<Card> topRemainingCards;
       set_difference(remainingCards.begin(), remainingCards.end(), midCombo.begin(), 
