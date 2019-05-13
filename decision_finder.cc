@@ -21,11 +21,18 @@ Decision DecisionFinder::findBestDecision(const GameState &game_state) {
   return best_decision;
 }
 
-vector<Decision> DecisionFinder::stageOneEvaluation(const vector<Decision> &all_decisions, int n, const GameState &game_state, int num_iterations) {
+vector<Decision> DecisionFinder::stageOneEvaluation(const vector<Decision> &all_decisions, unsigned int n, const GameState &game_state, int num_iterations) {
   vector< future<double> > futures;
   vector< pair<double, Decision> > ev_to_decision;
 
   cout << "size : " << all_decisions.size() << "\n\n";
+
+  vector<Card> dead_cards;
+  for (auto &h : game_state.other_hands) {
+    dead_cards.insert(dead_cards.end(), h.top.begin(), h.top.end());
+    dead_cards.insert(dead_cards.end(), h.middle.begin(), h.middle.end());
+    dead_cards.insert(dead_cards.end(), h.bottom.begin(), h.bottom.end());
+  }
 
   /* Ignore other hands for now. We want to cheaply narrow down the search space first. */
   for (Decision d : all_decisions) {
@@ -33,13 +40,13 @@ vector<Decision> DecisionFinder::stageOneEvaluation(const vector<Decision> &all_
     futures.push_back(
         async(
           std::launch::async,
-          [d, local_eval, num_iterations, game_state] () {
+          [d, local_eval, num_iterations, game_state, dead_cards] () {
           return Solver(local_eval).solve(
               num_iterations,
               game_state.my_hand.applyDecision(d),
               game_state.my_pull,
               vector<Hand>(),
-              game_state.dead_cards);
+              dead_cards);
           }));
   }
 

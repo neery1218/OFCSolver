@@ -85,7 +85,7 @@ vector<set<Card>> comb(const set<Card> &_cards, int K)
   do {
     set<Card> tmp;
 
-    for (int i = 0; i < cards.size(); ++i) // [0..N-1] integers
+    for (unsigned int i = 0; i < cards.size(); ++i) // [0..N-1] integers
     {
       if (bitmask[i]) tmp.insert(cards[i]);
     }

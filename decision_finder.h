@@ -20,7 +20,7 @@ class DecisionFinder {
     DecisionFinder& operator=(DecisionFinder&) = delete;
 
   private:
-    std::vector<Decision> stageOneEvaluation(const std::vector<Decision> &all_decisions, int n, const GameState &game_state,
+    std::vector<Decision> stageOneEvaluation(const std::vector<Decision> &all_decisions, unsigned int n, const GameState &game_state,
         int num_iterations);
     Decision stageTwoEvaluation(const std::vector<Decision> &all_decisions, const GameState &game_state,
         int num_iterations);
