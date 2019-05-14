@@ -16,7 +16,7 @@ Decision DecisionFinder::findBestDecision(const GameState &game_state) {
 
   int n = (all_decisions.size() > 24) ? 24 : all_decisions.size();
   vector<Decision> top_n_decisions_stage_one = stageOneEvaluation(all_decisions, n, game_state, 50);
-  Decision best_decision = stageTwoEvaluation(top_n_decisions_stage_one, game_state, 3000);
+  Decision best_decision = stageTwoEvaluation(top_n_decisions_stage_one, game_state, 5000);
 
   return best_decision;
 }
