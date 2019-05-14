@@ -44,28 +44,17 @@ double Solver::solve(int numIterations, const Hand &myHand, const Pull &myPull, 
   vector<unsigned int> cardsNeeded;
   for (const auto &h : allHands) { cardsNeeded.push_back(findCardsNeeded(h)); }
 
-  /* for (auto &numCards : cardsNeeded) { cout << numCards << " needed for hand." << endl; } */
-  int totalCardsNeeded = accumulate(cardsNeeded.begin(), cardsNeeded.end(), 0);
-
   // average hand values over all iterations
   int total = 0;
   for (int it = 0; it < numIterations; ++it) {
     // sample cards from deck
-    vector<Card> drawnCards = deck.select(totalCardsNeeded);
-
-    // add cards to each hand
-    unsigned int counter = cardsNeeded[0];
-
-    set<Card> cards(drawnCards.begin(), drawnCards.begin() + cardsNeeded[0]);
-    CompletedHand myOptimalHand = myHand.constructOptimalHand(cards, evaluator);
+    set<Card> my_draw = deck.select(cardsNeeded[0]);
+    CompletedHand myOptimalHand = myHand.constructOptimalHand(my_draw, evaluator);
 
     if (allHands.size() == 1) total += myOptimalHand.calculatePoints();
     else for (unsigned int i = 1; i < allHands.size(); ++i) {
-      set<Card> cards(
-          drawnCards.begin() + counter,
-          drawnCards.begin() + counter + cardsNeeded[i]);
-      counter += cardsNeeded[i];
-      CompletedHand otherHand = allHands[i].constructOptimalHand(cards, evaluator);
+      set<Card> other_draw = deck.select(cardsNeeded[i]);
+      CompletedHand otherHand = allHands[i].constructOptimalHand(other_draw, evaluator);
       total += myOptimalHand.calculatePoints(otherHand);
     }
   }

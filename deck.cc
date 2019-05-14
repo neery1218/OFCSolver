@@ -20,15 +20,15 @@ int Deck::size() {
   return deck.size();
 }
 
-const vector<Card> Deck::select(int k) {
+const set<Card> Deck::select(int k) {
   vector<string> tmp;
-  vector<Card> out;
+  set<Card> out;
   experimental::sample(
       deck.begin(), deck.end(), 
       back_inserter(tmp), k, 
       std::mt19937{std::random_device{}()});
   transform(
-      tmp.begin(), tmp.end(), back_inserter(out), 
+      tmp.begin(), tmp.end(), inserter(out, out.begin()), 
       [] (string val) { return Card(val); });
   return out;
 }

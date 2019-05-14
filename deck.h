@@ -2,6 +2,7 @@
 #define _DECK_H_
 
 #include <unordered_set>
+#include <set>
 #include <vector>
 #include "card.h"
 #include <string>
@@ -13,7 +14,7 @@ class Deck {
     Deck();
     void remove(Card card);
     void remove(const std::vector<Card> &cards);
-    const std::vector<Card> select(int k);
+    const std::set<Card> select(int k);
     int size();
 };
 
