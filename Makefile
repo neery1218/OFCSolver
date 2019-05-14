@@ -24,10 +24,10 @@ test_main.o: test_main.cc
 	g++ -std=c++17 -O3 test_main.cc -c
 
 fantasysolver: all
-	g++ -std=c++17 -O3 $(INC) $(SRCS) fantasy_simulator.cc -o fantasysolver
+	g++ -std=c++17 -O3 $(INC) $(SRCS) fantasy_simulator.cc -o fantasysolver -lpthread
 
 fantasysolverdebug:
-	g++ -g -std=c++17 -O3 $(INC) $(SRCS) fantasy_simulator.cc -o fantasysolverdebug
+	g++ -g -std=c++17 -O3 $(INC) $(SRCS) fantasy_simulator.cc -o fantasysolverdebug -lpthread
 
 server: server.cc
 	$(CXX) $(CFLAGS) $(INC) $(SRCS) server.cc -o server -lpthread

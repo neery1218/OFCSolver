@@ -16,6 +16,10 @@ void Deck::remove(const vector<Card> &cards) {
   for (auto &c : cards) { remove(c); }
 }
 
+void Deck::remove(const set<Card> &cards) {
+  for (auto &c : cards) { remove(c); }
+}
+
 int Deck::size() {
   return deck.size();
 }
