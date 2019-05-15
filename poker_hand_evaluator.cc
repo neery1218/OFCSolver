@@ -60,16 +60,16 @@ PokerHandEvaluator::~PokerHandEvaluator() {
 
 int PokerHandEvaluator::calculateFantasyBonus(int overallRank) const {
   if (overallRank >= 3833) {
-    if (gameType == GameType::Regular) return 7.5;
+    if (gameType == GameType::Regular) return 9;
     else if (gameType == GameType::Progressive) {
-      if (overallRank < 4115) return 7.5;
-      else if (overallRank < 4347) return 10;
-      else return 20;
+      if (overallRank < 4115) return 9;
+      else if (overallRank < 4347) return 14;
+      else return 19;
     } 
     else if (gameType == GameType::Ultimate) {
-      if (overallRank < 4115) return 7.5;
-      else if (overallRank < 4347)return 20;
-      else return 30;
+      if (overallRank < 4115) return 7;
+      else if (overallRank < 4347)return 12;
+      else return 25;
     }
   }
   return 0;
