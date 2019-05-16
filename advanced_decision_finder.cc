@@ -1,4 +1,6 @@
 #include "decision_finder.h"
+#include "advanced_decision_finder.h"
+#include "advanced_solver.h"
 #include "solver.h"
 #include <utility>
 #include <future>
@@ -7,40 +9,21 @@
 
 using namespace std;
 
-DecisionFinder::DecisionFinder(const PokerHandEvaluator *t_evaluator): evaluator{t_evaluator} {}
+AdvancedDecisionFinder::AdvancedDecisionFinder(const PokerHandEvaluator *t_evaluator): evaluator{t_evaluator} {}
 
-Decision DecisionFinder::findBestDecision(const GameState &game_state) {
+Decision AdvancedDecisionFinder::findBestDecision(const GameState &game_state) {
 
   vector<Decision> all_decisions = (game_state.my_hand.size() > 0) ? 
     findAllDrawDecisions(game_state) : findAllSetDecisions(game_state);
 
   int n = (all_decisions.size() > 24) ? 24 : all_decisions.size();
   vector<Decision> top_n_decisions_stage_one = stageOneEvaluation(all_decisions, n, game_state, 50);
-  Decision best_decision = stageTwoEvaluation(top_n_decisions_stage_one, game_state, 5000);
+  Decision best_decision = stageTwoEvaluation(top_n_decisions_stage_one, game_state, 400);
 
   return best_decision;
 }
 
-Decision DecisionFinder::findBestDecision(const GameState &game_state, int iterations) {
-
-  vector<Decision> all_decisions = (game_state.my_hand.size() > 0) ? 
-    findAllDrawDecisions(game_state) : findAllSetDecisions(game_state);
-
-  vector< pair<double, Decision> > ev_to_decision;
-
-  for (Decision d : all_decisions) {
-    double ev = Solver(evaluator).solve(
-        iterations, game_state.my_hand.applyDecision(d),
-        game_state.my_pull, game_state.other_hands, game_state.dead_cards);
-    ev_to_decision.emplace_back(ev, d);
-  }
-
-  auto max_pair = max_element(ev_to_decision.begin(), ev_to_decision.end(),
-      [](auto &left, auto &right) { return left.first < right.first; });
-  return max_pair->second;
-}
-
-vector<Decision> DecisionFinder::stageOneEvaluation(const vector<Decision> &all_decisions, unsigned int n, const GameState &game_state, int num_iterations) {
+vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(const vector<Decision> &all_decisions, unsigned int n, const GameState &game_state, int num_iterations) {
   vector< future<double> > futures;
   vector< pair<double, Decision> > ev_to_decision;
 
@@ -84,7 +67,7 @@ vector<Decision> DecisionFinder::stageOneEvaluation(const vector<Decision> &all_
 
   return top_n_decisions;
 }
-Decision DecisionFinder::stageTwoEvaluation(const vector<Decision> &all_decisions, const GameState &game_state, 
+Decision AdvancedDecisionFinder::stageTwoEvaluation(const vector<Decision> &all_decisions, const GameState &game_state, 
     int num_iterations) {
 
   vector< future<double> > futures;
@@ -98,12 +81,14 @@ Decision DecisionFinder::stageTwoEvaluation(const vector<Decision> &all_decision
           async(
             std::launch::async,
             [d, local_eval, num_iterations_split, game_state] () {
-            return Solver(local_eval).solve(
+            GameState new_state{
+              game_state.my_hand.applyDecision(d),
+              game_state.other_hands,
+              game_state.my_pull,
+              game_state.dead_cards};
+            return AdvancedSolver(local_eval).solve(
                 num_iterations_split,
-                game_state.my_hand.applyDecision(d),
-                game_state.my_pull,
-                game_state.other_hands,
-                game_state.dead_cards);
+                new_state);
             }));
     }
   }
@@ -117,7 +102,7 @@ Decision DecisionFinder::stageTwoEvaluation(const vector<Decision> &all_decision
   sort(ev_to_decision.begin(), ev_to_decision.end(),
       [](auto &left, auto &right) { return right.first < left.first; });
 
-  cout << "Stage two: \n";
+  cout << "Stage two (Advanced): \n";
   for (unsigned int i = 0; i < ev_to_decision.size(); ++i) { 
     cout << ev_to_decision[i].first << " : " << ev_to_decision[i].second;
   }
@@ -125,7 +110,7 @@ Decision DecisionFinder::stageTwoEvaluation(const vector<Decision> &all_decision
   return ev_to_decision[0].second;
 }
 
-vector<Decision> DecisionFinder::findAllSetDecisionsHelper(const set<Card> &cards, const vector<Placement> &acc) {
+vector<Decision> AdvancedDecisionFinder::findAllSetDecisionsHelper(const set<Card> &cards, const vector<Placement> &acc) {
   vector<Decision> out;
 
   if (cards.empty()) {
@@ -158,7 +143,7 @@ vector<Decision> DecisionFinder::findAllSetDecisionsHelper(const set<Card> &card
   return out;
 }
 
-vector<Decision> DecisionFinder::findAllSetDecisions(const GameState &game_state) {
+vector<Decision> AdvancedDecisionFinder::findAllSetDecisions(const GameState &game_state) {
   assert(game_state.my_pull.cards.size() == 5);
 
   vector<Decision> decisions = findAllSetDecisionsHelper(game_state.my_pull.cards, vector<Placement> ());
@@ -187,7 +172,7 @@ int DecisionFinder::findIterationsRequired(const Hand &h) {
 }
 */
 
-vector<Decision> DecisionFinder::findAllDrawDecisions(const GameState &game_state) {
+vector<Decision> AdvancedDecisionFinder::findAllDrawDecisions(const GameState &game_state) {
   assert(game_state.my_pull.cards.size() == 3);
 
   int topCardsMissing = 3 - game_state.my_hand.top.size();

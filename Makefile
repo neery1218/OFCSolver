@@ -1,7 +1,7 @@
 INC = -I /usr/local/include/boost/ -I include/
-SRCS = hand.cc solver.cc card.cc pull.cc deck.cc poker_hand_evaluator.cc decision_finder.cc fantasy_solver.cc
+SRCS = hand.cc solver.cc card.cc pull.cc deck.cc poker_hand_evaluator.cc decision_finder.cc fantasy_solver.cc advanced_solver.cc advanced_decision_finder.cc
 DRIVER = main.cc
-TESTS = test_hand.cc test_decision_finder.cc test_solver.cc
+TESTS = test_hand.cc test_decision_finder.cc test_solver.cc test_advanced_solver.cc test_advanced_decision_finder.cc
 CXX = g++
 CFLAGS = -std=c++17 -Wall -O3
 

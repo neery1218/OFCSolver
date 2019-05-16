@@ -23,7 +23,6 @@ set<Card> parse_cards(string cards) {
 
   return parsedCards;
 }
-
 TEST_CASE( "Solver::solve", "[Solver]" ) {
   Hand hand(
       parse_cards("Ac"),

@@ -5,7 +5,7 @@
 #include "gametype.h"
 #include "card.h"
 #include <boost/algorithm/string.hpp>
-#include "decision_finder.h"
+#include "advanced_decision_finder.h"
 
 extern PokerHandEvaluator eval_ultimate;
 
@@ -13,7 +13,7 @@ using namespace std;
 
 extern set<Card> parse(string cards);
 
-TEST_CASE( "calculate all decisisions", "[DecisionFinder]" ) {
+TEST_CASE( "AdvancedDecision::last draw", "[AdvancedDecisionFinder]" ) {
   Hand my_hand(
       parse("Ac Ks"), 
       parse("2c 2d 2s 3s 3d"), 
@@ -27,5 +27,16 @@ TEST_CASE( "calculate all decisisions", "[DecisionFinder]" ) {
 
   Pull my_pull = {parse("Ah 9s Kd")};
   GameState game_state{my_hand, other_hands, my_pull, vector<Card>()};
-  Decision d = DecisionFinder(&eval_ultimate).findBestDecision(game_state);
+  Decision d = AdvancedDecisionFinder(&eval_ultimate).findBestDecision(game_state);
+  cout << "best decision is: " << d;
+}
+
+TEST_CASE( "AdvancedDecision::set", "[AdvancedDecisionFinder]" ) {
+  Hand my_hand;
+
+  Pull my_pull = {parse("Ah 9s 9d 2s 2c")};
+
+  GameState game_state{my_hand, vector<Hand>(), my_pull, vector<Card>()};
+  Decision d = AdvancedDecisionFinder(&eval_ultimate).findBestDecision(game_state);
+  cout << "best decision is: " << d;
 }

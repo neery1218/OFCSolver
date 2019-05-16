@@ -5,6 +5,7 @@
 #include <set>
 #include <vector>
 #include "card.h"
+#include "game_state.h"
 #include <string>
 
 class Deck {
@@ -12,6 +13,8 @@ class Deck {
 
   public:
     Deck();
+    Deck(const GameState &state);
+    Deck(const Deck &d);
     void remove(Card card);
     void remove(const std::vector<Card> &cards);
     void remove(const std::set<Card> &cards);

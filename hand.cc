@@ -159,6 +159,18 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, const PokerHandEvalua
   return bestHand;
 }
 
+CompletedHand::CompletedHand(const Hand &h, const PokerHandEvaluator *eval) {
+  topInfo = *eval->eval(h.top, Position::top);
+  middleInfo = *eval->eval(h.middle, Position::middle);
+  bottomInfo = *eval->eval(h.bottom, Position::bottom);
+
+  if (topInfo.overallRank > middleInfo.overallRank || middleInfo.overallRank > bottomInfo.overallRank) {
+    topInfo = PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0};
+    middleInfo = PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0};
+    bottomInfo = PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0};
+  }
+}
+
 int CompletedHand::calculatePoints() const { // note: can't call this with a fouled hand. tightly coupled with solver.h
   return topInfo.royalties + middleInfo.royalties + bottomInfo.royalties;
 }

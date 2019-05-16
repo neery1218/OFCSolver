@@ -1,5 +1,5 @@
-#ifndef _SET_DECISION_FINDER
-#define _SET_DECISION_FINDER
+#ifndef _ADVANCED_DECISION_FINDER
+#define _ADVANCED_DECISION_FINDER
 
 #include "poker_hand_evaluator.h"
 #include "gametype.h"
@@ -11,14 +11,13 @@
 #include "decision.h"
 #include "card.h"
 
-class DecisionFinder {
+class AdvancedDecisionFinder {
   const PokerHandEvaluator *evaluator;
   public:
-    DecisionFinder(const PokerHandEvaluator *evaluator);
+    AdvancedDecisionFinder(const PokerHandEvaluator *evaluator);
     Decision findBestDecision(const GameState &game_state);
-    Decision findBestDecision(const GameState &game_state, int iterations);
-    DecisionFinder(const DecisionFinder&) = delete;
-    DecisionFinder& operator=(DecisionFinder&) = delete;
+    AdvancedDecisionFinder(const AdvancedDecisionFinder&) = delete;
+    AdvancedDecisionFinder& operator=(AdvancedDecisionFinder&) = delete;
 
   private:
     std::vector<Decision> stageOneEvaluation(const std::vector<Decision> &all_decisions, unsigned int n, const GameState &game_state, int num_iterations);

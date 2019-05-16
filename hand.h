@@ -39,6 +39,7 @@ struct CompletedHand {
   PokerHandInfo bottomInfo;
   
   CompletedHand() {};
+  CompletedHand(const Hand &h, const PokerHandEvaluator *evaluator);
   CompletedHand(const PokerHandInfo &top, const PokerHandInfo &mid, const PokerHandInfo &bot): topInfo{top}, middleInfo{mid}, bottomInfo{bot} {}
   int calculatePoints(const CompletedHand &other) const;
   int calculatePoints() const;

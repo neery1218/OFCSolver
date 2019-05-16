@@ -66,7 +66,7 @@ TEST_CASE( "CompletedHand::constructOptimalHand", "[CompletedHand]" ) {
   set<Card> cards = parseCards("Ad Kc Ks 2s 3s 4d");
   CompletedHand completedHand = hand.constructOptimalHand(cards, &evaluator);
 
-  REQUIRE( completedHand.topInfo.royalties == 29 );
+  REQUIRE( completedHand.topInfo.royalties == 28 );
   REQUIRE( completedHand.middleInfo.royalties == 2 );
   REQUIRE( completedHand.bottomInfo.royalties == 10 );
 
@@ -81,7 +81,7 @@ TEST_CASE( "CompletedHand::constructOptimalHand2", "[CompletedHand]" ) {
   set<Card> cards = parseCards("Kd Qd 4d 5c 2s Kh Ks Jh As");
   CompletedHand completedHand = hand.constructOptimalHand(cards, &evaluator);
 
-  REQUIRE( completedHand.topInfo.royalties == 29 );
+  REQUIRE( completedHand.topInfo.royalties == 28 );
   REQUIRE( completedHand.middleInfo.royalties == 0 );
   REQUIRE( completedHand.bottomInfo.royalties == 4 );
 
@@ -96,7 +96,7 @@ TEST_CASE( "CompletedHand::constructOptimalHand3", "[CompletedHand]" ) {
   set<Card> cards = parseCards("Kd Qd 4s 5c 2s Kh Ks Jh As");
   CompletedHand completedHand = hand.constructOptimalHand(cards, &evaluator);
 
-  REQUIRE( completedHand.topInfo.royalties == 29 );
+  REQUIRE( completedHand.topInfo.royalties == 28 );
   REQUIRE( completedHand.middleInfo.royalties == 0 );
   REQUIRE( completedHand.bottomInfo.royalties == 2 );
 
