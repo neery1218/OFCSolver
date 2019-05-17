@@ -15,7 +15,7 @@ debug:
 	g++ -g -O2 -std=c++17 $(INC) $(SRCS) $(DRIVER) -o maindebug -lpthread
 
 profile:
-	g++ -pg -O3 -std=c++17 $(INC) $(SRCS) $(DRIVER) -o mainprof
+	g++ -pg -O3 -std=c++17 $(INC) $(SRCS) $(DRIVER) -o mainprof -lpthread
 
 clean:
 	rm -f main maindebug mainprof maintest server

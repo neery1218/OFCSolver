@@ -29,7 +29,7 @@ double AdvancedSolver::solve(int iterations, const GameState &game_state, const 
 
       dead_cards.insert(dead_cards.end(), pull.cards.begin(), pull.cards.end());
 
-      GameState new_state{hands.top(), game_state.other_hands, pull, dead_cards};
+      GameState new_state{hands.top(), vector<Hand>(), pull, dead_cards};
       Decision d = DecisionFinder(evaluator).findBestDecision(new_state, 5);
       hands.push(hands.top().applyDecision(d));
     }
