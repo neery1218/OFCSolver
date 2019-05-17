@@ -3,10 +3,11 @@
 
 #include "poker_hand_evaluator.h"
 #include "game_state.h"
+#include "deck.h"
 
 struct SolverParams {
-  unsigned int cards;
-  unsigned int iterations;
+  unsigned int stage_one_iterations;
+  unsigned int stage_two_iterations;
 };
 
 class AdvancedSolver {
@@ -14,7 +15,7 @@ class AdvancedSolver {
 
   public:
     AdvancedSolver(const PokerHandEvaluator *evaluator);
-    double solve(int iterations, const GameState &game_state) const;
+    double solve(int iterations, const GameState &game_state, const Deck &initial_deck) const;
     AdvancedSolver(const AdvancedSolver&) = delete;
     AdvancedSolver& operator=(AdvancedSolver&) = delete;
 };

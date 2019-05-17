@@ -5,11 +5,14 @@
 #include "gametype.h"
 #include "game_state.h"
 #include "pull.h"
+#include "solver.h"
 #include <vector>
 #include <set>
 #include "hand.h"
 #include "decision.h"
 #include "card.h"
+#include "solver.h"
+#include "advanced_solver.h"
 
 class AdvancedDecisionFinder {
   const PokerHandEvaluator *evaluator;
@@ -20,6 +23,7 @@ class AdvancedDecisionFinder {
     AdvancedDecisionFinder& operator=(AdvancedDecisionFinder&) = delete;
 
   private:
+    SolverParams getSolverParams(const GameState &game_state) const;
     std::vector<Decision> stageOneEvaluation(const std::vector<Decision> &all_decisions, unsigned int n, const GameState &game_state, int num_iterations);
     Decision stageTwoEvaluation(const std::vector<Decision> &all_decisions, const GameState &game_state, int num_iterations);
 

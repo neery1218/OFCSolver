@@ -12,9 +12,7 @@ using namespace std;
 
 AdvancedSolver::AdvancedSolver(const PokerHandEvaluator *t_evaluator): evaluator{t_evaluator} {}
 
-double AdvancedSolver::solve(int iterations, const GameState &game_state) const {
-  // simulate the hand until the end!
-  Deck deck(game_state);
+double AdvancedSolver::solve(int iterations, const GameState &game_state, const Deck &initial_deck) const {
 
   double total = 0;
   for (int i = 0; i < iterations; ++i) {
@@ -23,8 +21,8 @@ double AdvancedSolver::solve(int iterations, const GameState &game_state) const 
 
     vector<Card> dead_cards(game_state.dead_cards);
 
-    Deck sim_deck(deck);
-    while (hands.top().size() != 7) {
+    Deck sim_deck(initial_deck);
+    while (hands.top().size() <= 7) {
       Pull pull = Pull{sim_deck.select(3)};
       sim_deck.remove(pull.cards); 
 
@@ -37,26 +35,16 @@ double AdvancedSolver::solve(int iterations, const GameState &game_state) const 
     //cout << "hand: " << hands.top() << "\n\n";
 
     GameState final_state{hands.top(), game_state.other_hands, Pull{set<Card>()}, dead_cards};
-    set<Card> my_draw = sim_deck.select(6);
+    set<Card> my_draw = sim_deck.select(13 - hands.top().size());
     CompletedHand my_final_hand = hands.top().constructOptimalHand(my_draw, evaluator);
-    // CompletedHand my_final_hand(hands.top(), evaluator);
 
-    Deck final_deck{final_state};
-
-    double sub_total = 0;
-    for (int j = 0; j < 2; ++j) {
-      if (game_state.other_hands.empty()) sub_total += my_final_hand.calculatePoints();
-      else for (unsigned int k = 0; k < final_state.other_hands.size(); ++k) {
-        int cards_needed = 13 - final_state.other_hands[k].size() + 1;
-        set<Card> draw = deck.select(cards_needed);
-        CompletedHand final_other_hand = final_state.other_hands[k].constructOptimalHand(draw, evaluator);
-        sub_total += my_final_hand.calculatePoints(final_other_hand);
-      }
+    if (game_state.other_hands.empty()) total += my_final_hand.calculatePoints();
+    else for (unsigned int k = 0; k < final_state.other_hands.size(); ++k) {
+      int cards_needed = 13 - final_state.other_hands[k].size() + 1;
+      set<Card> draw = sim_deck.select(cards_needed);
+      CompletedHand final_other_hand = final_state.other_hands[k].constructOptimalHand(draw, evaluator);
+      total += my_final_hand.calculatePoints(final_other_hand);
     }
-    // cout << "points: " << (sub_total / 10) << "\n";
-    total += (sub_total / 2);
-
   }
-
   return total / iterations;
 }

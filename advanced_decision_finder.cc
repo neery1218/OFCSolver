@@ -11,14 +11,39 @@ using namespace std;
 
 AdvancedDecisionFinder::AdvancedDecisionFinder(const PokerHandEvaluator *t_evaluator): evaluator{t_evaluator} {}
 
+SolverParams AdvancedDecisionFinder::getSolverParams(const GameState &game_state) const {
+  if (game_state.my_hand.size() == 5) return SolverParams{500, 1000};
+  else if (game_state.my_hand.size() == 7) return SolverParams{50, 1000};
+  else if (game_state.my_hand.size() == 9) return SolverParams{50, 1000};
+  else if (game_state.my_hand.size() == 11) return SolverParams{50, 1000};
+  else if (game_state.my_hand.size() == 13) return SolverParams{1, 1};
+  else throw runtime_error("Hand size is not valid!");
+}
+
+// TODO: factor in other hands size
+/*
+SolverParams AdvancedDecisionFinder::getSolverParams(const GameState &game_state) const {
+  if (game_state.my_hand.size() == 5) return SolverParams{50, 100};
+  else if (game_state.my_hand.size() == 7) return SolverParams{50, 100};
+  else if (game_state.my_hand.size() == 9) return SolverParams{50, 100};
+  else if (game_state.my_hand.size() == 11) return SolverParams{50, 100};
+  else if (game_state.my_hand.size() == 13) return SolverParams{1, 1};
+  else throw runtime_error("Hand size is not valid!");
+}
+*/
+
 Decision AdvancedDecisionFinder::findBestDecision(const GameState &game_state) {
 
   vector<Decision> all_decisions = (game_state.my_hand.size() > 0) ? 
     findAllDrawDecisions(game_state) : findAllSetDecisions(game_state);
+  int top_n = (all_decisions.size() > 12) ? 12 : all_decisions.size();
+  SolverParams params = getSolverParams(game_state);
 
-  int n = (all_decisions.size() > 12) ? 12 : all_decisions.size();
-  vector<Decision> top_n_decisions_stage_one = stageOneEvaluation(all_decisions, n, game_state, 500);
-  Decision best_decision = stageTwoEvaluation(top_n_decisions_stage_one, game_state, 2000);
+  vector<Decision> top_n_decisions_stage_one = stageOneEvaluation(
+      all_decisions, top_n, game_state, params.stage_one_iterations);
+
+  Decision best_decision = stageTwoEvaluation(
+      top_n_decisions_stage_one, game_state, params.stage_two_iterations);
 
   return best_decision;
 }
@@ -26,8 +51,6 @@ Decision AdvancedDecisionFinder::findBestDecision(const GameState &game_state) {
 vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(const vector<Decision> &all_decisions, unsigned int n, const GameState &game_state, int num_iterations) {
   vector< future<double> > futures;
   vector< pair<double, Decision> > ev_to_decision;
-
-  cout << "size : " << all_decisions.size() << "\n\n";
 
   vector<Card> dead_cards;
   for (auto &h : game_state.other_hands) {
@@ -74,6 +97,8 @@ Decision AdvancedDecisionFinder::stageTwoEvaluation(const vector<Decision> &all_
   vector< pair<double, Decision> > ev_to_decision;
   int split = 8;
 
+  Deck initial_deck(game_state);
+
   for (Decision d : all_decisions) {
     for (int i = 0; i < split; ++i) {
       const PokerHandEvaluator *local_eval = evaluator;
@@ -81,7 +106,7 @@ Decision AdvancedDecisionFinder::stageTwoEvaluation(const vector<Decision> &all_
       futures.push_back(
           async(
             std::launch::async,
-            [d, local_eval, num_iterations_split, game_state] () {
+            [d, local_eval, num_iterations_split, game_state, &initial_deck] () {
             GameState new_state{
               game_state.my_hand.applyDecision(d),
               game_state.other_hands,
@@ -89,7 +114,7 @@ Decision AdvancedDecisionFinder::stageTwoEvaluation(const vector<Decision> &all_
               game_state.dead_cards};
             return AdvancedSolver(local_eval).solve(
                 num_iterations_split,
-                new_state);
+                new_state, initial_deck);
             }));
     }
   }
