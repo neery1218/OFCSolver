@@ -40,3 +40,29 @@ TEST_CASE( "AdvancedDecision::set", "[AdvancedDecisionFinder]" ) {
   Decision d = AdvancedDecisionFinder(&eval_ultimate).findBestDecision(game_state);
   cout << "best decision is: " << d;
 }
+
+TEST_CASE( "AdvancedDecision::set2", "[AdvancedDecisionFinder]" ) {
+  Hand my_hand;
+
+  Pull my_pull = {parse("Jh 7s 6c 4h 4d")};
+
+  GameState game_state{my_hand, vector<Hand>(), my_pull, vector<Card>()};
+  Decision d = AdvancedDecisionFinder(&eval_ultimate).findBestDecision(game_state);
+  cout << "best decision is: " << d;
+}
+
+TEST_CASE( "AdvancedDecision::set3", "[AdvancedDecisionFinder]" ) {
+  Hand other_hand(
+      parse("Ac As"), 
+      parse("2c"), 
+      parse("9h 9d"));
+  Hand my_hand;
+
+  vector<Hand> other_hands{other_hand};
+
+  Pull my_pull = {parse("Jh 7s 6c 4h 4d")};
+
+  GameState game_state{my_hand, other_hands, my_pull, vector<Card>()};
+  Decision d = AdvancedDecisionFinder(&eval_ultimate).findBestDecision(game_state);
+  cout << "best decision is: " << d;
+}

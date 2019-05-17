@@ -16,9 +16,9 @@ Decision AdvancedDecisionFinder::findBestDecision(const GameState &game_state) {
   vector<Decision> all_decisions = (game_state.my_hand.size() > 0) ? 
     findAllDrawDecisions(game_state) : findAllSetDecisions(game_state);
 
-  int n = (all_decisions.size() > 24) ? 24 : all_decisions.size();
-  vector<Decision> top_n_decisions_stage_one = stageOneEvaluation(all_decisions, n, game_state, 50);
-  Decision best_decision = stageTwoEvaluation(top_n_decisions_stage_one, game_state, 400);
+  int n = (all_decisions.size() > 12) ? 12 : all_decisions.size();
+  vector<Decision> top_n_decisions_stage_one = stageOneEvaluation(all_decisions, n, game_state, 500);
+  Decision best_decision = stageTwoEvaluation(top_n_decisions_stage_one, game_state, 2000);
 
   return best_decision;
 }
@@ -72,11 +72,12 @@ Decision AdvancedDecisionFinder::stageTwoEvaluation(const vector<Decision> &all_
 
   vector< future<double> > futures;
   vector< pair<double, Decision> > ev_to_decision;
+  int split = 8;
 
   for (Decision d : all_decisions) {
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < split; ++i) {
       const PokerHandEvaluator *local_eval = evaluator;
-      int num_iterations_split = num_iterations / 4;
+      int num_iterations_split = num_iterations / split;
       futures.push_back(
           async(
             std::launch::async,
@@ -95,8 +96,8 @@ Decision AdvancedDecisionFinder::stageTwoEvaluation(const vector<Decision> &all_
 
   for (unsigned int i = 0; i < all_decisions.size(); ++i) {
     double total = 0;
-    for (int j = 0; j < 4; ++j) { total += futures[4 * i + j].get(); }
-    ev_to_decision.emplace_back(total / 4, all_decisions[i]);
+    for (int j = 0; j < split; ++j) { total += futures[split * i + j].get(); }
+    ev_to_decision.emplace_back(total / split, all_decisions[i]);
   }
 
   sort(ev_to_decision.begin(), ev_to_decision.end(),

@@ -16,6 +16,7 @@
 #include "decision.h"
 #include "placement.h"
 #include "decision_finder.h"
+#include "advanced_decision_finder.h"
 #include <fstream>
 #include <httplib.h>
 #include <stdexcept>
@@ -98,7 +99,7 @@ int main(int argc, char *argv[]) {
       cout << dead_cards.size() << "dead cards. \n";
 
       GameState game_state{my_hand, other_hands, my_pull, dead_cards};
-      Decision d = DecisionFinder(eval).findBestDecision(game_state);
+      Decision d = AdvancedDecisionFinder(eval).findBestDecision(game_state);
 
       stringstream ss;
       string out;

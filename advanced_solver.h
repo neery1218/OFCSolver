@@ -4,6 +4,11 @@
 #include "poker_hand_evaluator.h"
 #include "game_state.h"
 
+struct SolverParams {
+  unsigned int cards;
+  unsigned int iterations;
+};
+
 class AdvancedSolver {
   const PokerHandEvaluator *evaluator;
 
