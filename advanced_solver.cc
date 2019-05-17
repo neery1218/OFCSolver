@@ -4,6 +4,7 @@
 #include "pull.h"
 #include "decision.h"
 #include <vector>
+#include "solver.h"
 #include "hand.h"
 #include "decision_finder.h"
 
@@ -22,29 +23,18 @@ double AdvancedSolver::solve(int iterations, const GameState &game_state, const 
     vector<Card> dead_cards(game_state.dead_cards);
 
     Deck sim_deck(initial_deck);
-    while (hands.top().size() <= 7) {
+    while (hands.top().size() <= 9) {
       Pull pull = Pull{sim_deck.select(3)};
       sim_deck.remove(pull.cards); 
 
       dead_cards.insert(dead_cards.end(), pull.cards.begin(), pull.cards.end());
 
       GameState new_state{hands.top(), game_state.other_hands, pull, dead_cards};
-      Decision d = DecisionFinder(evaluator).findBestDecision(new_state, 2);
+      Decision d = DecisionFinder(evaluator).findBestDecision(new_state, 5);
       hands.push(hands.top().applyDecision(d));
     }
-    //cout << "hand: " << hands.top() << "\n\n";
 
-    GameState final_state{hands.top(), game_state.other_hands, Pull{set<Card>()}, dead_cards};
-    set<Card> my_draw = sim_deck.select(13 - hands.top().size());
-    CompletedHand my_final_hand = hands.top().constructOptimalHand(my_draw, evaluator);
-
-    if (game_state.other_hands.empty()) total += my_final_hand.calculatePoints();
-    else for (unsigned int k = 0; k < final_state.other_hands.size(); ++k) {
-      int cards_needed = 13 - final_state.other_hands[k].size() + 1;
-      set<Card> draw = sim_deck.select(cards_needed);
-      CompletedHand final_other_hand = final_state.other_hands[k].constructOptimalHand(draw, evaluator);
-      total += my_final_hand.calculatePoints(final_other_hand);
-    }
+    total += Solver(evaluator).solve(10, hands.top(), Pull(), game_state.other_hands, dead_cards);
   }
   return total / iterations;
 }
