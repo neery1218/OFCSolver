@@ -13,11 +13,16 @@ using namespace std;
 AdvancedDecisionFinder::AdvancedDecisionFinder(const PokerHandEvaluator *t_evaluator): evaluator{t_evaluator} {}
 
 SolverParams AdvancedDecisionFinder::getSolverParams(const GameState &game_state) const {
-  if (game_state.my_hand.size() == 5) return SolverParams{500, 1000};
+  if (game_state.my_hand.size() == 0) {
+    if (game_state.other_hands.size() == 0) return SolverParams{50, 1000};
+    else if (game_state.other_hands.size() == 1) return SolverParams{50, 600};
+    else if (game_state.other_hands.size() == 2) return SolverParams{50, 400};
+    else throw runtime_error("Too many other hands u fool");
+  }
+  if (game_state.my_hand.size() == 5) return SolverParams{50, 1000};
   else if (game_state.my_hand.size() == 7) return SolverParams{50, 1000};
   else if (game_state.my_hand.size() == 9) return SolverParams{50, 1000};
   else if (game_state.my_hand.size() == 11) return SolverParams{50, 1000};
-  else if (game_state.my_hand.size() == 13) return SolverParams{1, 1};
   else throw runtime_error("Hand size is not valid!");
 }
 
@@ -37,7 +42,7 @@ Decision AdvancedDecisionFinder::findBestDecision(const GameState &game_state) {
 
   vector<Decision> all_decisions = (game_state.my_hand.size() > 0) ? 
     findAllDrawDecisions(game_state) : findAllSetDecisions(game_state);
-  int top_n = (all_decisions.size() > 12) ? 12 : all_decisions.size();
+  int top_n = (all_decisions.size() > 8) ? 8 : all_decisions.size();
   SolverParams params = getSolverParams(game_state);
 
   vector<Decision> top_n_decisions_stage_one = stageOneEvaluation(
@@ -60,8 +65,27 @@ vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(const vector<Decisio
     dead_cards.insert(dead_cards.end(), h.bottom.begin(), h.bottom.end());
   }
 
+  Deck initial_deck(game_state);
+  initial_deck.remove(dead_cards);
+
   for (Decision d : all_decisions) {
     const PokerHandEvaluator *local_eval = evaluator;
+    futures.push_back(
+        async(
+          std::launch::async,
+          [d, local_eval, num_iterations, game_state, &initial_deck, dead_cards] () {
+          GameState new_state{
+            game_state.my_hand.applyDecision(d),
+            vector<Hand>(),
+            //game_state.other_hands, // TODO: experiment with removing this. 
+            game_state.my_pull,
+            dead_cards};
+          return AdvancedSolver(local_eval).solve(
+              num_iterations,
+              new_state, initial_deck);
+          }));
+  }
+    /*
     futures.push_back(
         async(
           std::launch::async,
@@ -73,7 +97,7 @@ vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(const vector<Decisio
               vector<Hand>(),
               dead_cards);
           }));
-  }
+    */
 
   for (unsigned int i = 0; i < futures.size(); ++i) {
     ev_to_decision.emplace_back(futures[i].get(), all_decisions[i]);
@@ -96,7 +120,7 @@ Decision AdvancedDecisionFinder::stageTwoEvaluation(const vector<Decision> &all_
 
   vector< future<double> > futures;
   vector< pair<double, Decision> > ev_to_decision;
-  int split = 8;
+  int split = 10;
 
   Deck initial_deck(game_state);
 
