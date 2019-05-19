@@ -7,14 +7,14 @@
 #include "solver.h"
 #include "hand.h"
 #include "decision_finder.h"
+#include <iostream>
 
 
 using namespace std;
 
 AdvancedSolver::AdvancedSolver(const PokerHandEvaluator *t_evaluator): evaluator{t_evaluator} {}
 
-double AdvancedSolver::solve(int iterations, const GameState &game_state, const Deck &initial_deck) const {
-
+double AdvancedSolver::solve(int iterations, const GameState &game_state, const Deck &initial_deck, int search_level) const {
   double total = 0;
   for (int i = 0; i < iterations; ++i) {
     stack<Hand> hands;
@@ -23,7 +23,7 @@ double AdvancedSolver::solve(int iterations, const GameState &game_state, const 
     vector<Card> dead_cards(game_state.dead_cards);
 
     Deck sim_deck(initial_deck);
-    while (hands.top().size() <= 9) {
+    while (hands.top().size() <= search_level) {
       Pull pull = Pull{sim_deck.select(3)};
       sim_deck.remove(pull.cards); 
 

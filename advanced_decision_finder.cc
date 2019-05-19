@@ -14,15 +14,15 @@ AdvancedDecisionFinder::AdvancedDecisionFinder(const PokerHandEvaluator *t_evalu
 
 SolverParams AdvancedDecisionFinder::getSolverParams(const GameState &game_state) const {
   if (game_state.my_hand.size() == 0) {
-    if (game_state.other_hands.size() == 0) return SolverParams{50, 1000};
-    else if (game_state.other_hands.size() == 1) return SolverParams{50, 600};
-    else if (game_state.other_hands.size() == 2) return SolverParams{50, 400};
+    if (game_state.other_hands.size() == 0) return SolverParams{50, 1000, 9};
+    else if (game_state.other_hands.size() == 1) return SolverParams{50, 600, 9};
+    else if (game_state.other_hands.size() == 2) return SolverParams{50, 600, 9};
     else throw runtime_error("Too many other hands u fool");
   }
-  if (game_state.my_hand.size() == 5) return SolverParams{50, 1000};
-  else if (game_state.my_hand.size() == 7) return SolverParams{50, 1000};
-  else if (game_state.my_hand.size() == 9) return SolverParams{50, 1000};
-  else if (game_state.my_hand.size() == 11) return SolverParams{50, 1000};
+  if (game_state.my_hand.size() == 5) return SolverParams{50, 2000, 9};
+  else if (game_state.my_hand.size() == 7) return SolverParams{50, 2000, 11};
+  else if (game_state.my_hand.size() == 9) return SolverParams{50, 2000, 11};
+  else if (game_state.my_hand.size() == 11) return SolverParams{50, 2000, 11};
   else throw runtime_error("Hand size is not valid!");
 }
 
@@ -42,19 +42,22 @@ Decision AdvancedDecisionFinder::findBestDecision(const GameState &game_state) {
 
   vector<Decision> all_decisions = (game_state.my_hand.size() > 0) ? 
     findAllDrawDecisions(game_state) : findAllSetDecisions(game_state);
-  int top_n = (all_decisions.size() > 8) ? 8 : all_decisions.size();
+
+  cout << "Decision size: " << all_decisions.size() << "\n";
+
+  int top_n = (all_decisions.size() > 12) ? 12 : all_decisions.size();
   SolverParams params = getSolverParams(game_state);
 
   vector<Decision> top_n_decisions_stage_one = stageOneEvaluation(
-      all_decisions, top_n, game_state, params.stage_one_iterations);
+      all_decisions, top_n, game_state, params);
 
   Decision best_decision = stageTwoEvaluation(
-      top_n_decisions_stage_one, game_state, params.stage_two_iterations);
+      top_n_decisions_stage_one, game_state, params);
 
   return best_decision;
 }
 
-vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(const vector<Decision> &all_decisions, unsigned int n, const GameState &game_state, int num_iterations) {
+vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(const vector<Decision> &all_decisions, unsigned int n, const GameState &game_state, const SolverParams &solver_params) {
   vector< future<double> > futures;
   vector< pair<double, Decision> > ev_to_decision;
 
@@ -73,7 +76,7 @@ vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(const vector<Decisio
     futures.push_back(
         async(
           std::launch::async,
-          [d, local_eval, num_iterations, game_state, &initial_deck, dead_cards] () {
+          [d, local_eval, solver_params, game_state, &initial_deck, dead_cards] () {
           GameState new_state{
             game_state.my_hand.applyDecision(d),
             vector<Hand>(),
@@ -81,8 +84,8 @@ vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(const vector<Decisio
             game_state.my_pull,
             dead_cards};
           return AdvancedSolver(local_eval).solve(
-              num_iterations,
-              new_state, initial_deck);
+              solver_params.stage_one_iterations,
+              new_state, initial_deck, solver_params.search_level);
           }));
   }
     /*
@@ -116,22 +119,22 @@ vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(const vector<Decisio
   return top_n_decisions;
 }
 Decision AdvancedDecisionFinder::stageTwoEvaluation(const vector<Decision> &all_decisions, const GameState &game_state, 
-    int num_iterations) {
+    const SolverParams &solver_params) {
 
   vector< future<double> > futures;
   vector< pair<double, Decision> > ev_to_decision;
-  int split = 10;
+  int split = 8;
 
   Deck initial_deck(game_state);
 
   for (Decision d : all_decisions) {
     for (int i = 0; i < split; ++i) {
       const PokerHandEvaluator *local_eval = evaluator;
-      int num_iterations_split = num_iterations / split;
+      int num_iterations_split = solver_params.stage_two_iterations / split;
       futures.push_back(
           async(
             std::launch::async,
-            [d, local_eval, num_iterations_split, game_state, &initial_deck] () {
+            [d, local_eval, num_iterations_split, game_state, &initial_deck, solver_params] () {
             GameState new_state{
               game_state.my_hand.applyDecision(d),
               game_state.other_hands,
@@ -139,7 +142,7 @@ Decision AdvancedDecisionFinder::stageTwoEvaluation(const vector<Decision> &all_
               game_state.dead_cards};
             return AdvancedSolver(local_eval).solve(
                 num_iterations_split,
-                new_state, initial_deck);
+                new_state, initial_deck, solver_params.search_level);
             }));
     }
   }

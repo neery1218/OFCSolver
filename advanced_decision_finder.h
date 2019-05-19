@@ -24,8 +24,8 @@ class AdvancedDecisionFinder {
 
   private:
     SolverParams getSolverParams(const GameState &game_state) const;
-    std::vector<Decision> stageOneEvaluation(const std::vector<Decision> &all_decisions, unsigned int n, const GameState &game_state, int num_iterations);
-    Decision stageTwoEvaluation(const std::vector<Decision> &all_decisions, const GameState &game_state, int num_iterations);
+    std::vector<Decision> stageOneEvaluation(const std::vector<Decision> &all_decisions, unsigned int n, const GameState &game_state, const SolverParams &solver_params);
+    Decision stageTwoEvaluation(const std::vector<Decision> &all_decisions, const GameState &game_state, const SolverParams &solver_params);
 
     std::vector<Decision> findAllSetDecisions(const GameState &game_state);
     std::vector<Decision> findAllSetDecisionsHelper(const std::set<Card> &cards, const std::vector<Placement> &acc);
