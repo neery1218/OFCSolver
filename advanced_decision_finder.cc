@@ -6,6 +6,7 @@
 #include <future>
 #include <algorithm>
 #include <cassert>
+#include <unordered_set>
 
 using namespace std;
 
@@ -173,17 +174,22 @@ vector<Decision> AdvancedDecisionFinder::findAllSetDecisions(const GameState &ga
   assert(game_state.my_pull.cards.size() == 5);
 
   vector<Decision> decisions = findAllSetDecisionsHelper(game_state.my_pull.cards, vector<Placement> ());
+  unordered_set<string> fantasy_cards = {"Ah", "Ad", "Ac", "As", "Kh", "Kd", "Kc", "Ks", "Qh", "Qd", "Qc", "Qs"};
   vector<Decision> validDecisions;
 
   for (auto &d : decisions) {
     int numTop = 0, numMid = 0, numBot = 0;
+    int numNonFantasyCardsTop = 0;
     for (auto &p : d.placements) {
-      if (p.position == Position::top) ++numTop;
+      if (p.position == Position::top) {
+        ++numTop;
+        if (fantasy_cards.count(p.card.val) == 0) ++numNonFantasyCardsTop;
+      }
       else if (p.position == Position::middle) ++numMid;
       else if (p.position == Position::bottom) ++numBot;
 
     }
-    if (numTop <= 3 && numMid <= 5 && numBot <= 5) validDecisions.push_back(d);
+    if (numTop <= 3 && numMid <= 5 && numBot <= 5 && numNonFantasyCardsTop < 2) validDecisions.push_back(d);
   }
 
   return validDecisions;
