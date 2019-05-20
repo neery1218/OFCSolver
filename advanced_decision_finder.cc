@@ -19,7 +19,7 @@ SolverParams AdvancedDecisionFinder::getSolverParams(const GameState &game_state
     else if (game_state.other_hands.size() == 2) return SolverParams{50, 600, 9};
     else throw runtime_error("Too many other hands u fool");
   }
-  if (game_state.my_hand.size() == 5) return SolverParams{50, 2000, 9};
+  if (game_state.my_hand.size() == 5) return SolverParams{50, 1200, 9};
   else if (game_state.my_hand.size() == 7) return SolverParams{50, 2000, 11};
   else if (game_state.my_hand.size() == 9) return SolverParams{50, 2000, 11};
   else if (game_state.my_hand.size() == 11) return SolverParams{50, 2000, 11};

@@ -5,6 +5,7 @@
 #include "game_state.h"
 #include "pull.h"
 #include "decision_finder.h"
+#include "advanced_decision_finder.h"
 #include <vector>
 #include <iostream>
 #include <boost/range/irange.hpp>
@@ -34,7 +35,7 @@ int main () {
   // make a fantasy hand
   // make a regular hand
   // calculate ev
-  PokerHandEvaluator *eval_ultimate = new PokerHandEvaluator(GameType::Progressive);
+  PokerHandEvaluator *eval_ultimate = new PokerHandEvaluator(GameType::Regular);
   PokerHandEvaluator *eval_nobonus = new PokerHandEvaluator(GameType::NoBonus);
 
   double total = 0;
@@ -42,7 +43,7 @@ int main () {
     cout << "i : " << i << "\n";
 
     bool refantasy = false;
-    int num_cards = 16;
+    int num_cards = 14;
     do {
       cout << "Using " << num_cards << " cards\n";
       refantasy = false;
@@ -66,7 +67,7 @@ int main () {
       for (int i = 0; i < 5; ++i) {
         GameState state{hands[i], vector<Hand> (), Pull{pulls[i]}, dead_cards};
         for (Card c : pulls[i]) { dead_cards.push_back(c); }
-        Decision d = DecisionFinder(eval_ultimate).findBestDecision(state);
+        Decision d = AdvancedDecisionFinder(eval_ultimate).findBestDecision(state);
         hands.push_back(hands[i].applyDecision(d));
       }
 
