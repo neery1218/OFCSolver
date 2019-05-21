@@ -29,13 +29,13 @@ CompletedHand complete(const Hand&h, const PokerHandEvaluator *eval) {
 }
 
 int main () {
-  int iterations = 300;
+  int iterations = 1500;
   int fantasy_n = 16;
   // each iteration:
   // make a fantasy hand
   // make a regular hand
   // calculate ev
-  PokerHandEvaluator *eval_ultimate = new PokerHandEvaluator(GameType::Regular);
+  PokerHandEvaluator *eval_ultimate = new PokerHandEvaluator(GameType::Ultimate);
   PokerHandEvaluator *eval_nobonus = new PokerHandEvaluator(GameType::NoBonus);
 
   double total = 0;
@@ -43,7 +43,7 @@ int main () {
     cout << "i : " << i << "\n";
 
     bool refantasy = false;
-    int num_cards = 14;
+    int num_cards = 16;
     do {
       cout << "Using " << num_cards << " cards\n";
       refantasy = false;
@@ -81,6 +81,7 @@ int main () {
 
       double ev = fantasy_hand.calculatePoints(my_regular_hand);
       total += ev;
+      cout << "Fantasy wins " << ev << ".\n";
 
       if (fantasy_hand.topInfo.handType == PokerHandType::TRIPS ||
           fantasy_hand.bottomInfo.handType == PokerHandType::QUADS ||
@@ -88,10 +89,11 @@ int main () {
           fantasy_hand.bottomInfo.handType == PokerHandType::ROYAL_FLUSH) refantasy = true;
       if (refantasy) {
         cout << "REFANTASY\n";
-        num_cards = 14;
+        num_cards = 16;
       }
     }
     while (refantasy);
+    cout << "Ev so far at stage " << (i + 1) << ": " << (total / (i + 1)) << ".\n";
   }
   double avg = total / iterations;
   cout << "Fantasy ev is : " << avg << "\n";

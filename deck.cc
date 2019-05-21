@@ -2,11 +2,12 @@
 #include <iterator>
 #include <random>
 #include <experimental/algorithm>
+#include <cassert>
 
 using namespace std;
 
 Deck::Deck(): deck{{"2d", "2c", "2h", "2s", "3d", "3c", "3h", "3s", "4d", "4c", "4h", "4s", "5d", "5c", "5h", "5s", "6d", "6c", "6h", "6s", "7d", "7c", "7h", "7s", "8d", "8c", "8h", "8s", "9d", "9c", "9h", "9s", "Td", "Tc", "Th", "Ts", "Jd", "Jc", "Jh", 
-  "Js", "Qd", "Qc", "Qh", "Qs", "Kd", "Kc", "Kh", "Ks", "Ad", "Ac", "Ah", "As"}} {}
+  "Js", "Qd", "Qc", "Qh", "Qs", "Kd", "Kc", "Kh", "Ks", "Ad", "Ac", "Ah", "As"}} { }
 
 Deck::Deck(const Deck& d): deck{d.deck} {}
 

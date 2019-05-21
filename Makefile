@@ -3,7 +3,7 @@ SRCS = hand.cc solver.cc card.cc pull.cc deck.cc poker_hand_evaluator.cc decisio
 DRIVER = main.cc
 TESTS = test_hand.cc test_decision_finder.cc test_solver.cc test_advanced_solver.cc test_advanced_decision_finder.cc
 CXX = g++
-CFLAGS = -std=c++17 -Wall -O3
+CFLAGS = -std=c++17 -Wall -O3 -march=broadwell -mtune=broadwell
 
 all: 
 	g++ -std=c++17 -Wall -O2 $(INC) $(SRCS) $(DRIVER) -o main -lpthread
@@ -31,3 +31,5 @@ fantasysolverdebug:
 
 server: server.cc
 	$(CXX) $(CFLAGS) $(INC) $(SRCS) server.cc -o server -lpthread
+serverdebug: server.cc
+	$(CXX) -g $(CFLAGS) $(INC) $(SRCS) server.cc -o serverdebug -lpthread

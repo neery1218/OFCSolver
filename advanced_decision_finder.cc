@@ -15,14 +15,14 @@ AdvancedDecisionFinder::AdvancedDecisionFinder(const PokerHandEvaluator *t_evalu
 SolverParams AdvancedDecisionFinder::getSolverParams(const GameState &game_state) const {
   if (game_state.my_hand.size() == 0) {
     if (game_state.other_hands.size() == 0) return SolverParams{50, 1000, 9};
-    else if (game_state.other_hands.size() == 1) return SolverParams{50, 600, 9};
-    else if (game_state.other_hands.size() == 2) return SolverParams{50, 600, 9};
+    else if (game_state.other_hands.size() == 1) return SolverParams{50, 1000, 9};
+    else if (game_state.other_hands.size() == 2) return SolverParams{50, 1000, 9};
     else throw runtime_error("Too many other hands u fool");
   }
-  if (game_state.my_hand.size() == 5) return SolverParams{50, 1200, 9};
-  else if (game_state.my_hand.size() == 7) return SolverParams{50, 2000, 11};
-  else if (game_state.my_hand.size() == 9) return SolverParams{50, 2000, 11};
-  else if (game_state.my_hand.size() == 11) return SolverParams{50, 2000, 11};
+  if (game_state.my_hand.size() == 5) return SolverParams{50, 1500, 9};
+  else if (game_state.my_hand.size() == 7) return SolverParams{50, 3000, 11};
+  else if (game_state.my_hand.size() == 9) return SolverParams{50, 10000, 11};
+  else if (game_state.my_hand.size() == 11) return SolverParams{50, 1500, 11};
   else throw runtime_error("Hand size is not valid!");
 }
 
@@ -61,7 +61,7 @@ vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(const vector<Decisio
   vector< future<double> > futures;
   vector< pair<double, Decision> > ev_to_decision;
 
-  vector<Card> dead_cards;
+  vector<Card> dead_cards(game_state.dead_cards);
   for (auto &h : game_state.other_hands) {
     dead_cards.insert(dead_cards.end(), h.top.begin(), h.top.end());
     dead_cards.insert(dead_cards.end(), h.middle.begin(), h.middle.end());
@@ -216,7 +216,7 @@ vector<Decision> AdvancedDecisionFinder::findAllSetDecisions(const GameState &ga
       else if (p.position == Position::bottom) ++numBot;
 
     }
-    if (numTop <= 3 && numMid <= 5 && numBot <= 5 && numNonFantasyCardsTop < 2) validDecisions.push_back(d);
+    if (numTop <= 3 && numMid <= 5 && numBot <= 5 && (numNonFantasyCardsTop < 1 || game_state.other_hands.size() > 0 && numNonFantasyCardsTop < 2)) validDecisions.push_back(d);
   }
 
   return validDecisions;

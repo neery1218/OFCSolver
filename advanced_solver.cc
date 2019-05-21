@@ -21,9 +21,10 @@ double AdvancedSolver::solve(int iterations, const GameState &game_state, const 
     hands.push(game_state.my_hand);
 
     vector<Card> dead_cards(game_state.dead_cards);
+    dead_cards.insert(dead_cards.end(), game_state.my_pull.cards.begin(), game_state.my_pull.cards.end());
 
     Deck sim_deck(initial_deck);
-    while (hands.top().size() <= search_level) {
+    while (hands.top().size() < search_level) {
       Pull pull = Pull{sim_deck.select(3)};
       sim_deck.remove(pull.cards); 
 
@@ -33,7 +34,6 @@ double AdvancedSolver::solve(int iterations, const GameState &game_state, const 
       Decision d = DecisionFinder(evaluator).findBestDecision(new_state, 5);
       hands.push(hands.top().applyDecision(d));
     }
-
     total += Solver(evaluator).solve(10, hands.top(), Pull(), game_state.other_hands, dead_cards);
   }
   return total / iterations;

@@ -30,8 +30,11 @@ Decision DecisionFinder::findBestDecision(const GameState &game_state, int itera
 
   for (Decision d : all_decisions) {
     double ev = Solver(evaluator).solve(
-        iterations, game_state.my_hand.applyDecision(d),
-        game_state.my_pull, game_state.other_hands, game_state.dead_cards);
+        iterations, 
+        game_state.my_hand.applyDecision(d),
+        game_state.my_pull, 
+        game_state.other_hands, 
+        game_state.dead_cards);
     ev_to_decision.emplace_back(ev, d);
   }
 
@@ -46,7 +49,7 @@ vector<Decision> DecisionFinder::stageOneEvaluation(const vector<Decision> &all_
 
   cout << "size : " << all_decisions.size() << "\n\n";
 
-  vector<Card> dead_cards;
+  vector<Card> dead_cards{game_state.dead_cards};
   for (auto &h : game_state.other_hands) {
     dead_cards.insert(dead_cards.end(), h.top.begin(), h.top.end());
     dead_cards.insert(dead_cards.end(), h.middle.begin(), h.middle.end());

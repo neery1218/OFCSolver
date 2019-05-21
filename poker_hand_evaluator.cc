@@ -67,8 +67,8 @@ int PokerHandEvaluator::calculateFantasyBonus(int overallRank) const {
       else return 19;
     } 
     else if (gameType == GameType::Ultimate) {
-      if (overallRank < 4115) return 7;
-      else if (overallRank < 4347)return 12;
+      if (overallRank < 4115) return 8;
+      else if (overallRank < 4347)return 15;
       else return 25;
     }
   }
