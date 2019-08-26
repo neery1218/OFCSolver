@@ -7,7 +7,7 @@
 using namespace std;
 
 PokerHandEvaluator::PokerHandEvaluator(GameType _gameType): gameType{_gameType} {
-  ifstream f("hand_strength.csv");
+  ifstream f("/root/src/solver/src/hand_strength.csv");
   string line;
 
   topEvalInfo.reserve(22100);

@@ -1,7 +1,6 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 #include "hand.h"
-#include "include/discreture.hpp"
 
 using namespace std;
 

@@ -7,6 +7,7 @@
 #include <stdexcept>
 using namespace std;
 
+
 Solver::Solver(const PokerHandEvaluator *_evaluator): evaluator{_evaluator} {}
 
 unsigned int Solver::findCardsNeeded(const Hand &h) const {
