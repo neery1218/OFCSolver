@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install \
     gdb \
     libboost-all-dev \
     openjdk-8-jdk \
+    linux-tools-common \
+    linux-tools-generic \
     cmake  --yes
 
 RUN apt-get install curl --yes

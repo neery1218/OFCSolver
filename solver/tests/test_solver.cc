@@ -1,60 +1,70 @@
-#include "catch.hpp"
+#include "gtest/gtest.h"
+#include "absl/strings/str_split.h"
+#include <vector>
 #include <set>
-#include "hand.h"
+#include <iostream>
+
 #include "poker_hand_evaluator.h"
 #include "gametype.h"
-#include "solver.h"
+#include "position.h"
 #include "card.h"
+#include "hand.h"
+#include "solver.h"
 #include "pull.h"
-#include <boost/algorithm/string.hpp>
 
-using namespace std;
+class SolverTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    evaluator = new PokerHandEvaluator(GameType::Ultimate);;
+  }
+  std::set<Card> parseCards(std::string cards) {
+    std::set<Card> parsedCards;
+    std::vector<std::string> tokens = absl::StrSplit(cards, " ");
+    for (auto token : tokens) {
+      assert(token.size() == 2);
+      parsedCards.insert(Card(token));
+    }
 
-PokerHandEvaluator eval(GameType::Ultimate);
-
-set<Card> parse_cards(string cards) {
-  vector<string> tokens;
-  set<Card> parsedCards;
-
-  boost::split(tokens, cards, boost::is_any_of(" "));
-  for (auto token : tokens) {
-    parsedCards.insert(Card(token));
+    return parsedCards;
   }
 
-  return parsedCards;
-}
-TEST_CASE( "Solver::solve", "[Solver]" ) {
+  // void TearDown() override {}
+  PokerHandEvaluator *evaluator;
+};
+
+TEST_F( SolverTest, Basic) {
   Hand hand(
-      parse_cards("Ac"),
-      parse_cards("2c 2d 3d 4s"),
-      parse_cards("9h 9d 9c 9s"));
+      parseCards("Ac"),
+      parseCards("2c 2d 3d 4s"),
+      parseCards("9h 9d 9c 9s"));
 
-  Pull pull{parse_cards("Ac 4s 4d")};
+  Pull pull{parseCards("Ac 4c 4d")};
 
-  double ev = Solver(&eval).solve(10, hand, pull, vector<Hand> (), vector<Card> ());
-  REQUIRE(ev >= 10);
+  double ev = Solver(evaluator).solve(10, hand, pull, std::vector<Hand> (), std::vector<Card> ());
+  std::cout << "Solver ev: " << ev << std::endl;
+  ASSERT_GT(ev, 10);
 
 }
 
-TEST_CASE( "hand is dead, ev must be 0", "[Solver]" ) {
+TEST_F(SolverTest, DeadHand) {
   // all jacks are dead
   Hand hand(
-      parse_cards("Kh Ad"),
-      parse_cards("2c 2d 3d 3s 5d"),
-      parse_cards("Ks Qh Ts 9s"));
+      parseCards("Kh Ad"),
+      parseCards("2c 2d 3d 3s 5d"),
+      parseCards("Ks Qh Ts 9s"));
 
   Hand other_hand(
-      parse_cards("Ac Kd Qd"),
-      parse_cards("6d 6s 4c 4d Jh"),
-      parse_cards("7d 7s 2h 2s Jc"));
+      parseCards("Ac Kd Qd"),
+      parseCards("6d 6s 4c 4d Jh"),
+      parseCards("7d 7s 2h 2s Jc"));
 
-  Pull pull{parse_cards("Ts 4s Jd")};
-  set<Card> dead_card_set = parse_cards("Qd Js As Ah");
+  Pull pull{parseCards("Ts 4s Jd")};
+  std::set<Card> dead_card_set = parseCards("Qd Js As Ah");
 
-  vector<Card> dead_cards(dead_card_set.begin(), dead_card_set.end());
-  vector<Hand> other_hands{other_hand};
+  std::vector<Card> dead_cards(dead_card_set.begin(), dead_card_set.end());
+  std::vector<Hand> other_hands{other_hand};
 
-  double ev = Solver(&eval).solve(10, hand, pull, other_hands, dead_cards);
-  REQUIRE(ev == -6.0);
+  double ev = Solver(evaluator).solve(10, hand, pull, other_hands, dead_cards);
+  ASSERT_EQ(ev, -6.0);
 
 }
