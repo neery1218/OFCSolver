@@ -8,18 +8,17 @@
 #include "position.h"
 #include "card.h"
 
-
 class PokerHandEvaluatorTest : public ::testing::Test {
  protected:
   void SetUp() override { 
     evaluator = new PokerHandEvaluator(GameType::Regular);
   }
-  std::set<Card> parseCards(std::string cards) {
-    std::set<Card> parsedCards;
+  std::vector<Card> parseCards(std::string cards) {
+    std::vector<Card> cards;
     std::vector<std::string> tokens = absl::StrSplit(cards, " ");
     for (auto token : tokens) {
       assert(token.size() == 2);
-      parsedCards.insert(Card(token));
+      cards.push_back(parseCard(token));
     }
 
     return parsedCards;
@@ -30,8 +29,8 @@ class PokerHandEvaluatorTest : public ::testing::Test {
 };
 
 TEST_F(PokerHandEvaluatorTest, Basic) {
-  std::set<Card> cards = parseCards("Ah Kh Qh Jh Th");
+  std::vector<Card> cards = parseCards("As Kh Qh Jh Th");
   PokerHandInfo *res = evaluator->eval(cards, Position::bottom);
-  ASSERT_EQ(res->handType, PokerHandType::ROYAL_FLUSH);  
+  ASSERT_EQ(res->handType, PokerHandType::STRAIGHT);  
   ASSERT_EQ(res->royalties, 25);  
 }

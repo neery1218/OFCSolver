@@ -6,13 +6,27 @@
 
 using namespace std;
 
-Deck::Deck(): deck{{"2d", "2c", "2h", "2s", "3d", "3c", "3h", "3s", "4d", "4c", "4h", "4s", "5d", "5c", "5h", "5s", "6d", "6c", "6h", "6s", "7d", "7c", "7h", "7s", "8d", "8c", "8h", "8s", "9d", "9c", "9h", "9s", "Td", "Tc", "Th", "Ts", "Jd", "Jc", "Jh", 
-  "Js", "Qd", "Qc", "Qh", "Qs", "Kd", "Kc", "Kh", "Ks", "Ad", "Ac", "Ah", "As"}} { }
+Deck::Deck() {
+  char suits[] = {'d', 'c', 'h', 's'};
+  char ranks[] = {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
 
+  for (auto &s : suits) {
+    for (auto &r : ranks) {
+      deck.insert(CardUtils::parseCard(std::string() + s + r));
+    }
+  }
+}
 Deck::Deck(const Deck& d): deck{d.deck} {}
+Deck::Deck(const GameState &game_state) {
 
-Deck::Deck(const GameState &game_state): deck{{"2d", "2c", "2h", "2s", "3d", "3c", "3h", "3s", "4d", "4c", "4h", "4s", "5d", "5c", "5h", "5s", "6d", "6c", "6h", "6s", "7d", "7c", "7h", "7s", "8d", "8c", "8h", "8s", "9d", "9c", "9h", "9s", "Td", "Tc", "Th", "Ts", "Jd", "Jc", "Jh", 
-  "Js", "Qd", "Qc", "Qh", "Qs", "Kd", "Kc", "Kh", "Ks", "Ad", "Ac", "Ah", "As"}} {
+  char suits[] = {'d', 'c', 'h', 's'};
+  char ranks[] = {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
+
+  for (auto &s : suits) {
+    for (auto &r : ranks) {
+      deck.insert(CardUtils::parseCard(std::string() + s + r));
+    }
+  }
 
   remove(game_state.my_hand.top);
   remove(game_state.my_hand.middle);
@@ -29,7 +43,7 @@ Deck::Deck(const GameState &game_state): deck{{"2d", "2c", "2h", "2s", "3d", "3c
 }
 
 void Deck::remove(Card card) {
-  deck.erase(card.val);
+  deck.erase(card);
 }
 
 void Deck::remove(const vector<Card> &cards) {
@@ -44,15 +58,11 @@ int Deck::size() {
   return deck.size();
 }
 
-const set<Card> Deck::select(int k) {
-  vector<string> tmp;
-  set<Card> out;
+const vector<Card> Deck::select(int k) {
+  vector<Card> cards;
   experimental::sample(
       deck.begin(), deck.end(), 
-      back_inserter(tmp), k, 
+      back_inserter(cards), k, 
       std::mt19937{std::random_device{}()});
-  transform(
-      tmp.begin(), tmp.end(), inserter(out, out.begin()), 
-      [] (string val) { return Card(val); });
-  return out;
+  return cards;
 }

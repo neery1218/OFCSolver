@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <set>
 #include "card.h"
 #include "decision.h"
 #include "poker_hand_evaluator.h"
@@ -13,12 +12,12 @@ struct Decision;
 struct CompletedHand;
 
 struct Hand {
-  std::set<Card> top;
-  std::set<Card> middle;
-  std::set<Card> bottom;
+  std::vector<Card> top;
+  std::vector<Card> middle;
+  std::vector<Card> bottom;
   int _size;
 
-  Hand(std::set<Card> top, std::set<Card> middle, std::set<Card> bottom);
+  Hand(std::vector<Card> top, std::vector<Card> middle, std::vector<Card> bottom);
   Hand(const Hand &obj);
   Hand();
 
@@ -28,7 +27,7 @@ struct Hand {
 
   int size() const;
   Hand applyDecision(Decision decision) const;
-  CompletedHand constructOptimalHand(std::set<Card> &cards, const PokerHandEvaluator *evaluator) const;
+  CompletedHand constructOptimalHand(std::vector<Card> &cards, const PokerHandEvaluator *evaluator) const;
 
   friend std::ostream& operator<<(std::ostream& os, const Hand& c);
 };
