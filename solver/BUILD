@@ -11,6 +11,18 @@ cc_library(
     ],
 )
 
+cc_binary(
+  name = "server",
+  srcs = ["src/server.cc"],
+  copts = [
+    "-Isolver/include/",
+  ],
+  deps = [
+    "solver",
+    "@com_google_absl//absl/strings",
+  ],
+) 
+
 # profile targets
 cc_library(
     name = "profile_solver_lib",
