@@ -126,7 +126,7 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, const FastPokerHandEv
       PokerHandInfo midInfo = evaluator->evalMiddle(completed_middle);
 
       if (botInfo < midInfo) continue; // fouled hand
-      if (_size <= 7 && highestRoyalties > GET_ROYALTIES(botInfo) + GET_ROYALTIES(midInfo) && GET_ROYALTIES(midInfo) < 3886) continue; // don't continue if mid is less than 66
+      if (_size <= 7 && highestRoyalties > (GET_ROYALTIES(botInfo) + GET_ROYALTIES(midInfo)) && GET_OVERALL_RANK(midInfo) < 3886) continue; // don't continue if mid is less than 66
 
       set<Card> topRemainingCards;
       set_difference(remainingCards.begin(), remainingCards.end(), midCombo.begin(), 

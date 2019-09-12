@@ -9,19 +9,8 @@ cc_library(
     deps = [
         "@com_google_absl//absl/strings",
     ],
+    visibility = ["//:__pkg__"],
 )
-
-cc_binary(
-  name = "server",
-  srcs = ["src/server.cc"],
-  copts = [
-    "-Isolver/include/",
-  ],
-  deps = [
-    "solver",
-    "@com_google_absl//absl/strings",
-  ],
-) 
 
 # profile targets
 cc_library(
@@ -50,39 +39,8 @@ cc_binary(
         "-fno-omit-frame-pointer",
     ],
 )
-"""
-cc_test(
-    name = "test_poker_hand_evaluator",
-    srcs = [
-        "tests/test_poker_hand_evaluator.cc"
-    ],
-    copts = [
-        "-Iexternal/gtest/include", 
-        "-Isolver/include",
-	"-O3",
-    ],
-    deps = [
-        "@gtest//:main",
-        "@com_google_absl//absl/strings",
-    ]
-)
-"""
 
-cc_test(
-    name = "test_solver",
-    srcs = ["tests/test_solver.cc"],
-    copts = [
-        "-Iexternal/gtest/include", 
-        "-Isolver/include",
-	"-O3",
-    ],
-    deps = [
-        "@gtest//:main",
-        "@com_google_absl//absl/strings",
-        "solver"
-    ]
-)
-
+# benchmarking
 cc_test(
     name = "benchmark_fast_poker_hand_evaluator",
     srcs = [
@@ -90,7 +48,6 @@ cc_test(
     ],
     copts = [
         "-Isolver/include",
-        "-O2",
     ],
     tags = ["benchmark"],
     deps = [
@@ -101,6 +58,20 @@ cc_test(
 )
 
 # tests
+cc_test(
+    name = "test_solver",
+    srcs = ["tests/test_solver.cc"],
+    copts = [
+        "-Iexternal/gtest/include", 
+        "-Isolver/include",
+    ],
+    deps = [
+        "@gtest//:main",
+        "@com_google_absl//absl/strings",
+        "solver"
+    ]
+)
+
 cc_test(
     name = "test_decision_finder",
     srcs = [
@@ -122,8 +93,6 @@ cc_test(
     name = "test_card",
     srcs = [
       "tests/test_card.cc", 
-      "include/card.h",
-      "include/gametype.h"
     ],
     tags = ["testcard"],
     copts = [
@@ -132,6 +101,7 @@ cc_test(
     ],
     deps = [
         "@gtest//:main",
+        "solver",
         "@com_google_absl//absl/strings",
     ]
 )
@@ -145,7 +115,6 @@ cc_test(
     copts = [
       "-Isolver/include",
       "-Iexternal/gtest/include", 
-      "-O2",
     ],
     deps = [
         "solver",
@@ -185,9 +154,9 @@ cc_test(
 )
 
 cc_test(
-    name = "test_deck",
+    name = "test_hand",
     srcs = [
-      "tests/test_deck.cc", 
+      "tests/test_hand.cc", 
     ],
     tags = ["test"],
     copts = [
@@ -201,17 +170,26 @@ cc_test(
 )
 
 cc_test(
+    name = "test_deck",
+    srcs = [
+      "tests/test_deck.cc", 
+    ],
+    tags = ["test"],
+    copts = [
+      "-Isolver/include",
+      "-Iexternal/gtest/include", 
+    ],
+    deps = [
+        "@gtest//:main",
+        "solver",
+        "@com_google_absl//absl/strings",
+    ]
+)
+
+cc_test(
     name = "test_fast_poker_hand_evaluator",
     srcs = [
         "tests/test_fast_poker_hand_evaluator.cc",
-        "src/fast_poker_hand_evaluator.cc",
-        "src/poker_hand_evaluator.cc",
-        "include/fast_poker_hand_evaluator.h",
-        "include/poker_hand_evaluator.h",
-        "include/poker_hand_info.h",
-        "include/gametype.h",
-        "include/card.h",
-        "include/position.h"
     ],
     copts = [
         "-Iexternal/gtest/include", 
@@ -219,6 +197,7 @@ cc_test(
         "-O3",
     ],
     deps = [
+	      "solver",
         "@gtest//:main",
         "@com_google_absl//absl/strings",
     ]

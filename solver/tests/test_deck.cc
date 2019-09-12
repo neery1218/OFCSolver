@@ -4,13 +4,9 @@
 #include <set>
 #include <iostream>
 
-#include "poker_hand_evaluator.h"
-#include "gametype.h"
-#include "position.h"
 #include "card.h"
-#include "hand.h"
-#include "solver.h"
-#include "pull.h"
+#include "deck.h"
+#include "game_state.h"
 
 class DeckTest : public ::testing::Test {
  protected:

@@ -1,120 +1,99 @@
-#include "catch.hpp"
-#include <set>
-#include "hand.h"
-#include "poker_hand_evaluator.h"
+#include "gtest/gtest.h"
+#include "absl/strings/str_split.h"
+
+#include "fast_poker_hand_evaluator.h"
 #include "gametype.h"
+#include "position.h"
 #include "card.h"
+#include "hand.h"
+#include "solver.h"
+#include "pull.h"
 
-using namespace std;
+class HandTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    evaluator = new FastPokerHandEvaluator(GameType::Ultimate);
+  }
+  std::vector<Card> parseCards(std::string cards) {
+    std::vector<Card> parsedCards;
+    std::vector<std::string> tokens = absl::StrSplit(cards, " ");
+    for (auto token : tokens) {
+      assert(token.size() == 2);
+      parsedCards.push_back(CardUtils::parseCard(token));
+    }
 
-PokerHandEvaluator evaluator(GameType::Progressive);
-
-set<Card> parseCards(string cards) {
-  vector<string> tokens;
-  set<Card> parsedCards;
-
-  boost::split(tokens, cards, boost::is_any_of(" "));
-  for (auto token : tokens) {
-    parsedCards.insert(Card(token));
+    return parsedCards;
   }
 
-  return parsedCards;
+  // void TearDown() override {}
+  FastPokerHandEvaluator *evaluator;
+};
+
+TEST_F(HandTest, BasicCalculatePoints) {
+  CompletedHand my_hand(
+      evaluator->evalTop(parseCards("Ac Kd Qd")),
+      evaluator->evalMiddle(parseCards("2d 2c 3h 3d 4h")),
+      evaluator->evalBottom(parseCards("4s 5s 6h 7d 8d"))
+  );
+
+  CompletedHand other_hand(
+      evaluator->evalTop(parseCards("Jd Td 9d")),
+      evaluator->evalMiddle(parseCards("Ad Ah 2s 3s 8s")),
+      evaluator->evalBottom(parseCards("5s 5h 6d 6s 9s"))
+  );
+
+  ASSERT_EQ(my_hand.calculatePoints(other_hand), 8);
+  ASSERT_EQ(other_hand.calculatePoints(my_hand), -8);
+
 }
 
-TEST_CASE( "CompletedHand::calculatePoints", "[CompletedHand]" ) {
-  PokerHandInfo myTop{1, PokerHandType::HIGH_CARD, 0};
-  PokerHandInfo myMid{20, PokerHandType::TRIPS, 2};
-  PokerHandInfo myBot{30, PokerHandType::STRAIGHT, 2};
-
-
-  PokerHandInfo yourTop{2, PokerHandType::HIGH_CARD, 0};
-  PokerHandInfo yourMid{5, PokerHandType::PAIR, 0};
-  PokerHandInfo yourBot{90, PokerHandType::FLUSH, 4};
-
-  CompletedHand myHand{myTop, myMid, myBot};
-  CompletedHand yourHand{yourTop, yourMid, yourBot};
-
-  REQUIRE( myHand.calculatePoints(yourHand) == -1 );
-  REQUIRE( yourHand.calculatePoints(myHand) == 1 );
-}
-
-
-TEST_CASE( "CompletedHand::calculatePointsScooped", "[CompletedHand]" ) {
-  PokerHandInfo myTop{1, PokerHandType::HIGH_CARD, 0};
-  PokerHandInfo myMid{20, PokerHandType::TRIPS, 2};
-  PokerHandInfo myBot{30, PokerHandType::STRAIGHT, 2};
-
-
-  PokerHandInfo yourTop{2, PokerHandType::HIGH_CARD, 0};
-  PokerHandInfo yourMid{25, PokerHandType::TRIPS, 2};
-  PokerHandInfo yourBot{90, PokerHandType::FLUSH, 4};
-
-  CompletedHand myHand{myTop, myMid, myBot};
-  CompletedHand yourHand{yourTop, yourMid, yourBot};
-
-  REQUIRE( myHand.calculatePoints(yourHand) == -8 );
-  REQUIRE( yourHand.calculatePoints(myHand) == 8 );
-}
-
-TEST_CASE( "CompletedHand::constructOptimalHand", "[CompletedHand]" ) {
+TEST_F(HandTest, ConstructOptimalFantasyHand) {
   Hand hand(
       parseCards("Ac"),
       parseCards("2c 2d 3d 4s"),
-      parseCards("9h 9d 9c 9s"));
+      parseCards("9h 9d 9c 9s")
+  );
 
-  set<Card> cards = parseCards("Ad Kc Ks 2s 3s 4d");
-  CompletedHand completedHand = hand.constructOptimalHand(cards, &evaluator);
+  std::vector<Card> cards = parseCards("Ad Kc Ks 2s 3s 4d");
+  std::set<Card> card_set(cards.begin(), cards.end());
+  CompletedHand completedHand = hand.constructOptimalHand(card_set, evaluator);
 
-  REQUIRE( completedHand.topInfo.royalties == 28 );
-  REQUIRE( completedHand.middleInfo.royalties == 2 );
-  REQUIRE( completedHand.bottomInfo.royalties == 10 );
+  ASSERT_EQ(GET_ROYALTIES(completedHand.topInfo), 34);
+  ASSERT_EQ(GET_ROYALTIES(completedHand.middleInfo), 2);
+  ASSERT_EQ(GET_ROYALTIES(completedHand.bottomInfo), 10);
 
 }
 
-TEST_CASE( "CompletedHand::constructOptimalHand2", "[CompletedHand]" ) {
+TEST_F(HandTest, ConstructOptimalHand2) {
   Hand hand(
       parseCards("Ad"),
       parseCards("5s 2c"),
       parseCards("Td 9d"));
 
-  set<Card> cards = parseCards("Kd Qd 4d 5c 2s Kh Ks Jh As");
-  CompletedHand completedHand = hand.constructOptimalHand(cards, &evaluator);
+  std::vector<Card> cards = parseCards("Kd Qd 4d 5c 2s Kh Ks Jh As");
+  std::set<Card> card_set(cards.begin(), cards.end());
+  CompletedHand completedHand = hand.constructOptimalHand(card_set, evaluator);
 
-  REQUIRE( completedHand.topInfo.royalties == 28 );
-  REQUIRE( completedHand.middleInfo.royalties == 0 );
-  REQUIRE( completedHand.bottomInfo.royalties == 4 );
-
+  ASSERT_EQ(GET_ROYALTIES(completedHand.bottomInfo), 4);
+  ASSERT_EQ(GET_ROYALTIES(completedHand.middleInfo), 0);
+  ASSERT_EQ(GET_ROYALTIES(completedHand.topInfo), 34); 
 }
 
-TEST_CASE( "CompletedHand::constructOptimalHand3", "[CompletedHand]" ) {
-  Hand hand(
-      parseCards("Ad"),
-      parseCards("5s 2c"),
-      parseCards("Td 9d"));
-
-  set<Card> cards = parseCards("Kd Qd 4s 5c 2s Kh Ks Jh As");
-  CompletedHand completedHand = hand.constructOptimalHand(cards, &evaluator);
-
-  REQUIRE( completedHand.topInfo.royalties == 28 );
-  REQUIRE( completedHand.middleInfo.royalties == 0 );
-  REQUIRE( completedHand.bottomInfo.royalties == 2 );
-
-}
-
-TEST_CASE( "CompletedHand::constructOptimalHandFouled", "[CompletedHand]" ) {
+TEST_F(HandTest, FouledHand) {
   Hand hand(
       parseCards("Ad Ac Qh"),
       parseCards("5s 2c 2d 3s 4s"),
       parseCards("Td"));
 
-  set<Card> cards = parseCards("Kd Qd 4d 5c 2s Kh Ks Jh As");
-  CompletedHand completedHand = hand.constructOptimalHand(cards, &evaluator);
+  std::vector<Card> cards = parseCards("Kd Qd 4d 5c 2s Kh Ks Jh As");
+  std::set<Card> card_set(cards.begin(), cards.end());
+  CompletedHand completedHand = hand.constructOptimalHand(card_set, evaluator);
 
-  REQUIRE( completedHand.topInfo.royalties == 0 );
-  REQUIRE( completedHand.topInfo.overallRank == -1 );
-  REQUIRE( completedHand.middleInfo.royalties == 0 );
-  REQUIRE( completedHand.middleInfo.overallRank == -1 );
-  REQUIRE( completedHand.bottomInfo.royalties == 0 );
-  REQUIRE( completedHand.bottomInfo.overallRank == -1 );
+  ASSERT_EQ(GET_ROYALTIES(completedHand.topInfo) ,0 );
+  ASSERT_EQ(GET_OVERALL_RANK(completedHand.topInfo), 0);
+  ASSERT_EQ(GET_ROYALTIES(completedHand.middleInfo), 0);
+  ASSERT_EQ(GET_OVERALL_RANK(completedHand.middleInfo), 0);
+  ASSERT_EQ(GET_ROYALTIES(completedHand.bottomInfo), 0);
+  ASSERT_EQ(GET_OVERALL_RANK(completedHand.bottomInfo), 0);
 
 }

@@ -89,6 +89,7 @@ FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type): game_type{_
       }
     }
   }
+  std::cout << "Done." << std::endl;
   f.close();
 
 }
