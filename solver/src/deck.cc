@@ -7,24 +7,27 @@
 using namespace std;
 
 Deck::Deck() {
-  char suits[] = {'d', 'c', 'h', 's'};
-  char ranks[] = {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
-
-  for (auto &s : suits) {
-    for (auto &r : ranks) {
-      deck.insert(CardUtils::parseCard(std::string() + s + r));
+  std::string suits[] {"d", "c", "h", "s"};
+  std::string ranks[] {"2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"};
+  for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 13; ++j) {
+      std::string card = "";
+      card += ranks[j];
+      card += suits[i];
+      deck.insert(CardUtils::parseCard(card));
     }
   }
 }
 Deck::Deck(const Deck& d): deck{d.deck} {}
 Deck::Deck(const GameState &game_state) {
-
-  char suits[] = {'d', 'c', 'h', 's'};
-  char ranks[] = {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
-
-  for (auto &s : suits) {
-    for (auto &r : ranks) {
-      deck.insert(CardUtils::parseCard(std::string() + s + r));
+  std::string suits[4] {"d", "c", "h", "s"};
+  std::string ranks[13] {"2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"};
+  for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 13; ++j) {
+      std::string card = "";
+      card += ranks[j];
+      card += suits[i];
+      deck.insert(CardUtils::parseCard(card));
     }
   }
 

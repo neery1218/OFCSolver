@@ -43,8 +43,10 @@ FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type): game_type{_
   top_eval_info.reserve(2197);
   middle_eval_info.reserve(371293);
   bottom_eval_info.reserve(371293);
+  flush_middle_eval_info.reserve(371293);
+  flush_bottom_eval_info.reserve(371293);
 
-  std::cout << "Starting..." << std::endl;
+  std::cout << "Starting FastPokerHandEvaluator..." << std::endl;
 
   while (getline(f, line)) {
     // sample line: "2224J,5467,3,0" => 
@@ -64,13 +66,28 @@ FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type): game_type{_
     unsigned int hand_index = convertHandStr(hand);
 
     if (hand.size() == 3) { // top row
-      royalties += calculateFantasyBonus(hand_type);
+      royalties += calculateFantasyBonus(overall_rank);
 
       top_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, hand_type, royalties);
     }
     else {
       middle_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, hand_type, royalties_middle);
       bottom_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, hand_type, royalties);
+
+      if (hand_type == HIGH_CARD) {
+        flush_bottom_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, FLUSH, 4);
+        flush_middle_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, FLUSH, 8);
+      }
+      else if (hand_type == STRAIGHT) {
+        if (hand.find("T") != std::string::npos && hand.find("A") != std::string::npos) {
+          flush_bottom_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, ROYAL_FLUSH, 25);
+          flush_middle_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, ROYAL_FLUSH, 50);
+        }
+        else {
+          flush_bottom_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, STRAIGHT_FLUSH, 15);
+          flush_middle_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, STRAIGHT_FLUSH, 30);
+        }
+      }
     }
   }
   f.close();
@@ -98,19 +115,23 @@ unsigned int FastPokerHandEvaluator::calculateFantasyBonus(unsigned int overall_
 
 PokerHandInfo FastPokerHandEvaluator::evalBottom(const std::vector<Card> &row) const {
   int index = 28561 * (row[0] & 15) + 2197 * (row[1] & 15) + 169 * (row[2] & 15) + 13 * (row[3] & 15) + (row[4] & 15);
-  PokerHandInfo info = bottom_eval_info[index];
-  if (row[0] & row[1] & row[2] & row[3] & row[4] & SUIT_MASK > 0) { // flush
-
+  if ((row[0] & row[1] & row[2] & row[3] & row[4] & SUIT_MASK) > 0) { // flush
+    return flush_bottom_eval_info[index];
   }
+
   return bottom_eval_info[index];
 }
 
 PokerHandInfo FastPokerHandEvaluator::evalMiddle(const std::vector<Card> &row) const {
   int index = 28561 * (row[0] & 15) + 2197 * (row[1] & 15) + 169 * (row[2] & 15) + 13 * (row[3] & 15) + (row[4] & 15);
+  if ((row[0] & row[1] & row[2] & row[3] & row[4] & SUIT_MASK) > 0) { // flush
+    return flush_middle_eval_info[index];
+  }
+
   return middle_eval_info[index];
 }
 
 PokerHandInfo FastPokerHandEvaluator::evalTop(const std::vector<Card> &row) const {
-  int index = 169 * (row[2] & 15) + 13 * (row[3] & 15) + (row[4] & 15);
+  int index = 169 * (row[0] & 15) + 13 * (row[1] & 15) + (row[2] & 15);
   return top_eval_info[index];
 }

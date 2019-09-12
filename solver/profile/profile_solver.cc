@@ -3,7 +3,7 @@
 #include <set>
 #include <iostream>
 
-#include "poker_hand_evaluator.h"
+#include "fast_poker_hand_evaluator.h"
 #include "gametype.h"
 #include "position.h"
 #include "card.h"
@@ -12,19 +12,19 @@
 #include "pull.h"
 
 
-static std::set<Card> parseCards(std::string cards) {
-    std::set<Card> parsedCards;
+static std::vector<Card> parseCards(std::string cards) {
+    std::vector<Card> parsedCards;
     std::vector<std::string> tokens = absl::StrSplit(cards, " ");
     for (auto token : tokens) {
       assert(token.size() == 2);
-      parsedCards.insert(Card(token));
+      parsedCards.push_back(CardUtils::parseCard(token));
     }
 
     return parsedCards;
 }
 
 int main() {
-  PokerHandEvaluator *evaluator = new PokerHandEvaluator(GameType::Regular);
+  FastPokerHandEvaluator *evaluator = new FastPokerHandEvaluator(GameType::Regular);
   Hand hand(
       parseCards("Ac"),
       parseCards("2c 2d"),

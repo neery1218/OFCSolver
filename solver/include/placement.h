@@ -18,7 +18,7 @@ inline std::ostream& operator<<(std::ostream& os, const Placement &p) {
   if (p.position == Position::bottom) { pos = "bottom"; }
   if (p.position == Position::dead) { pos = "dead"; }
 
-  os << p.card << " " << pos;
+  os << CardUtils::cardToString(p.card) << " " << pos;
   return os;
 }
 

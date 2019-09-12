@@ -70,3 +70,31 @@ TEST_F(FastPokerHandEvaluatorTest, ExtensiveBottom) {
 
   }
 }
+
+TEST_F(FastPokerHandEvaluatorTest, ExtensiveMiddle) {
+  // Use old PokerhandEvaluator to test FastPokerhandEvaluator's values.
+  PokerHandEvaluator *old_evaluator = new PokerHandEvaluator(GameType::Regular);
+  for (auto p : old_evaluator->middle_eval_info) {
+    std::string row = p.first;
+    PokerHandInfo expected_info = p.second;
+
+    PokerHandInfo info = evalHand(row, Position::middle);
+    ASSERT_EQ(PokerHandInfoUtils::getRoyalties(info), PokerHandInfoUtils::getRoyalties(expected_info)) << row;
+    ASSERT_EQ(PokerHandInfoUtils::getHandType(info), PokerHandInfoUtils::getHandType(expected_info)) << row;
+
+  }
+}
+
+TEST_F(FastPokerHandEvaluatorTest, ExtensiveTop) {
+  // Use old PokerhandEvaluator to test FastPokerhandEvaluator's values.
+  PokerHandEvaluator *old_evaluator = new PokerHandEvaluator(GameType::Regular);
+  for (auto p : old_evaluator->top_eval_info) {
+    std::string row = p.first;
+    PokerHandInfo expected_info = p.second;
+
+    PokerHandInfo info = evalHand(row, Position::top);
+    ASSERT_EQ(PokerHandInfoUtils::getRoyalties(info), PokerHandInfoUtils::getRoyalties(expected_info)) << row;
+    ASSERT_EQ(PokerHandInfoUtils::getHandType(info), PokerHandInfoUtils::getHandType(expected_info)) << row;
+
+  }
+}

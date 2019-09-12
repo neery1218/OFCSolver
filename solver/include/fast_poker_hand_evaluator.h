@@ -30,6 +30,8 @@ class FastPokerHandEvaluator {
     std::vector<PokerHandInfo> top_eval_info;
     std::vector<PokerHandInfo> middle_eval_info;
     std::vector<PokerHandInfo> bottom_eval_info;
+    std::vector<PokerHandInfo> flush_middle_eval_info;
+    std::vector<PokerHandInfo> flush_bottom_eval_info;
 };
 
 #endif

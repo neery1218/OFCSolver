@@ -15,21 +15,21 @@
 class SolverTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    evaluator = new PokerHandEvaluator(GameType::Ultimate);;
+    evaluator = new FastPokerHandEvaluator(GameType::Regular);
   }
-  std::set<Card> parseCards(std::string cards) {
-    std::set<Card> parsedCards;
+  std::vector<Card> parseCards(std::string cards) {
+    std::vector<Card> parsedCards;
     std::vector<std::string> tokens = absl::StrSplit(cards, " ");
     for (auto token : tokens) {
       assert(token.size() == 2);
-      parsedCards.insert(Card(token));
+      parsedCards.push_back(CardUtils::parseCard(token));
     }
 
     return parsedCards;
   }
 
   // void TearDown() override {}
-  PokerHandEvaluator *evaluator;
+  FastPokerHandEvaluator *evaluator;
 };
 
 TEST_F( SolverTest, Basic) {
@@ -41,7 +41,6 @@ TEST_F( SolverTest, Basic) {
   Pull pull{parseCards("Ac 4c 4d")};
 
   double ev = Solver(evaluator).solve(10, hand, pull, std::vector<Hand> (), std::vector<Card> ());
-  std::cout << "Solver ev: " << ev << std::endl;
   ASSERT_GT(ev, 10);
 
 }
@@ -59,7 +58,7 @@ TEST_F(SolverTest, DeadHand) {
       parseCards("7d 7s 2h 2s Jc"));
 
   Pull pull{parseCards("Ts 4s Jd")};
-  std::set<Card> dead_card_set = parseCards("Qd Js As Ah");
+  std::vector<Card> dead_card_set = parseCards("Qd Js As Ah");
 
   std::vector<Card> dead_cards(dead_card_set.begin(), dead_card_set.end());
   std::vector<Hand> other_hands{other_hand};

@@ -7,7 +7,7 @@
 #include <stdexcept>
 using namespace std;
 
-Solver::Solver(const PokerHandEvaluator *_evaluator): evaluator{_evaluator} {}
+Solver::Solver(const FastPokerHandEvaluator *_evaluator): evaluator{_evaluator} {}
 
 unsigned int Solver::findCardsNeeded(const Hand &h) const {
   if (h.size() == 5) return 9; // not a typo
@@ -49,12 +49,14 @@ double Solver::solve(int numIterations, const Hand &myHand, const Pull &myPull, 
   for (int it = 0; it < numIterations; ++it) {
     // sample cards from deck
     vector<Card> my_draw = deck.select(cardsNeeded[0]);
-    CompletedHand myOptimalHand = myHand.constructOptimalHand(my_draw, evaluator);
+    set<Card> my_draw_set(my_draw.begin(), my_draw.end());
+    CompletedHand myOptimalHand = myHand.constructOptimalHand(my_draw_set, evaluator);
 
     if (allHands.size() == 1) total += myOptimalHand.calculatePoints();
     else for (unsigned int i = 1; i < allHands.size(); ++i) {
       vector<Card> other_draw = deck.select(cardsNeeded[i]);
-      CompletedHand otherHand = allHands[i].constructOptimalHand(other_draw, evaluator);
+      set<Card> other_draw_set(other_draw.begin(), other_draw.end());
+      CompletedHand otherHand = allHands[i].constructOptimalHand(other_draw_set, evaluator);
       total += myOptimalHand.calculatePoints(otherHand);
     }
   }

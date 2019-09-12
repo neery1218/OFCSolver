@@ -3,10 +3,11 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include <map>
 #include "card.h"
 #include "decision.h"
-#include "poker_hand_evaluator.h"
+#include "fast_poker_hand_evaluator.h"
 
 struct Decision;
 struct CompletedHand;
@@ -27,7 +28,7 @@ struct Hand {
 
   int size() const;
   Hand applyDecision(Decision decision) const;
-  CompletedHand constructOptimalHand(std::vector<Card> &cards, const PokerHandEvaluator *evaluator) const;
+  CompletedHand constructOptimalHand(std::set<Card> &cards, const FastPokerHandEvaluator *evaluator) const;
 
   friend std::ostream& operator<<(std::ostream& os, const Hand& c);
 };
@@ -38,8 +39,8 @@ struct CompletedHand {
   PokerHandInfo bottomInfo;
   
   CompletedHand() {};
-  CompletedHand(const Hand &h, const PokerHandEvaluator *evaluator);
-  CompletedHand(const PokerHandInfo &top, const PokerHandInfo &mid, const PokerHandInfo &bot): topInfo{top}, middleInfo{mid}, bottomInfo{bot} {}
+  CompletedHand(const Hand &h, const FastPokerHandEvaluator *evaluator);
+  CompletedHand(const PokerHandInfo top, const PokerHandInfo mid, const PokerHandInfo bot): topInfo{top}, middleInfo{mid}, bottomInfo{bot} {}
   int calculatePoints(const CompletedHand &other) const;
   int calculatePoints() const;
 };

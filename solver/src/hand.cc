@@ -21,19 +21,19 @@ Hand::Hand() {
 
 void Hand::addTop(Card card) { 
   assert(top.size() < 3);
-  top.insert(card); 
+  top.push_back(card); 
   _size++;
 }
 
 void Hand::addMiddle(Card card) { 
   assert(middle.size() < 5);
-  middle.insert(card); 
+  middle.push_back(card); 
   _size++;
 }
 
 void Hand::addBottom(Card card) { 
   assert(bottom.size() < 5);
-  bottom.insert(card); 
+  bottom.push_back(card); 
   _size++;
 }
 
@@ -72,9 +72,9 @@ ostream& operator<<(ostream& os, const Hand& hand) {
 
   return os;
 }
-
-vector<set<Card>> comb(const vector<Card> &cards, int K)
+vector<set<Card>> comb(const set<Card> &_cards, int K)
 {
+  vector<Card> cards(_cards.begin(), _cards.end());
   std::string bitmask(K, 1); // K leading 1's
   bitmask.resize(cards.size(), 0); // N-K trailing 0's
 
@@ -92,8 +92,9 @@ vector<set<Card>> comb(const vector<Card> &cards, int K)
 
   return out;
 }
-
-CompletedHand Hand::constructOptimalHand(vector<Card> &cards, const PokerHandEvaluator *evaluator) const {
+// 4118
+// 2494
+CompletedHand Hand::constructOptimalHand(set<Card> &cards, const FastPokerHandEvaluator *evaluator) const {
   int topCardsMissing  = 3 - top.size();
   int middleCardsMissing  = 5 - middle.size();
   int bottomCardsMissing  = 5 - bottom.size();
@@ -105,43 +106,44 @@ CompletedHand Hand::constructOptimalHand(vector<Card> &cards, const PokerHandEva
   if (botCombos.empty()) botCombos.push_back(set<Card>());
 
   for (auto &botCombo : botCombos) {
+    vector<Card> completed_bottom(bottom.begin(), bottom.end());
+    completed_bottom.insert(completed_bottom.end(), botCombo.begin(), botCombo.end());
+    PokerHandInfo botInfo = evaluator->evalBottom(completed_bottom);
 
-    PokerHandInfo botInfo = bottomCardsMissing > 0 ? evaluator->eval(bottom, botCombo, Position::bottom) : evaluator->eval(bottom, Position::bottom);
-    short int botRank = PokerHandInfoUtils::getRank(botInfo);
+    if (_size <= 7 && highestRoyalties >= 0 && GET_OVERALL_RANK(botInfo) < 4118) continue; // don't continue if bottom is less than KK
 
-    if (_size <= 7 && highestRoyalties >= 0 && botInfo->overallRank < 4346) continue; // don't continue if bottom is less than KK
-
-    vector<Card> remainingCards;
+    set<Card> remainingCards;
     set_difference(
         cards.begin(), cards.end(), 
         botCombo.begin(), botCombo.end(), 
-        back_inserter(remainingCards));
+        inserter(remainingCards, remainingCards.begin()));
 
     vector< set<Card> > midCombos = comb(remainingCards, middleCardsMissing);
     if (midCombos.empty()) midCombos.push_back(set<Card>());
 
     for (auto &midCombo : midCombos) {
+      vector<Card> completed_middle(middle.begin(), middle.end());
+      completed_middle.insert(completed_middle.end(), midCombo.begin(), midCombo.end());
+      PokerHandInfo midInfo = evaluator->evalMiddle(completed_middle);
 
-      PokerHandInfo midInfo = middleCardsMissing > 0 ? evaluator->eval(middle, midCombo, Position::middle) : evaluator->eval(middle, Position::middle);
-      short int midRank = PokerHandInfoUtils::getRank(midInfo);
+      if (botInfo < midInfo) continue; // fouled hand
+      if (_size <= 7 && highestRoyalties > GET_ROYALTIES(botInfo) + GET_ROYALTIES(midInfo) && GET_ROYALTIES(midInfo) < 3886) continue; // don't continue if mid is less than 66
 
-      if (botRank < midRank) continue; // fouled hand
-      if (_size <= 7 && highestRoyalties > botInfo->royalties + midInfo->royalties && midInfo->overallRank < 2722) continue; // don't continue if mid is less than 66
-
-      vector<Card> topRemainingCards;
+      set<Card> topRemainingCards;
       set_difference(remainingCards.begin(), remainingCards.end(), midCombo.begin(), 
-          midCombo.end(), back_inserter(topRemainingCards));
+          midCombo.end(), inserter(topRemainingCards, topRemainingCards.begin()));
 
       vector< set<Card> > topCombos = comb(topRemainingCards, topCardsMissing);
       if (topCombos.empty()) topCombos.push_back(set<Card>());
 
       for (auto &topCombo : topCombos) {
-        PokerHandInfo topInfo = topCardsMissing > 0 ? evaluator->eval(top, topCombo, Position::top) : evaluator->eval(top, Position::top);
-        short int topRank = PokerHandInfoUtils::getRank(topInfo);
+        vector<Card> completed_top(top.begin(), top.end());
+        completed_top.insert(completed_top.end(), topCombo.begin(), topCombo.end());
+        PokerHandInfo topInfo = evaluator->evalTop(completed_top);
 
-        if (midRank < topRank) continue; // fouled hand
+        if (midInfo < topInfo) continue; // fouled hand
 
-        int royalties = PokerHandInfoUtils::getRoyalties(topInfo) + PokerHandInfoUtils::getRoyalties(midInfo) + PokerHandInfoUtils::getRoyalties(botInfo);
+        int royalties = GET_ROYALTIES(topInfo) + GET_ROYALTIES(midInfo) + GET_ROYALTIES(botInfo);
         if (royalties > highestRoyalties) {
           highestRoyalties = royalties;
           bestHand = CompletedHand(topInfo, midInfo, botInfo);
@@ -151,45 +153,44 @@ CompletedHand Hand::constructOptimalHand(vector<Card> &cards, const PokerHandEva
   }
 
   if (highestRoyalties == -1) { // all possible hands are fouled
-    return CompletedHand{
-      PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0},
-        PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0},
-        PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0}};
+    return CompletedHand(
+      PokerHandInfoUtils::createPokerHandInfo(0, 0, 0),
+      PokerHandInfoUtils::createPokerHandInfo(0, 0, 0),
+      PokerHandInfoUtils::createPokerHandInfo(0, 0, 0)
+      );
   }
 
   return bestHand;
 }
 
-CompletedHand::CompletedHand(const Hand &h, const PokerHandEvaluator *eval) {
-  topInfo = *eval->eval(h.top, Position::top);
-  middleInfo = *eval->eval(h.middle, Position::middle);
-  bottomInfo = *eval->eval(h.bottom, Position::bottom);
+CompletedHand::CompletedHand(const Hand &h, const FastPokerHandEvaluator *eval) {
+  topInfo = eval->evalTop(h.top);
+  middleInfo = eval->evalMiddle(h.middle);
+  bottomInfo = eval->evalBottom(h.bottom);
 
-  if (topInfo.overallRank > middleInfo.overallRank || middleInfo.overallRank > bottomInfo.overallRank) {
-    topInfo = PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0};
-    middleInfo = PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0};
-    bottomInfo = PokerHandInfo{-1, PokerHandType::HIGH_CARD, 0};
+  if (topInfo > middleInfo || middleInfo > bottomInfo) {
+    topInfo = PokerHandInfoUtils::createPokerHandInfo(0, 0, 0);
+    middleInfo = PokerHandInfoUtils::createPokerHandInfo(0, 0, 0);
+    bottomInfo = PokerHandInfoUtils::createPokerHandInfo(0, 0, 0);
   }
 }
 
 int CompletedHand::calculatePoints() const { // note: can't call this with a fouled hand. tightly coupled with solver.h
-  return topInfo.royalties + middleInfo.royalties + bottomInfo.royalties;
+  return GET_ROYALTIES(topInfo) + GET_ROYALTIES(middleInfo) + GET_ROYALTIES(bottomInfo);
 }
 
 int CompletedHand::calculatePoints(const CompletedHand &otherHand) const {
-
-  int royaltyPoints = topInfo.royalties + middleInfo.royalties + bottomInfo.royalties - otherHand.topInfo.royalties - otherHand.middleInfo.royalties - otherHand.bottomInfo.royalties;
+  int royaltyPoints = GET_ROYALTIES(topInfo) + GET_ROYALTIES(middleInfo) + GET_ROYALTIES(bottomInfo) - GET_ROYALTIES(otherHand.topInfo) - GET_ROYALTIES(otherHand.middleInfo) - GET_ROYALTIES(otherHand.bottomInfo);
 
   int gtBonus = 0;
+  if (topInfo < otherHand.topInfo) gtBonus -= 1;
+  else if (otherHand.topInfo < topInfo) gtBonus += 1;
 
-  if (topInfo.overallRank < otherHand.topInfo.overallRank) gtBonus -= 1;
-  else if (otherHand.topInfo.overallRank < topInfo.overallRank) gtBonus += 1;
+  if (middleInfo < otherHand.middleInfo) gtBonus -= 1;
+  else if (otherHand.middleInfo < middleInfo) gtBonus += 1;
 
-  if (middleInfo.overallRank < otherHand.middleInfo.overallRank) gtBonus -= 1;
-  else if (otherHand.middleInfo.overallRank < middleInfo.overallRank) gtBonus += 1;
-
-  if (bottomInfo.overallRank < otherHand.bottomInfo.overallRank) gtBonus -= 1;
-  else if (otherHand.bottomInfo.overallRank < bottomInfo.overallRank) gtBonus += 1;
+  if (bottomInfo < otherHand.bottomInfo) gtBonus -= 1;
+  else if (otherHand.bottomInfo < bottomInfo) gtBonus += 1;
 
   if (gtBonus == -3) gtBonus = -6;
   if (gtBonus == 3) gtBonus = 6;
