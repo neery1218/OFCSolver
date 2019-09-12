@@ -4,7 +4,6 @@
 #include "fast_poker_hand_evaluator.h"
 #include "gametype.h"
 #include "card.h"
-#include <boost/algorithm/string.hpp>
 #include "advanced_decision_finder.h"
 
 class AdvancedDecisionFinderTest : public ::testing::Test {

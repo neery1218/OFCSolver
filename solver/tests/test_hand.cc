@@ -4,7 +4,6 @@
 #include "poker_hand_evaluator.h"
 #include "gametype.h"
 #include "card.h"
-#include <boost/algorithm/string.hpp>
 
 using namespace std;
 
