@@ -1,8 +1,8 @@
 #include "poker_hand_evaluator.h"
+#include "absl/strings/str_split.h"
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <boost/algorithm/string.hpp>
 
 using namespace std;
 
@@ -17,8 +17,7 @@ PokerHandEvaluator::PokerHandEvaluator(GameType _gameType): gameType{_gameType} 
   cout << "Starting..." << endl;
 
   while (getline(f, line)) {
-    vector<string> tokens;
-    boost::split(tokens, line, boost::is_any_of(","));
+    vector<string> tokens = absl::StrSplit(line, ",");
 
     unsigned int overallRank = stoi(tokens[1]);
     unsigned int handType = stoi(tokens[2]);

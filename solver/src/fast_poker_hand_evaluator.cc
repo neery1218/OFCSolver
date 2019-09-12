@@ -4,7 +4,6 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <boost/algorithm/string.hpp>
 #include <assert.h>     /* assert */
 
 unsigned int convertHandStr(std::string hand) {
