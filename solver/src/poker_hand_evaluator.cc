@@ -31,13 +31,13 @@ PokerHandEvaluator::PokerHandEvaluator(GameType _gameType): gameType{_gameType} 
 
     if (tokens[0].size() == 6) { // top row
       if (overallRank >= 3883) { royalties += calculateFantasyBonus(overallRank); }
-      top_eval_info.push_back(make_pair(new_row, PokerHandInfoUtils::createPokerHandInfo(overallRank, handType, royalties)));
+      top_eval_info.push_back(make_pair(new_row, CREATE_POKER_HAND_INFO(overallRank, handType, royalties)));
     } 
     else {
-      bottom_eval_info.push_back(make_pair(new_row, PokerHandInfoUtils::createPokerHandInfo(overallRank, handType, royalties)));
+      bottom_eval_info.push_back(make_pair(new_row, CREATE_POKER_HAND_INFO(overallRank, handType, royalties)));
 
       if (handType == TRIPS) royalties = 1; // special case...this feels bad
-      middle_eval_info.push_back(make_pair(new_row, PokerHandInfoUtils::createPokerHandInfo(overallRank, handType, royalties * 2)));
+      middle_eval_info.push_back(make_pair(new_row, CREATE_POKER_HAND_INFO(overallRank, handType, royalties * 2)));
     }
   }
 

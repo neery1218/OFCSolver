@@ -91,8 +91,7 @@ vector<set<Card>> comb(const set<Card> &_cards, int K)
 
   return out;
 }
-// 4118
-// 2494
+
 CompletedHand Hand::constructOptimalHand(set<Card> &cards, const FastPokerHandEvaluator *evaluator) const {
   int topCardsMissing  = 3 - top.size();
   int middleCardsMissing  = 5 - middle.size();
@@ -109,7 +108,7 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, const FastPokerHandEv
     completed_bottom.insert(completed_bottom.end(), botCombo.begin(), botCombo.end());
     PokerHandInfo botInfo = evaluator->evalBottom(completed_bottom);
 
-    if (_size <= 7 && highestRoyalties >= 0 && GET_OVERALL_RANK(botInfo) < 4118) continue; // don't continue if bottom is less than KK
+    if (_size <= 7 && highestRoyalties >= 0 && botInfo < CREATE_POKER_HAND_INFO(4118, PAIR, 0)) continue; // don't continue if bottom is less than KK
 
     set<Card> remainingCards;
     set_difference(
@@ -125,8 +124,8 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, const FastPokerHandEv
       completed_middle.insert(completed_middle.end(), midCombo.begin(), midCombo.end());
       PokerHandInfo midInfo = evaluator->evalMiddle(completed_middle);
 
-      if (botInfo < midInfo) continue; // fouled hand
-      if (_size <= 7 && highestRoyalties > (GET_ROYALTIES(botInfo) + GET_ROYALTIES(midInfo)) && GET_OVERALL_RANK(midInfo) < 3886) continue; // don't continue if mid is less than 66
+      if (GET_OVERALL_RANK(botInfo) < GET_OVERALL_RANK(midInfo)) continue; // fouled hand
+      if (_size <= 7 && highestRoyalties > (GET_ROYALTIES(botInfo) + GET_ROYALTIES(midInfo)) && midInfo < CREATE_POKER_HAND_INFO(3886, PAIR, 0)) continue; // don't continue if mid is less than 66
 
       set<Card> topRemainingCards;
       set_difference(remainingCards.begin(), remainingCards.end(), midCombo.begin(), 
@@ -140,7 +139,7 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, const FastPokerHandEv
         completed_top.insert(completed_top.end(), topCombo.begin(), topCombo.end());
         PokerHandInfo topInfo = evaluator->evalTop(completed_top);
 
-        if (midInfo < topInfo) continue; // fouled hand
+        if (GET_OVERALL_RANK(midInfo) < GET_OVERALL_RANK(topInfo)) continue; // fouled hand
 
         int royalties = GET_ROYALTIES(topInfo) + GET_ROYALTIES(midInfo) + GET_ROYALTIES(botInfo);
         if (royalties > highestRoyalties) {
@@ -153,9 +152,9 @@ CompletedHand Hand::constructOptimalHand(set<Card> &cards, const FastPokerHandEv
 
   if (highestRoyalties == -1) { // all possible hands are fouled
     return CompletedHand(
-      PokerHandInfoUtils::createPokerHandInfo(0, 0, 0),
-      PokerHandInfoUtils::createPokerHandInfo(0, 0, 0),
-      PokerHandInfoUtils::createPokerHandInfo(0, 0, 0)
+      CREATE_POKER_HAND_INFO(0, 0, 0),
+      CREATE_POKER_HAND_INFO(0, 0, 0),
+      CREATE_POKER_HAND_INFO(0, 0, 0)
       );
   }
 
@@ -168,9 +167,9 @@ CompletedHand::CompletedHand(const Hand &h, const FastPokerHandEvaluator *eval) 
   bottomInfo = eval->evalBottom(h.bottom);
 
   if (topInfo > middleInfo || middleInfo > bottomInfo) {
-    topInfo = PokerHandInfoUtils::createPokerHandInfo(0, 0, 0);
-    middleInfo = PokerHandInfoUtils::createPokerHandInfo(0, 0, 0);
-    bottomInfo = PokerHandInfoUtils::createPokerHandInfo(0, 0, 0);
+    topInfo = CREATE_POKER_HAND_INFO(0, 0, 0);
+    middleInfo = CREATE_POKER_HAND_INFO(0, 0, 0);
+    bottomInfo = CREATE_POKER_HAND_INFO(0, 0, 0);
   }
 }
 

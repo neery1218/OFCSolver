@@ -67,24 +67,24 @@ FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type): game_type{_
     if (hand.size() == 3) { // top row
       royalties += calculateFantasyBonus(overall_rank);
 
-      top_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, hand_type, royalties);
+      top_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, hand_type, royalties);
     }
     else {
-      middle_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, hand_type, royalties_middle);
-      bottom_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, hand_type, royalties);
+      middle_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, hand_type, royalties_middle);
+      bottom_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, hand_type, royalties);
 
       if (hand_type == HIGH_CARD) {
-        flush_bottom_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, FLUSH, 4);
-        flush_middle_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, FLUSH, 8);
+        flush_bottom_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, FLUSH, 4);
+        flush_middle_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, FLUSH, 8);
       }
       else if (hand_type == STRAIGHT) {
         if (hand.find("T") != std::string::npos && hand.find("A") != std::string::npos) {
-          flush_bottom_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, ROYAL_FLUSH, 25);
-          flush_middle_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, ROYAL_FLUSH, 50);
+          flush_bottom_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, ROYAL_FLUSH, 25);
+          flush_middle_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, ROYAL_FLUSH, 50);
         }
         else {
-          flush_bottom_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, STRAIGHT_FLUSH, 15);
-          flush_middle_eval_info[hand_index] = PokerHandInfoUtils::createPokerHandInfo(overall_rank, STRAIGHT_FLUSH, 30);
+          flush_bottom_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, STRAIGHT_FLUSH, 15);
+          flush_middle_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, STRAIGHT_FLUSH, 30);
         }
       }
     }

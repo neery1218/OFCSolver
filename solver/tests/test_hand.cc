@@ -97,3 +97,18 @@ TEST_F(HandTest, FouledHand) {
   ASSERT_EQ(GET_OVERALL_RANK(completedHand.bottomInfo), 0);
 
 }
+
+TEST_F(HandTest, Regression) {
+  Hand hand;
+
+  std::vector<Card> cards = parseCards("5h 6h 7h 8h 9h 5d 6d 7d 8d 9d Ad Ac Ah");
+  std::set<Card> card_set(cards.begin(), cards.end());
+  CompletedHand completedHand = hand.constructOptimalHand(card_set, evaluator);
+
+  ASSERT_EQ(GET_ROYALTIES(completedHand.topInfo) , 22 + 25);
+  ASSERT_EQ(GET_ROYALTIES(completedHand.middleInfo) , 30);
+  ASSERT_EQ(GET_ROYALTIES(completedHand.bottomInfo) , 15);
+
+
+
+}
