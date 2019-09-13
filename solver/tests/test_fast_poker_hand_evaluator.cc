@@ -16,6 +16,19 @@ class FastPokerHandEvaluatorTest : public ::testing::Test {
 
     void SetUp() override { 
       evaluator = new FastPokerHandEvaluator(GameType::Regular);
+      evaluator_progressive = new FastPokerHandEvaluator(GameType::Progressive);
+      evaluator_ultimate = new FastPokerHandEvaluator(GameType::Ultimate);
+    }
+
+    std::vector<Card> parseCards(std::string cards) {
+      std::vector<Card> parsedCards;
+      std::vector<std::string> tokens = absl::StrSplit(cards, " ");
+      for (auto token : tokens) {
+        assert(token.size() == 2);
+        parsedCards.push_back(CardUtils::parseCard(token));
+      }
+
+      return parsedCards;
     }
 
     PokerHandInfo evalHand(std::string cards, Position pos) {
@@ -43,6 +56,8 @@ class FastPokerHandEvaluatorTest : public ::testing::Test {
 
     // void TearDown() override {}
     FastPokerHandEvaluator *evaluator;
+    FastPokerHandEvaluator *evaluator_progressive;
+    FastPokerHandEvaluator *evaluator_ultimate;
 };
 
 TEST_F(FastPokerHandEvaluatorTest, HighestStraight) {
@@ -93,6 +108,34 @@ TEST_F(FastPokerHandEvaluatorTest, ExtensiveTop) {
     PokerHandInfo expected_info = p.second;
 
     PokerHandInfo info = evalHand(row, Position::top);
+    ASSERT_EQ(PokerHandInfoUtils::getRoyalties(info), PokerHandInfoUtils::getRoyalties(expected_info)) << row;
+    ASSERT_EQ(PokerHandInfoUtils::getHandType(info), PokerHandInfoUtils::getHandType(expected_info)) << row;
+
+  }
+}
+
+TEST_F(FastPokerHandEvaluatorTest, ExtensiveTopProgressive) {
+  // Use old PokerhandEvaluator to test FastPokerhandEvaluator's values.
+  PokerHandEvaluator *old_evaluator = new PokerHandEvaluator(GameType::Progressive);
+  for (auto p : old_evaluator->top_eval_info) {
+    std::string row = p.first;
+    PokerHandInfo expected_info = p.second;
+
+    PokerHandInfo info = evaluator_progressive->evalTop(parseCards(row));
+    ASSERT_EQ(PokerHandInfoUtils::getRoyalties(info), PokerHandInfoUtils::getRoyalties(expected_info)) << row;
+    ASSERT_EQ(PokerHandInfoUtils::getHandType(info), PokerHandInfoUtils::getHandType(expected_info)) << row;
+
+  }
+}
+
+TEST_F(FastPokerHandEvaluatorTest, ExtensiveUltimate) {
+  // Use old PokerhandEvaluator to test FastPokerhandEvaluator's values.
+  PokerHandEvaluator *old_evaluator = new PokerHandEvaluator(GameType::Ultimate);
+  for (auto p : old_evaluator->top_eval_info) {
+    std::string row = p.first;
+    PokerHandInfo expected_info = p.second;
+
+    PokerHandInfo info = evaluator_ultimate->evalTop(parseCards(row));
     ASSERT_EQ(PokerHandInfoUtils::getRoyalties(info), PokerHandInfoUtils::getRoyalties(expected_info)) << row;
     ASSERT_EQ(PokerHandInfoUtils::getHandType(info), PokerHandInfoUtils::getHandType(expected_info)) << row;
 
