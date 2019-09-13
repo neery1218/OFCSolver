@@ -1,5 +1,6 @@
 #include "decision_finder.h"
 #include "solver.h"
+#include "action_enumerator.h"
 #include <utility>
 #include <future>
 #include <algorithm>
@@ -12,7 +13,7 @@ DecisionFinder::DecisionFinder(const FastPokerHandEvaluator *t_evaluator): evalu
 Decision DecisionFinder::findBestDecision(const GameState &game_state) {
 
   vector<Decision> all_decisions = (game_state.my_hand.size() > 0) ? 
-    findAllDrawDecisions(game_state) : findAllSetDecisions(game_state);
+    ActionEnumerator::findAllDrawDecisions(game_state) : ActionEnumerator::findAllSetDecisions(game_state);
 
   int n = (all_decisions.size() > 24) ? 24 : all_decisions.size();
   vector<Decision> top_n_decisions_stage_one = stageOneEvaluation(all_decisions, n, game_state, 50);
@@ -24,7 +25,7 @@ Decision DecisionFinder::findBestDecision(const GameState &game_state) {
 Decision DecisionFinder::findBestDecision(const GameState &game_state, int iterations) {
 
   vector<Decision> all_decisions = (game_state.my_hand.size() > 0) ? 
-    findAllDrawDecisions(game_state) : findAllSetDecisions(game_state);
+    ActionEnumerator::findAllDrawDecisions(game_state) : ActionEnumerator::findAllSetDecisions(game_state);
 
   vector< pair<double, Decision> > ev_to_decision;
 
@@ -46,8 +47,6 @@ Decision DecisionFinder::findBestDecision(const GameState &game_state, int itera
 vector<Decision> DecisionFinder::stageOneEvaluation(const vector<Decision> &all_decisions, unsigned int n, const GameState &game_state, int num_iterations) {
   vector< future<double> > futures;
   vector< pair<double, Decision> > ev_to_decision;
-
-  cout << "size : " << all_decisions.size() << "\n\n";
 
   vector<Card> dead_cards{game_state.dead_cards};
   for (auto &h : game_state.other_hands) {
@@ -87,6 +86,7 @@ vector<Decision> DecisionFinder::stageOneEvaluation(const vector<Decision> &all_
 
   return top_n_decisions;
 }
+
 Decision DecisionFinder::stageTwoEvaluation(const vector<Decision> &all_decisions, const GameState &game_state, 
     int num_iterations) {
 
@@ -126,141 +126,4 @@ Decision DecisionFinder::stageTwoEvaluation(const vector<Decision> &all_decision
   }
 
   return ev_to_decision[0].second;
-}
-
-vector<Decision> DecisionFinder::findAllSetDecisionsHelper(const set<Card> &cards, const vector<Placement> &acc) {
-  vector<Decision> out;
-
-  if (cards.empty()) {
-    assert(acc.size() == 5);
-    return vector<Decision>{Decision(acc)};
-  }
-
-  Card c = *cards.begin();
-  set<Card> subCards(cards);
-  subCards.erase(c);
-
-  
-  vector<Placement> topAcc(acc);
-  topAcc.push_back(Placement{c, Position::top});
-  vector<Decision> topDecisions = findAllSetDecisionsHelper(subCards, topAcc);
-  out.insert(out.end(), topDecisions.begin(), topDecisions.end());
-
-
-  vector<Placement> midAcc(acc);
-  midAcc.push_back(Placement{c, Position::middle});
-  vector<Decision> midDecisions = findAllSetDecisionsHelper(subCards, midAcc);
-  out.insert(out.end(), midDecisions.begin(), midDecisions.end());
-
-  
-  vector<Placement> botAcc(acc);
-  botAcc.push_back(Placement{c, Position::bottom});
-  vector<Decision> botDecisions = findAllSetDecisionsHelper(subCards, botAcc);
-  out.insert(out.end(), botDecisions.begin(), botDecisions.end());
-
-  return out;
-}
-
-vector<Decision> DecisionFinder::findAllSetDecisions(const GameState &game_state) {
-  assert(game_state.my_pull.cards.size() == 5);
-  set<Card> my_pull_set(game_state.my_pull.cards.begin(), game_state.my_pull.cards.end());
-
-  vector<Decision> decisions = findAllSetDecisionsHelper(my_pull_set, vector<Placement> ());
-  vector<Decision> validDecisions;
-
-  for (auto &d : decisions) {
-    int numTop = 0, numMid = 0, numBot = 0;
-    for (auto &p : d.placements) {
-      if (p.position == Position::top) ++numTop;
-      else if (p.position == Position::middle) ++numMid;
-      else if (p.position == Position::bottom) ++numBot;
-
-    }
-    if (numTop <= 3 && numMid <= 5 && numBot <= 5) validDecisions.push_back(d);
-  }
-
-  return validDecisions;
-}
-
-/*
-int DecisionFinder::findIterationsRequired(const Hand &h) {
-  if (h.size() == 5) return 1000;
-  else if (h.size() == 7) return 1000;
-  else if (h.size() == 9) return 1000;
-  return 1000;
-}
-*/
-
-vector<Decision> DecisionFinder::findAllDrawDecisions(const GameState &game_state) {
-  assert(game_state.my_pull.cards.size() == 3);
-
-  int topCardsMissing = 3 - game_state.my_hand.top.size();
-  int midCardsMissing = 5 - game_state.my_hand.middle.size();
-  int botCardsMissing = 5 - game_state.my_hand.bottom.size();
-
-  vector<Card> cards(game_state.my_pull.cards.begin(), game_state.my_pull.cards.end());
-  vector<Decision> decisions;
-
-  for (int i = 0; i < cards.size(); ++i) {
-
-    if (topCardsMissing > 0) {
-      --topCardsMissing;
-      Placement p1(cards[i], Position::top);
-      for (int j = i + 1; j < cards.size(); ++j) {
-        if (topCardsMissing > 0) {
-          decisions.emplace_back(Decision{p1, Placement(cards[j], Position::top)});
-        }
-
-        if (midCardsMissing > 0) {
-          decisions.emplace_back(Decision{p1, Placement(cards[j], Position::middle)});
-        }
-
-        if (botCardsMissing > 0) {
-          decisions.emplace_back(Decision{p1, Placement(cards[j], Position::bottom)});
-        }
-      }
-      ++topCardsMissing;
-    }
-
-
-    if (midCardsMissing > 0) {
-      --midCardsMissing;
-      Placement p1(cards[i], Position::middle);
-      for (int j = i + 1; j < cards.size(); ++j) {
-        if (topCardsMissing > 0) {
-          decisions.emplace_back(Decision{p1, Placement(cards[j], Position::top)});
-        }
-
-        if (midCardsMissing > 0) {
-          decisions.emplace_back(Decision{p1, Placement(cards[j], Position::middle)});
-        }
-
-        if (botCardsMissing > 0) {
-          decisions.emplace_back(Decision{p1, Placement(cards[j], Position::bottom)});
-        }
-      }
-      ++midCardsMissing;
-    }
-
-    if (botCardsMissing > 0) {
-      --botCardsMissing;
-      Placement p1(cards[i], Position::bottom);
-      for (int j = i + 1; j < cards.size(); ++j) {
-        if (topCardsMissing > 0) {
-          decisions.emplace_back(Decision{p1, Placement(cards[j], Position::top)});
-        }
-
-        if (midCardsMissing > 0) {
-          decisions.emplace_back(Decision{p1, Placement(cards[j], Position::middle)});
-        }
-
-        if (botCardsMissing > 0) {
-          decisions.emplace_back(Decision{p1, Placement(cards[j], Position::bottom)});
-        }
-      }
-      ++botCardsMissing;
-    }
-  }
-
-  return decisions;
 }

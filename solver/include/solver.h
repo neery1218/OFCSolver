@@ -15,7 +15,7 @@
 #include "decision.h"
 
 /*
- * tldr: Pass hands to solver, solver estimates EV of hand. Used by DecisionFinder
+ * tldr: Pass hands to solver, solver estimates EV of hand. Used by DecisionFinder, AdvancedDecisionFinder
  * */
 
 
