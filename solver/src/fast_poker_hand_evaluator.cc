@@ -1,33 +1,34 @@
 #include "fast_poker_hand_evaluator.h"
-#include "absl/strings/str_split.h"
+#include <boost/algorithm/string.hpp>
 
+#include <assert.h> /* assert */
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <assert.h>     /* assert */
 
-unsigned int convertHandStr(std::string hand) {
+unsigned int convertHandStr(std::string hand)
+{
   unsigned int index = 0;
-  for (const char &c : hand) {
+  for (const char& c : hand) {
     unsigned int val = 0;
     switch (c) {
-      case 'A':
-        val = 12;
-        break;
-      case 'K':
-        val = 11;
-        break;
-      case 'Q':
-        val = 10;
-        break;
-      case 'J':
-        val = 9;
-        break;
-      case 'T':
-        val = 8;
-        break;
-      default:
-        val = c - '2';
+    case 'A':
+      val = 12;
+      break;
+    case 'K':
+      val = 11;
+      break;
+    case 'Q':
+      val = 10;
+      break;
+    case 'J':
+      val = 9;
+      break;
+    case 'T':
+      val = 8;
+      break;
+    default:
+      val = c - '2';
     }
     index = index * 13 + val;
   }
@@ -35,8 +36,17 @@ unsigned int convertHandStr(std::string hand) {
   return index;
 }
 
-FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type): game_type{_game_type} {
-  std::ifstream f("/root/src/solver/src/no_suit_hand_strength.csv");
+FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type)
+    : game_type { _game_type }
+{
+  // std::ifstream f("/root/src/solver/src/no_suit_hand_strength.csv");
+  std::ifstream f("/home/neerajen/Projects/OFCSolver/solver/src/no_suit_hand_strength.csv");
+
+  if (!f.is_open()) {
+    std::cout << "File doesn't exist!. set the value as an environment variable." << std::endl;
+    throw 1;
+  }
+
   std::string line;
 
   top_eval_info.reserve(2197);
@@ -48,13 +58,14 @@ FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type): game_type{_
   std::cout << "Starting FastPokerHandEvaluator..." << std::endl;
 
   while (getline(f, line)) {
-    // sample line: "2224J,5467,3,0" => 
+    // sample line: "2224J,5467,3,0" =>
     // hand = "2224J"
     // overall rank = "5467" (relative rank to all other hands)
     // hand type = 3
     // royalties = 2
 
-    std::vector<std::string> tokens = absl::StrSplit(line, ",");
+    std::vector<std::string> tokens;
+    boost::split(tokens, line, boost::is_any_of(","));
 
     std::string hand = tokens[0];
     unsigned int overall_rank = stoi(tokens[1]);
@@ -68,21 +79,18 @@ FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type): game_type{_
       royalties += calculateFantasyBonus(overall_rank);
 
       top_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, hand_type, royalties);
-    }
-    else {
+    } else {
       middle_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, hand_type, royalties_middle);
       bottom_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, hand_type, royalties);
 
       if (hand_type == HIGH_CARD) {
         flush_bottom_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, FLUSH, 4);
         flush_middle_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, FLUSH, 8);
-      }
-      else if (hand_type == STRAIGHT) {
+      } else if (hand_type == STRAIGHT) {
         if (hand.find("T") != std::string::npos && hand.find("A") != std::string::npos) {
           flush_bottom_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, ROYAL_FLUSH, 25);
           flush_middle_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, ROYAL_FLUSH, 50);
-        }
-        else {
+        } else {
           flush_bottom_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, STRAIGHT_FLUSH, 15);
           flush_middle_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, STRAIGHT_FLUSH, 30);
         }
@@ -91,29 +99,36 @@ FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type): game_type{_
   }
   std::cout << "Done." << std::endl;
   f.close();
-
 }
 
 FastPokerHandEvaluator::~FastPokerHandEvaluator() {}
 
-unsigned int FastPokerHandEvaluator::calculateFantasyBonus(unsigned int overall_rank) const {
+unsigned int FastPokerHandEvaluator::calculateFantasyBonus(unsigned int overall_rank) const
+{
   if (overall_rank >= 3883) {
-    if (game_type == GameType::Regular) return 9;
+    if (game_type == GameType::Regular)
+      return 9;
     else if (game_type == GameType::Progressive) {
-      if (overall_rank < 4115) return 9;
-      else if (overall_rank < 4347) return 14;
-      else return 19;
-    } 
-    else if (game_type == GameType::Ultimate) {
-      if (overall_rank < 4115) return 8;
-      else if (overall_rank < 4347) return 15;
-      else return 25;
+      if (overall_rank < 4115)
+        return 9;
+      else if (overall_rank < 4347)
+        return 14;
+      else
+        return 19;
+    } else if (game_type == GameType::Ultimate) {
+      if (overall_rank < 4115)
+        return 8;
+      else if (overall_rank < 4347)
+        return 15;
+      else
+        return 25;
     }
   }
   return 0;
 }
 
-PokerHandInfo FastPokerHandEvaluator::evalBottom(const std::vector<Card> &row) const {
+PokerHandInfo FastPokerHandEvaluator::evalBottom(const std::vector<Card>& row) const
+{
   int index = 28561 * (row[0] & 15) + 2197 * (row[1] & 15) + 169 * (row[2] & 15) + 13 * (row[3] & 15) + (row[4] & 15);
   if ((row[0] & row[1] & row[2] & row[3] & row[4] & SUIT_MASK) > 0) { // flush
     return flush_bottom_eval_info[index];
@@ -122,7 +137,8 @@ PokerHandInfo FastPokerHandEvaluator::evalBottom(const std::vector<Card> &row) c
   return bottom_eval_info[index];
 }
 
-PokerHandInfo FastPokerHandEvaluator::evalMiddle(const std::vector<Card> &row) const {
+PokerHandInfo FastPokerHandEvaluator::evalMiddle(const std::vector<Card>& row) const
+{
   int index = 28561 * (row[0] & 15) + 2197 * (row[1] & 15) + 169 * (row[2] & 15) + 13 * (row[3] & 15) + (row[4] & 15);
   if ((row[0] & row[1] & row[2] & row[3] & row[4] & SUIT_MASK) > 0) { // flush
     return flush_middle_eval_info[index];
@@ -131,7 +147,8 @@ PokerHandInfo FastPokerHandEvaluator::evalMiddle(const std::vector<Card> &row) c
   return middle_eval_info[index];
 }
 
-PokerHandInfo FastPokerHandEvaluator::evalTop(const std::vector<Card> &row) const {
+PokerHandInfo FastPokerHandEvaluator::evalTop(const std::vector<Card>& row) const
+{
   int index = 169 * (row[0] & 15) + 13 * (row[1] & 15) + (row[2] & 15);
   return top_eval_info[index];
 }

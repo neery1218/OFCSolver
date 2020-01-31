@@ -1,12 +1,14 @@
 #include "poker_hand_evaluator.h"
-#include "absl/strings/str_split.h"
+#include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <iostream>
 #include <string>
 
 using namespace std;
 
-PokerHandEvaluator::PokerHandEvaluator(GameType _gameType): gameType{_gameType} {
+PokerHandEvaluator::PokerHandEvaluator(GameType _gameType)
+    : gameType { _gameType }
+{
   ifstream f("/root/src/solver/src/hand_strength.csv");
   string line;
 
@@ -17,26 +19,30 @@ PokerHandEvaluator::PokerHandEvaluator(GameType _gameType): gameType{_gameType} 
   cout << "Starting..." << endl;
 
   while (getline(f, line)) {
-    vector<string> tokens = absl::StrSplit(line, ",");
+    vector<string> tokens;
+    boost::split(tokens, line, boost::is_any_of(" "));
 
     unsigned int overallRank = stoi(tokens[1]);
     unsigned int handType = stoi(tokens[2]);
     unsigned int royalties = stoi(tokens[3]);
-  
+
     std::string new_row = "";
     for (int i = 0; i < tokens[0].size(); ++i) {
-      if (i > 0 && i % 2 == 0) new_row += " ";
+      if (i > 0 && i % 2 == 0)
+        new_row += " ";
       new_row += tokens[0][i];
     }
 
     if (tokens[0].size() == 6) { // top row
-      if (overallRank >= 3883) { royalties += calculateFantasyBonus(overallRank); }
+      if (overallRank >= 3883) {
+        royalties += calculateFantasyBonus(overallRank);
+      }
       top_eval_info.push_back(make_pair(new_row, CREATE_POKER_HAND_INFO(overallRank, handType, royalties)));
-    } 
-    else {
+    } else {
       bottom_eval_info.push_back(make_pair(new_row, CREATE_POKER_HAND_INFO(overallRank, handType, royalties)));
 
-      if (handType == TRIPS) royalties = 1; // special case...this feels bad
+      if (handType == TRIPS)
+        royalties = 1; // special case...this feels bad
       middle_eval_info.push_back(make_pair(new_row, CREATE_POKER_HAND_INFO(overallRank, handType, royalties * 2)));
     }
   }
@@ -44,18 +50,25 @@ PokerHandEvaluator::PokerHandEvaluator(GameType _gameType): gameType{_gameType} 
   f.close();
 }
 
-unsigned int PokerHandEvaluator::calculateFantasyBonus(unsigned int overallRank) const {
+unsigned int PokerHandEvaluator::calculateFantasyBonus(unsigned int overallRank) const
+{
   if (overallRank >= 3833) {
-    if (gameType == GameType::Regular) return 9;
+    if (gameType == GameType::Regular)
+      return 9;
     else if (gameType == GameType::Progressive) {
-      if (overallRank < 4115) return 9;
-      else if (overallRank < 4347) return 14;
-      else return 19;
-    } 
-    else if (gameType == GameType::Ultimate) {
-      if (overallRank < 4115) return 8;
-      else if (overallRank < 4347)return 15;
-      else return 25;
+      if (overallRank < 4115)
+        return 9;
+      else if (overallRank < 4347)
+        return 14;
+      else
+        return 19;
+    } else if (gameType == GameType::Ultimate) {
+      if (overallRank < 4115)
+        return 8;
+      else if (overallRank < 4347)
+        return 15;
+      else
+        return 25;
     }
   }
   return 0;

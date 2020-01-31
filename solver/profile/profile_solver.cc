@@ -1,42 +1,29 @@
-#include "absl/strings/str_split.h"
-#include <vector>
-#include <set>
 #include <iostream>
+#include <set>
+#include <vector>
 
+#include "card.h"
 #include "fast_poker_hand_evaluator.h"
 #include "gametype.h"
-#include "position.h"
-#include "card.h"
 #include "hand.h"
-#include "solver.h"
+#include "position.h"
 #include "pull.h"
+#include "solver.h"
 
-
-static std::vector<Card> parseCards(std::string cards) {
-    std::vector<Card> parsedCards;
-    std::vector<std::string> tokens = absl::StrSplit(cards, " ");
-    for (auto token : tokens) {
-      assert(token.size() == 2);
-      parsedCards.push_back(CardUtils::parseCard(token));
-    }
-
-    return parsedCards;
-}
-
-int main() {
-  FastPokerHandEvaluator *evaluator = new FastPokerHandEvaluator(GameType::Regular);
+int main()
+{
+  FastPokerHandEvaluator* evaluator = new FastPokerHandEvaluator(GameType::Regular);
   Hand hand(
-      parseCards("Ac"),
-      parseCards("2c 2d"),
-      parseCards("9h 9d"));
+      CardUtils::parseCards("Ac"),
+      CardUtils::parseCards("2c 2d"),
+      CardUtils::parseCards("9h 9d"));
 
-  Pull pull{parseCards("Ac 4c 4d")};
-	double ev = Solver(evaluator).solve(
-			10000,
-			hand,
-			pull,
-			std::vector<Hand> (),
-			std::vector<Card> ()
-	);
-  std::cout<< "Ev: " << ev << std::endl;
+  Pull pull { CardUtils::parseCards("Ac 4c 4d") };
+  double ev = Solver(evaluator).solve(
+      10000,
+      hand,
+      pull,
+      std::vector<Hand>(),
+      std::vector<Card>());
+  std::cout << "Ev: " << ev << std::endl;
 }
