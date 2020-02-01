@@ -11,7 +11,7 @@
 #include "pull.h"
 #include "solver.h"
 
-static FastPokerHandEvaluator* evaluator = new FastPokerHandEvaluator(GameType::Regular);
+static FastPokerHandEvaluator evaluator(GameType::Regular);
 
 static void FastPokerHandEvaluator(benchmark::State& state)
 {
@@ -22,7 +22,7 @@ static void FastPokerHandEvaluator(benchmark::State& state)
   std::vector<Card> cards_4 = CardUtils::parseCards("2c 4d 4c 2s Ah");
 
   for (auto _ : state) {
-    PokerHandInfo res_1 = evaluator->evalBottom(cards_1);
+    PokerHandInfo res_1 = evaluator.evalBottom(cards_1);
     /*
     PokerHandInfo *res_2 = evaluator->evalBottom(cards_2, Position::bottom);
     PokerHandInfo *res_3 = evaluator->evalBottom(cards_3, Position::bottom);
@@ -40,12 +40,7 @@ static void Solver_2(benchmark::State& state)
 
   Pull pull { CardUtils::parseCards("Ac 4c 4d") };
   for (auto _ : state) {
-    double ev = Solver(evaluator).solve(
-        state.range(0),
-        hand,
-        pull,
-        std::vector<Hand>(),
-        std::vector<Card>());
+    double ev = Solver(&evaluator).solve(state.range(0), hand, pull, std::vector<Hand>(), std::vector<Card>());
   }
 }
 
@@ -58,12 +53,7 @@ static void Solver_3(benchmark::State& state)
 
   Pull pull { CardUtils::parseCards("Ac 4c 4d") };
   for (auto _ : state) {
-    double ev = Solver(evaluator).solve(
-        state.range(0),
-        hand,
-        pull,
-        std::vector<Hand>(),
-        std::vector<Card>());
+    double ev = Solver(&evaluator).solve(state.range(0), hand, pull, std::vector<Hand>(), std::vector<Card>());
   }
 }
 
@@ -76,12 +66,7 @@ static void Solver_4(benchmark::State& state)
 
   Pull pull { CardUtils::parseCards("Ac 4c 4d") };
   for (auto _ : state) {
-    double ev = Solver(evaluator).solve(
-        state.range(0),
-        hand,
-        pull,
-        std::vector<Hand>(),
-        std::vector<Card>());
+    double ev = Solver(&evaluator).solve(state.range(0), hand, pull, std::vector<Hand>(), std::vector<Card>());
   }
 }
 

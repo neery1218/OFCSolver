@@ -49,11 +49,13 @@ FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type)
 
   std::string line;
 
+  /*
   top_eval_info.reserve(2197);
   middle_eval_info.reserve(371293);
   bottom_eval_info.reserve(371293);
   flush_middle_eval_info.reserve(371293);
   flush_bottom_eval_info.reserve(371293);
+  */
 
   std::cout << "Starting FastPokerHandEvaluator..." << std::endl;
 
@@ -98,6 +100,7 @@ FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type)
     }
   }
   std::cout << "Done." << std::endl;
+
   f.close();
 }
 
