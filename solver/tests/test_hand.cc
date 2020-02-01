@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "card.h"
+#include "completed_hand.h"
 #include "fast_poker_hand_evaluator.h"
 #include "gametype.h"
 #include "hand.h"

@@ -1,4 +1,5 @@
 #include "solver.h"
+#include "completed_hand.h"
 #include "deck.h"
 #include <algorithm>
 #include <cassert>
