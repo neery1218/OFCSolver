@@ -13,7 +13,7 @@
 
 static FastPokerHandEvaluator* evaluator = new FastPokerHandEvaluator(GameType::Regular);
 
-static void BM_FastPokerHandEvaluator(benchmark::State& state)
+static void FastPokerHandEvaluator(benchmark::State& state)
 {
   // Perform setup here
   std::vector<Card> cards_1 = CardUtils::parseCards("Ah Kh Qh Jh Th");
@@ -31,7 +31,7 @@ static void BM_FastPokerHandEvaluator(benchmark::State& state)
   }
 }
 
-static void BM_Solver_2(benchmark::State& state)
+static void Solver_2(benchmark::State& state)
 {
   Hand hand(
       CardUtils::parseCards("Ac"),
@@ -49,7 +49,7 @@ static void BM_Solver_2(benchmark::State& state)
   }
 }
 
-static void BM_Solver_3(benchmark::State& state)
+static void Solver_3(benchmark::State& state)
 {
   Hand hand(
       CardUtils::parseCards("Ac"),
@@ -67,7 +67,7 @@ static void BM_Solver_3(benchmark::State& state)
   }
 }
 
-static void BM_Solver_4(benchmark::State& state)
+static void Solver_4(benchmark::State& state)
 {
   Hand hand(
       CardUtils::parseCards("Ac"),
@@ -86,11 +86,11 @@ static void BM_Solver_4(benchmark::State& state)
 }
 
 // Register the function as a benchmark
-// BENCHMARK(BM_FastPokerHandEvaluator)->Unit(benchmark::kMicrosecond);
+// BENCHMARK(FastPokerHandEvaluator)->Unit(benchmark::kMicrosecond);
 
-BENCHMARK(BM_Solver_4)->RangeMultiplier(4)->Range(8, 15000)->Unit(benchmark::kMicrosecond);
-BENCHMARK(BM_Solver_3)->RangeMultiplier(4)->Range(8, 15000)->Unit(benchmark::kMicrosecond);
-BENCHMARK(BM_Solver_2)->RangeMultiplier(4)->Range(8, 15000)->Unit(benchmark::kMicrosecond);
+BENCHMARK(Solver_4)->RangeMultiplier(4)->Range(8, 15000)->Unit(benchmark::kMicrosecond);
+BENCHMARK(Solver_3)->RangeMultiplier(4)->Range(8, 15000)->Unit(benchmark::kMicrosecond);
+BENCHMARK(Solver_2)->RangeMultiplier(4)->Range(8, 15000)->Unit(benchmark::kMicrosecond);
 
 // Run the benchmark
 BENCHMARK_MAIN();
