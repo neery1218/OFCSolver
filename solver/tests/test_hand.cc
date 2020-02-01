@@ -46,9 +46,9 @@ TEST_F(HandTest, ConstructOptimalFantasyHand)
   std::set<Card> card_set(cards.begin(), cards.end());
   CompletedHand completedHand = hand.constructOptimalHand(card_set, evaluator);
 
-  ASSERT_EQ(GET_ROYALTIES(completedHand.topInfo), 34);
-  ASSERT_EQ(GET_ROYALTIES(completedHand.middleInfo), 2);
-  ASSERT_EQ(GET_ROYALTIES(completedHand.bottomInfo), 10);
+  ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.topInfo), 34);
+  ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.middleInfo), 2);
+  ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.bottomInfo), 10);
 }
 
 TEST_F(HandTest, ConstructOptimalHand2)
@@ -62,9 +62,9 @@ TEST_F(HandTest, ConstructOptimalHand2)
   std::set<Card> card_set(cards.begin(), cards.end());
   CompletedHand completedHand = hand.constructOptimalHand(card_set, evaluator);
 
-  ASSERT_EQ(GET_ROYALTIES(completedHand.bottomInfo), 4);
-  ASSERT_EQ(GET_ROYALTIES(completedHand.middleInfo), 0);
-  ASSERT_EQ(GET_ROYALTIES(completedHand.topInfo), 34);
+  ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.bottomInfo), 4);
+  ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.middleInfo), 0);
+  ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.topInfo), 34);
 }
 
 TEST_F(HandTest, FouledHand)
@@ -78,12 +78,12 @@ TEST_F(HandTest, FouledHand)
   std::set<Card> card_set(cards.begin(), cards.end());
   CompletedHand completedHand = hand.constructOptimalHand(card_set, evaluator);
 
-  ASSERT_EQ(GET_ROYALTIES(completedHand.topInfo), 0);
-  ASSERT_EQ(GET_OVERALL_RANK(completedHand.topInfo), 0);
-  ASSERT_EQ(GET_ROYALTIES(completedHand.middleInfo), 0);
-  ASSERT_EQ(GET_OVERALL_RANK(completedHand.middleInfo), 0);
-  ASSERT_EQ(GET_ROYALTIES(completedHand.bottomInfo), 0);
-  ASSERT_EQ(GET_OVERALL_RANK(completedHand.bottomInfo), 0);
+  ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.topInfo), 0);
+  ASSERT_EQ(PokerHandUtils::getOverallRank(completedHand.topInfo), 0);
+  ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.middleInfo), 0);
+  ASSERT_EQ(PokerHandUtils::getOverallRank(completedHand.middleInfo), 0);
+  ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.bottomInfo), 0);
+  ASSERT_EQ(PokerHandUtils::getOverallRank(completedHand.bottomInfo), 0);
 }
 
 TEST_F(HandTest, Regression)
@@ -94,7 +94,7 @@ TEST_F(HandTest, Regression)
   std::set<Card> card_set(cards.begin(), cards.end());
   CompletedHand completedHand = hand.constructOptimalHand(card_set, evaluator);
 
-  ASSERT_EQ(GET_ROYALTIES(completedHand.topInfo), 22 + 25);
-  ASSERT_EQ(GET_ROYALTIES(completedHand.middleInfo), 30);
-  ASSERT_EQ(GET_ROYALTIES(completedHand.bottomInfo), 15);
+  ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.topInfo), 22 + 25);
+  ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.middleInfo), 30);
+  ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.bottomInfo), 15);
 }

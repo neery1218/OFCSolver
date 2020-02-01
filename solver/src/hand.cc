@@ -130,7 +130,7 @@ CompletedHand Hand::constructOptimalHand(set<Card>& cards, const FastPokerHandEv
     completed_bottom.insert(completed_bottom.end(), botCombo.begin(), botCombo.end());
     PokerHandInfo botInfo = evaluator->evalBottom(completed_bottom);
 
-    if (_size <= 7 && highestRoyalties >= 0 && botInfo < CREATE_POKER_HAND_INFO(4118, PAIR, 0))
+    if (_size <= 7 && highestRoyalties >= 0 && botInfo < PokerHandUtils::createPokerHandInfo(4118, static_cast<int>(HandType::PAIR), 0))
       continue; // don't continue if bottom is less than KK
 
     set<Card> remainingCards;
@@ -148,9 +148,9 @@ CompletedHand Hand::constructOptimalHand(set<Card>& cards, const FastPokerHandEv
       completed_middle.insert(completed_middle.end(), midCombo.begin(), midCombo.end());
       PokerHandInfo midInfo = evaluator->evalMiddle(completed_middle);
 
-      if (GET_OVERALL_RANK(botInfo) < GET_OVERALL_RANK(midInfo))
+      if (PokerHandUtils::getOverallRank(botInfo) < PokerHandUtils::getOverallRank(midInfo))
         continue; // fouled hand
-      if (_size <= 7 && highestRoyalties > (GET_ROYALTIES(botInfo) + GET_ROYALTIES(midInfo)) && midInfo < CREATE_POKER_HAND_INFO(3886, PAIR, 0))
+      if (_size <= 7 && highestRoyalties > (PokerHandUtils::getRoyalties(botInfo) + PokerHandUtils::getRoyalties(midInfo)) && midInfo < PokerHandUtils::createPokerHandInfo(3886, static_cast<int>(HandType::PAIR), 0))
         continue; // don't continue if mid is less than 66
 
       set<Card> topRemainingCards;
@@ -166,10 +166,10 @@ CompletedHand Hand::constructOptimalHand(set<Card>& cards, const FastPokerHandEv
         completed_top.insert(completed_top.end(), topCombo.begin(), topCombo.end());
         PokerHandInfo topInfo = evaluator->evalTop(completed_top);
 
-        if (GET_OVERALL_RANK(midInfo) < GET_OVERALL_RANK(topInfo))
+        if (PokerHandUtils::getOverallRank(midInfo) < PokerHandUtils::getOverallRank(topInfo))
           continue; // fouled hand
 
-        int royalties = GET_ROYALTIES(topInfo) + GET_ROYALTIES(midInfo) + GET_ROYALTIES(botInfo);
+        int royalties = PokerHandUtils::getRoyalties(topInfo) + PokerHandUtils::getRoyalties(midInfo) + PokerHandUtils::getRoyalties(botInfo);
         if (royalties > highestRoyalties) {
           highestRoyalties = royalties;
           bestHand = CompletedHand(topInfo, midInfo, botInfo);
@@ -180,9 +180,9 @@ CompletedHand Hand::constructOptimalHand(set<Card>& cards, const FastPokerHandEv
 
   if (highestRoyalties == -1) { // all possible hands are fouled
     return CompletedHand(
-        CREATE_POKER_HAND_INFO(0, 0, 0),
-        CREATE_POKER_HAND_INFO(0, 0, 0),
-        CREATE_POKER_HAND_INFO(0, 0, 0));
+        PokerHandUtils::createPokerHandInfo(0, 0, 0),
+        PokerHandUtils::createPokerHandInfo(0, 0, 0),
+        PokerHandUtils::createPokerHandInfo(0, 0, 0));
   }
 
   return bestHand;
@@ -195,20 +195,20 @@ CompletedHand::CompletedHand(const Hand& h, const FastPokerHandEvaluator* eval)
   bottomInfo = eval->evalBottom(h.bottom);
 
   if (topInfo > middleInfo || middleInfo > bottomInfo) {
-    topInfo = CREATE_POKER_HAND_INFO(0, 0, 0);
-    middleInfo = CREATE_POKER_HAND_INFO(0, 0, 0);
-    bottomInfo = CREATE_POKER_HAND_INFO(0, 0, 0);
+    topInfo = PokerHandUtils::createPokerHandInfo(0, 0, 0);
+    middleInfo = PokerHandUtils::createPokerHandInfo(0, 0, 0);
+    bottomInfo = PokerHandUtils::createPokerHandInfo(0, 0, 0);
   }
 }
 
 int CompletedHand::calculatePoints() const
 { // note: can't call this with a fouled hand. tightly coupled with solver.h
-  return GET_ROYALTIES(topInfo) + GET_ROYALTIES(middleInfo) + GET_ROYALTIES(bottomInfo);
+  return PokerHandUtils::getRoyalties(topInfo) + PokerHandUtils::getRoyalties(middleInfo) + PokerHandUtils::getRoyalties(bottomInfo);
 }
 
 int CompletedHand::calculatePoints(const CompletedHand& otherHand) const
 {
-  int royaltyPoints = GET_ROYALTIES(topInfo) + GET_ROYALTIES(middleInfo) + GET_ROYALTIES(bottomInfo) - GET_ROYALTIES(otherHand.topInfo) - GET_ROYALTIES(otherHand.middleInfo) - GET_ROYALTIES(otherHand.bottomInfo);
+  int royaltyPoints = PokerHandUtils::getRoyalties(topInfo) + PokerHandUtils::getRoyalties(middleInfo) + PokerHandUtils::getRoyalties(bottomInfo) - PokerHandUtils::getRoyalties(otherHand.topInfo) - PokerHandUtils::getRoyalties(otherHand.middleInfo) - PokerHandUtils::getRoyalties(otherHand.bottomInfo);
 
   int gtBonus = 0;
   if (topInfo < otherHand.topInfo)

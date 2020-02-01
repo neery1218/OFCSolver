@@ -44,14 +44,14 @@ class FastPokerHandEvaluatorTest : public ::testing::Test {
 TEST_F(FastPokerHandEvaluatorTest, HighestStraight)
 {
   PokerHandInfo info = evalHand("As Kh Qh Jh Th", Position::bottom);
-  ASSERT_EQ(GET_ROYALTIES(info), 2);
-  ASSERT_EQ(GET_HAND_TYPE(info), STRAIGHT);
-  ASSERT_GT(GET_OVERALL_RANK(info), 0);
+  ASSERT_EQ(PokerHandUtils::getRoyalties(info), 2);
+  ASSERT_EQ(PokerHandUtils::getHandType(info), static_cast<int>(HandType::STRAIGHT));
+  ASSERT_GT(PokerHandUtils::getOverallRank(info), 0);
 
   PokerHandInfo middle_info = evalHand("As Kh Qh Jh Th", Position::middle);
-  ASSERT_EQ(GET_ROYALTIES(middle_info), 4);
-  ASSERT_EQ(GET_HAND_TYPE(middle_info), STRAIGHT);
-  ASSERT_GT(GET_OVERALL_RANK(middle_info), 0);
+  ASSERT_EQ(PokerHandUtils::getRoyalties(middle_info), 4);
+  ASSERT_EQ(PokerHandUtils::getHandType(middle_info), static_cast<int>(HandType::STRAIGHT));
+  ASSERT_GT(PokerHandUtils::getOverallRank(middle_info), 0);
 }
 
 TEST_F(FastPokerHandEvaluatorTest, ExtensiveBottom)
@@ -63,8 +63,8 @@ TEST_F(FastPokerHandEvaluatorTest, ExtensiveBottom)
     PokerHandInfo expected_info = p.second;
 
     PokerHandInfo info = evalHand(row, Position::bottom);
-    ASSERT_EQ(GET_ROYALTIES(info), GET_ROYALTIES(expected_info)) << row;
-    ASSERT_EQ(GET_HAND_TYPE(info), GET_HAND_TYPE(expected_info)) << row;
+    ASSERT_EQ(PokerHandUtils::getRoyalties(info), PokerHandUtils::getRoyalties(expected_info)) << row;
+    ASSERT_EQ(PokerHandUtils::getHandType(info), PokerHandUtils::getHandType(expected_info)) << row;
   }
 }
 
@@ -77,8 +77,8 @@ TEST_F(FastPokerHandEvaluatorTest, ExtensiveMiddle)
     PokerHandInfo expected_info = p.second;
 
     PokerHandInfo info = evalHand(row, Position::middle);
-    ASSERT_EQ(GET_ROYALTIES(info), GET_ROYALTIES(expected_info)) << row;
-    ASSERT_EQ(GET_HAND_TYPE(info), GET_HAND_TYPE(expected_info)) << row;
+    ASSERT_EQ(PokerHandUtils::getRoyalties(info), PokerHandUtils::getRoyalties(expected_info)) << row;
+    ASSERT_EQ(PokerHandUtils::getHandType(info), PokerHandUtils::getHandType(expected_info)) << row;
   }
 }
 
@@ -91,8 +91,8 @@ TEST_F(FastPokerHandEvaluatorTest, ExtensiveTop)
     PokerHandInfo expected_info = p.second;
 
     PokerHandInfo info = evalHand(row, Position::top);
-    ASSERT_EQ(GET_ROYALTIES(info), GET_ROYALTIES(expected_info)) << row;
-    ASSERT_EQ(GET_HAND_TYPE(info), GET_HAND_TYPE(expected_info)) << row;
+    ASSERT_EQ(PokerHandUtils::getRoyalties(info), PokerHandUtils::getRoyalties(expected_info)) << row;
+    ASSERT_EQ(PokerHandUtils::getHandType(info), PokerHandUtils::getHandType(expected_info)) << row;
   }
 }
 
@@ -105,8 +105,8 @@ TEST_F(FastPokerHandEvaluatorTest, ExtensiveTopProgressive)
     PokerHandInfo expected_info = p.second;
 
     PokerHandInfo info = evaluator_progressive->evalTop(CardUtils::parseCards(row));
-    ASSERT_EQ(GET_ROYALTIES(info), GET_ROYALTIES(expected_info)) << row;
-    ASSERT_EQ(GET_HAND_TYPE(info), GET_HAND_TYPE(expected_info)) << row;
+    ASSERT_EQ(PokerHandUtils::getRoyalties(info), PokerHandUtils::getRoyalties(expected_info)) << row;
+    ASSERT_EQ(PokerHandUtils::getHandType(info), PokerHandUtils::getHandType(expected_info)) << row;
   }
 }
 
@@ -119,7 +119,7 @@ TEST_F(FastPokerHandEvaluatorTest, ExtensiveUltimate)
     PokerHandInfo expected_info = p.second;
 
     PokerHandInfo info = evaluator_ultimate->evalTop(CardUtils::parseCards(row));
-    ASSERT_EQ(GET_ROYALTIES(info), GET_ROYALTIES(expected_info)) << row;
-    ASSERT_EQ(GET_HAND_TYPE(info), GET_HAND_TYPE(expected_info)) << row;
+    ASSERT_EQ(PokerHandUtils::getRoyalties(info), PokerHandUtils::getRoyalties(expected_info)) << row;
+    ASSERT_EQ(PokerHandUtils::getHandType(info), PokerHandUtils::getHandType(expected_info)) << row;
   }
 }

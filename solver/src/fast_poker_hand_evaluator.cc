@@ -71,28 +71,28 @@ FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type)
     unsigned int overall_rank = stoi(tokens[1]);
     unsigned int hand_type = stoi(tokens[2]);
     unsigned int royalties = stoi(tokens[3]);
-    unsigned int royalties_middle = (hand_type == TRIPS) ? 2 : (royalties * 2);
+    unsigned int royalties_middle = (hand_type == static_cast<int>(HandType::TRIPS)) ? 2 : (royalties * 2);
 
     unsigned int hand_index = convertHandStr(hand);
 
     if (hand.size() == 3) { // top row
       royalties += calculateFantasyBonus(overall_rank);
 
-      top_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, hand_type, royalties);
+      top_eval_info[hand_index] = PokerHandUtils::createPokerHandInfo(overall_rank, hand_type, royalties);
     } else {
-      middle_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, hand_type, royalties_middle);
-      bottom_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, hand_type, royalties);
+      middle_eval_info[hand_index] = PokerHandUtils::createPokerHandInfo(overall_rank, hand_type, royalties_middle);
+      bottom_eval_info[hand_index] = PokerHandUtils::createPokerHandInfo(overall_rank, hand_type, royalties);
 
-      if (hand_type == HIGH_CARD) {
-        flush_bottom_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, FLUSH, 4);
-        flush_middle_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, FLUSH, 8);
-      } else if (hand_type == STRAIGHT) {
+      if (hand_type == static_cast<int>(HandType::HIGH_CARD)) {
+        flush_bottom_eval_info[hand_index] = PokerHandUtils::createPokerHandInfo(overall_rank, static_cast<int>(HandType::FLUSH), 4);
+        flush_middle_eval_info[hand_index] = PokerHandUtils::createPokerHandInfo(overall_rank, static_cast<int>(HandType::FLUSH), 8);
+      } else if (hand_type == static_cast<int>(HandType::STRAIGHT)) {
         if (hand.find("T") != std::string::npos && hand.find("A") != std::string::npos) {
-          flush_bottom_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, ROYAL_FLUSH, 25);
-          flush_middle_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, ROYAL_FLUSH, 50);
+          flush_bottom_eval_info[hand_index] = PokerHandUtils::createPokerHandInfo(overall_rank, static_cast<int>(HandType::ROYAL_FLUSH), 25);
+          flush_middle_eval_info[hand_index] = PokerHandUtils::createPokerHandInfo(overall_rank, static_cast<int>(HandType::ROYAL_FLUSH), 50);
         } else {
-          flush_bottom_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, STRAIGHT_FLUSH, 15);
-          flush_middle_eval_info[hand_index] = CREATE_POKER_HAND_INFO(overall_rank, STRAIGHT_FLUSH, 30);
+          flush_bottom_eval_info[hand_index] = PokerHandUtils::createPokerHandInfo(overall_rank, static_cast<int>(HandType::STRAIGHT_FLUSH), 15);
+          flush_middle_eval_info[hand_index] = PokerHandUtils::createPokerHandInfo(overall_rank, static_cast<int>(HandType::STRAIGHT_FLUSH), 30);
         }
       }
     }
