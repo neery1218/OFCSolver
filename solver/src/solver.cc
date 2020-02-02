@@ -78,8 +78,8 @@ double Solver::solve(int numIterations, const Hand& myHand, const Pull& myPull, 
   for (int it = 0; it < numIterations; ++it) {
     // sample cards from deck
     vector<Card> my_draw = deck.select(cardsNeeded[0]);
-    set<Card> my_draw_set(my_draw.begin(), my_draw.end());
-    CompletedHand myOptimalHand = OptimalHand::constructOptimalHand(myHand, my_draw_set, evaluator);
+    std::sort(my_draw.begin(), my_draw.end());
+    CompletedHand myOptimalHand = OptimalHand::constructOptimalHand(myHand, my_draw, evaluator);
 
     if (allHands.size() == 1)
       total += myOptimalHand.calculatePoints();
@@ -87,7 +87,7 @@ double Solver::solve(int numIterations, const Hand& myHand, const Pull& myPull, 
       for (unsigned int i = 1; i < allHands.size(); ++i) {
         vector<Card> other_draw = deck.select(cardsNeeded[i]);
         set<Card> other_draw_set(other_draw.begin(), other_draw.end());
-        CompletedHand otherHand = OptimalHand::constructOptimalHand(allHands[i], other_draw_set, evaluator);
+        CompletedHand otherHand = OptimalHand::constructOptimalHand(allHands[i], other_draw, evaluator);
         total += myOptimalHand.calculatePoints(otherHand);
       }
   }

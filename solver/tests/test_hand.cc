@@ -45,8 +45,8 @@ TEST_F(HandTest, ConstructOptimalFantasyHand)
       CardUtils::parseCards("9h 9d 9c 9s"));
 
   std::vector<Card> cards = CardUtils::parseCards("Ad Kc Ks 2s 3s 4d");
-  std::set<Card> card_set(cards.begin(), cards.end());
-  CompletedHand completedHand = OptimalHand::constructOptimalHand(hand, card_set, evaluator);
+  std::sort(cards.begin(), cards.end());
+  CompletedHand completedHand = OptimalHand::constructOptimalHand(hand, cards, evaluator);
 
   ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.topInfo), 34);
   ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.middleInfo), 2);
@@ -61,8 +61,8 @@ TEST_F(HandTest, ConstructOptimalHand2)
       CardUtils::parseCards("Td 9d"));
 
   std::vector<Card> cards = CardUtils::parseCards("Kd Qd 4d 5c 2s Kh Ks Jh As");
-  std::set<Card> card_set(cards.begin(), cards.end());
-  CompletedHand completedHand = OptimalHand::constructOptimalHand(hand, card_set, evaluator);
+  std::sort(cards.begin(), cards.end());
+  CompletedHand completedHand = OptimalHand::constructOptimalHand(hand, cards, evaluator);
 
   ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.bottomInfo), 4);
   ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.middleInfo), 0);
@@ -77,8 +77,8 @@ TEST_F(HandTest, FouledHand)
       CardUtils::parseCards("Td"));
 
   std::vector<Card> cards = CardUtils::parseCards("Kd Qd 4d 5c 2s Kh Ks Jh As");
-  std::set<Card> card_set(cards.begin(), cards.end());
-  CompletedHand completedHand = OptimalHand::constructOptimalHand(hand, card_set, evaluator);
+  std::sort(cards.begin(), cards.end());
+  CompletedHand completedHand = OptimalHand::constructOptimalHand(hand, cards, evaluator);
 
   ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.topInfo), 0);
   ASSERT_EQ(PokerHandUtils::getOverallRank(completedHand.topInfo), 0);
@@ -93,8 +93,8 @@ TEST_F(HandTest, Regression)
   Hand hand;
 
   std::vector<Card> cards = CardUtils::parseCards("5h 6h 7h 8h 9h 5d 6d 7d 8d 9d Ad Ac Ah");
-  std::set<Card> card_set(cards.begin(), cards.end());
-  CompletedHand completedHand = OptimalHand::constructOptimalHand(hand, card_set, evaluator);
+  std::sort(cards.begin(), cards.end());
+  CompletedHand completedHand = OptimalHand::constructOptimalHand(hand, cards, evaluator);
 
   ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.topInfo), 22 + 25);
   ASSERT_EQ(PokerHandUtils::getRoyalties(completedHand.middleInfo), 30);

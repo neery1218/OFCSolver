@@ -6,5 +6,5 @@
 
 // given a set of cards and a hand, construct the best hand possible
 namespace OptimalHand {
-CompletedHand constructOptimalHand(const Hand& h, std::set<Card>& cards, const FastPokerHandEvaluator* evaluator);
+CompletedHand constructOptimalHand(const Hand& h, std::vector<Card>& cards, const FastPokerHandEvaluator* evaluator);
 }

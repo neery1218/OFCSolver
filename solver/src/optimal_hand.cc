@@ -4,21 +4,32 @@ namespace OptimalHand {
 
 using namespace std;
 
-vector<set<Card>> comb(const set<Card>& _cards, int K)
+constexpr int nCr(int n, int r)
 {
-  vector<Card> cards(_cards.begin(), _cards.end());
+  // static_assert(n >= r, "Bad use of nCr!");
+  if (n == r || r == 0) {
+    return 1;
+  }
+
+  return nCr(n - 1, r) + nCr(n - 1, r - 1);
+}
+
+vector<vector<Card>> comb(const vector<Card>& cards, int K)
+{
   std::string bitmask(K, 1);       // K leading 1's
   bitmask.resize(cards.size(), 0); // N-K trailing 0's
 
-  vector<set<Card>> out;
+  vector<vector<Card>> out;
+  out.reserve(nCr(cards.size(), K));
   // print integers and permute bitmask
   do {
-    set<Card> tmp;
+    vector<Card> tmp;
+    tmp.reserve(K);
 
     for (unsigned int i = 0; i < cards.size(); ++i) // [0..N-1] integers
     {
       if (bitmask[i])
-        tmp.insert(cards[i]);
+        tmp.push_back(cards[i]);
     }
     out.emplace_back(tmp); // TODO: verify move semantics
   } while (std::prev_permutation(bitmask.begin(), bitmask.end()));
@@ -26,7 +37,7 @@ vector<set<Card>> comb(const set<Card>& _cards, int K)
   return out;
 }
 
-CompletedHand constructOptimalHand(const Hand& h, std::set<Card>& cards, const FastPokerHandEvaluator* evaluator)
+CompletedHand constructOptimalHand(const Hand& h, std::vector<Card>& cards, const FastPokerHandEvaluator* evaluator)
 {
   int topCardsMissing = 3 - h.top.size();
   int middleCardsMissing = 5 - h.middle.size();
@@ -35,9 +46,9 @@ CompletedHand constructOptimalHand(const Hand& h, std::set<Card>& cards, const F
   CompletedHand bestHand;
   int highestRoyalties = -1;
 
-  vector<set<Card>> botCombos = comb(cards, bottomCardsMissing);
+  vector<vector<Card>> botCombos = comb(cards, bottomCardsMissing);
   if (botCombos.empty())
-    botCombos.push_back(set<Card>());
+    botCombos.push_back(vector<Card>());
 
   for (auto& botCombo : botCombos) {
     vector<Card> completed_bottom(h.bottom.begin(), h.bottom.end());
@@ -47,15 +58,15 @@ CompletedHand constructOptimalHand(const Hand& h, std::set<Card>& cards, const F
     if (h.size() <= 7 && highestRoyalties >= 0 && botInfo < PokerHandUtils::createPokerHandInfo(4118, static_cast<int>(HandType::PAIR), 0))
       continue; // don't continue if bottom is less than KK
 
-    set<Card> remainingCards;
+    vector<Card> remainingCards;
     std::set_difference(
         cards.begin(), cards.end(),
         botCombo.begin(), botCombo.end(),
-        inserter(remainingCards, remainingCards.begin()));
+        back_inserter(remainingCards));
 
-    vector<set<Card>> midCombos = comb(remainingCards, middleCardsMissing);
+    vector<vector<Card>> midCombos = comb(remainingCards, middleCardsMissing);
     if (midCombos.empty())
-      midCombos.push_back(set<Card>());
+      midCombos.push_back(vector<Card>());
 
     for (auto& midCombo : midCombos) {
       vector<Card> completed_middle(h.middle.begin(), h.middle.end());
@@ -67,13 +78,13 @@ CompletedHand constructOptimalHand(const Hand& h, std::set<Card>& cards, const F
       if (h.size() <= 7 && highestRoyalties > (PokerHandUtils::getRoyalties(botInfo) + PokerHandUtils::getRoyalties(midInfo)) && midInfo < PokerHandUtils::createPokerHandInfo(3886, static_cast<int>(HandType::PAIR), 0))
         continue; // don't continue if mid is less than 66
 
-      set<Card> topRemainingCards;
+      vector<Card> topRemainingCards;
       std::set_difference(remainingCards.begin(), remainingCards.end(), midCombo.begin(),
-          midCombo.end(), inserter(topRemainingCards, topRemainingCards.begin()));
+          midCombo.end(), back_inserter(topRemainingCards));
 
-      vector<set<Card>> topCombos = comb(topRemainingCards, topCardsMissing);
+      vector<vector<Card>> topCombos = comb(topRemainingCards, topCardsMissing);
       if (topCombos.empty())
-        topCombos.push_back(set<Card>());
+        topCombos.push_back(vector<Card>());
 
       for (auto& topCombo : topCombos) {
         vector<Card> completed_top(h.top.begin(), h.top.end());
