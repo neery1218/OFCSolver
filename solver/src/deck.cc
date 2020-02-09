@@ -6,7 +6,6 @@
 using namespace std;
 
 Deck::Deck()
-    : e { std::random_device {}() }
 {
   std::string suits[] { "d", "c", "h", "s" };
   std::string ranks[] { "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A" };
@@ -21,7 +20,6 @@ Deck::Deck()
 }
 Deck::Deck(const Deck& d)
     : deck { d.deck }
-    , e { std::random_device {}() }
 {
 }
 Deck::Deck(const GameState& game_state)
@@ -75,12 +73,14 @@ int Deck::size()
   return deck.size();
 }
 
-const vector<Card> Deck::select(int k)
+const vector<Card> Deck::select(int k, std::mt19937* rng)
 {
+  std::mt19937 local_rng { rng->operator()() };
+
   vector<Card> cards;
   experimental::sample(
       deck.begin(), deck.end(),
       back_inserter(cards), k,
-      e);
+      local_rng);
   return cards;
 }

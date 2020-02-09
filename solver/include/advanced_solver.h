@@ -1,9 +1,9 @@
 #ifndef _ADVANCED_SOLVER_H_
 #define _ADVANCED_SOLVER_H_
 
+#include "deck.h"
 #include "fast_poker_hand_evaluator.h"
 #include "game_state.h"
-#include "deck.h"
 
 struct SolverParams {
   unsigned int stage_one_iterations;
@@ -11,13 +11,15 @@ struct SolverParams {
   unsigned int search_level;
 };
 
+/* If you parallelize this later, make sure to create new seeds for the child threads. */
 class AdvancedSolver {
-  const FastPokerHandEvaluator *evaluator;
+  const FastPokerHandEvaluator* evaluator;
+  std::mt19937 rng;
 
   public:
-    AdvancedSolver(const FastPokerHandEvaluator *evaluator);
-    double solve(int iterations, const GameState &game_state, const Deck &initial_deck, int search_level) const;
-    AdvancedSolver(const AdvancedSolver&) = delete;
-    AdvancedSolver& operator=(AdvancedSolver&) = delete;
+  AdvancedSolver(const FastPokerHandEvaluator* evaluator, uint32_t seed);
+  double solve(int iterations, const GameState& game_state, const Deck& initial_deck, int search_level);
+  AdvancedSolver(const AdvancedSolver&) = delete;
+  AdvancedSolver& operator=(AdvancedSolver&) = delete;
 };
 #endif

@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include <iostream>
+#include <random>
 #include <set>
 #include <vector>
 
@@ -59,7 +60,8 @@ TEST_F(DeckTest, GameStateRemoval)
 TEST_F(DeckTest, SampleDeck)
 {
   Deck deck;
-  std::vector<Card> cards = deck.select(10);
+  std::mt19937 rng { 1234 };
+  std::vector<Card> cards = deck.select(10, &rng);
   std::set<Card> card_set(cards.begin(), cards.end());
 
   ASSERT_EQ(cards.size(), 10);    // test exactly 10 cards were returned

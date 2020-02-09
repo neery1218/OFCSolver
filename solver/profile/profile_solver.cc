@@ -13,17 +13,13 @@
 int main()
 {
   FastPokerHandEvaluator* evaluator = new FastPokerHandEvaluator(GameType::Regular);
+  std::mt19937 rng { 1234 };
   Hand hand(
       CardUtils::parseCards("Ac"),
       CardUtils::parseCards("2c 2d"),
       CardUtils::parseCards("9h 9d"));
 
   Pull pull { CardUtils::parseCards("Ac 4c 4d") };
-  double ev = Solver(evaluator).solve(
-      10000,
-      hand,
-      pull,
-      std::vector<Hand>(),
-      std::vector<Card>());
+  double ev = Solver(evaluator, &rng).solve(10000, hand, pull, std::vector<Hand>(), std::vector<Card>());
   std::cout << "Ev: " << ev << std::endl;
 }

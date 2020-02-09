@@ -32,7 +32,7 @@ TEST_F(AdvancedSolverTest, BasicTest)
   GameState state { hand, std::vector<Hand>(), pull, std::vector<Card>() };
   Deck deck;
 
-  double ev = AdvancedSolver(evaluator).solve(100, state, deck, 11);
+  double ev = AdvancedSolver(evaluator, 1234).solve(100, state, deck, 11);
   ASSERT_GE(ev, 0) << ev;
 }
 
@@ -55,6 +55,6 @@ TEST_F(AdvancedSolverTest, DeadHand)
   GameState state { hand, other_hands, pull, dead_cards };
   Deck deck;
 
-  double ev = AdvancedSolver(evaluator).solve(100, state, deck, 11);
+  double ev = AdvancedSolver(evaluator, 1234).solve(100, state, deck, 11);
   ASSERT_LT(ev, -6.0);
 }

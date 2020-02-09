@@ -15,6 +15,7 @@ class DecisionFinderTest : public ::testing::Test {
 
   // void TearDown() override {}
   FastPokerHandEvaluator* evaluator;
+  std::mt19937 rng { 1234 };
 };
 
 TEST_F(DecisionFinderTest, Basic)
@@ -32,5 +33,5 @@ TEST_F(DecisionFinderTest, Basic)
 
   Pull my_pull = { CardUtils::parseCards("Ah 9s Kd") };
   GameState game_state { my_hand, other_hands, my_pull, std::vector<Card>() };
-  Decision d = DecisionFinder(evaluator).findBestDecision(game_state);
+  Decision d = DecisionFinder(evaluator, &rng).findBestDecision(game_state, 100);
 }

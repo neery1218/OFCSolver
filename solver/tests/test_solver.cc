@@ -20,6 +20,7 @@ class SolverTest : public ::testing::Test {
 
   // void TearDown() override {}
   FastPokerHandEvaluator* evaluator;
+  std::mt19937 rng { 1234 };
 };
 
 TEST_F(SolverTest, Basic)
@@ -31,7 +32,7 @@ TEST_F(SolverTest, Basic)
 
   Pull pull { CardUtils::parseCards("Ac 4c 4d") };
 
-  double ev = Solver(evaluator).solve(10, hand, pull, std::vector<Hand>(), std::vector<Card>());
+  double ev = Solver(evaluator, &rng).solve(10, hand, pull, std::vector<Hand>(), std::vector<Card>());
   ASSERT_GT(ev, 10);
 }
 
@@ -54,6 +55,6 @@ TEST_F(SolverTest, DeadHand)
   std::vector<Card> dead_cards(dead_card_set.begin(), dead_card_set.end());
   std::vector<Hand> other_hands { other_hand };
 
-  double ev = Solver(evaluator).solve(10, hand, pull, other_hands, dead_cards);
+  double ev = Solver(evaluator, &rng).solve(10, hand, pull, other_hands, dead_cards);
   ASSERT_EQ(ev, -6.0);
 }

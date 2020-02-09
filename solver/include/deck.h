@@ -8,7 +8,6 @@
 
 class Deck {
   std::set<Card> deck;
-  std::mt19937 e;
 
   public:
   Deck();
@@ -17,7 +16,7 @@ class Deck {
   void remove(Card card);
   void remove(const std::vector<Card>& cards);
   void remove(const std::set<Card>& cards);
-  const std::vector<Card> select(int k);
+  const std::vector<Card> select(int k, std::mt19937* rng);
   int size();
 };
 
