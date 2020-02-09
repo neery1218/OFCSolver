@@ -75,7 +75,7 @@ int Deck::size()
 
 const vector<Card> Deck::select(int k, std::mt19937* rng)
 {
-  std::mt19937 local_rng { rng->operator()() };
+  std::mt19937_64 local_rng { rng->operator()() }; // Why is this faster???
 
   vector<Card> cards;
   experimental::sample(
