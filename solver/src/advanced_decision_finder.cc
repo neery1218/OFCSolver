@@ -86,8 +86,8 @@ vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(const vector<Decisio
   initial_deck.remove(dead_cards);
 
   // Create a random seed per AdvancedSolver instance
-  vector<uint32_t> seeds(all_decisions.size());
-  for (int i = 0; i < seeds.size(); ++i) {
+  vector<uint32_t> seeds;
+  for (int i = 0; i < all_decisions.size(); ++i) {
     seeds.push_back(rd());
   }
 
@@ -135,8 +135,8 @@ Decision AdvancedDecisionFinder::stageTwoEvaluation(const vector<Decision>& all_
   Deck initial_deck(game_state);
 
   // Create a random seed per AdvancedSolver instance
-  vector<uint32_t> seeds(all_decisions.size());
-  for (int i = 0; i < seeds.size(); ++i) {
+  vector<uint32_t> seeds;
+  for (int i = 0; i < all_decisions.size(); ++i) {
     seeds.push_back(rd());
   }
 
