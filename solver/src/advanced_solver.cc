@@ -5,7 +5,9 @@
 #include "hand.h"
 #include "pull.h"
 #include "solver.h"
+#include <fstream>
 #include <iostream>
+#include <random>
 #include <stack>
 #include <vector>
 
@@ -19,6 +21,10 @@ AdvancedSolver::AdvancedSolver(const FastPokerHandEvaluator* t_evaluator, uint32
 
 double AdvancedSolver::solve(int iterations, const GameState& game_state, const Deck& initial_deck, int search_level)
 {
+#ifdef RESEARCH
+  vector<double> evs;
+#endif
+
   double total = 0;
   for (int i = 0; i < iterations; ++i) {
     stack<Hand> hands;
@@ -38,7 +44,27 @@ double AdvancedSolver::solve(int iterations, const GameState& game_state, const 
       Decision d = DecisionFinder(evaluator, &rng).findBestDecision(new_state, 5);
       hands.push(hands.top().applyDecision(d));
     }
-    total += Solver(evaluator, &rng).solve(10, hands.top(), Pull(), game_state.other_hands, dead_cards);
+    double ev = Solver(evaluator, &rng).solve(10, hands.top(), Pull(), game_state.other_hands, dead_cards);
+    total += ev;
+#ifdef RESEARCH
+    evs.push_back(ev);
+#endif
   }
+#ifdef RESEARCH
+  if (iterations > 50) { // only take stage two values
+    //int val = std::random_device {}();
+    std::stringstream ss;
+    ss << "/home/neerajen/Projects/OFCSolver/data/" << game_state.my_hand << ".csv";
+    // ss << val;
+    std::ofstream outf(ss.str());
+
+    outf << "ev"
+         << "\n";
+    for (auto ev : evs) {
+      outf << ev << "\n";
+    }
+  }
+#endif
+
   return total / iterations;
 }

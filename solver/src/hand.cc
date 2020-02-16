@@ -70,24 +70,20 @@ Hand Hand::applyDecision(Decision decision) const
 ostream& operator<<(ostream& os, const Hand& hand)
 {
   for (const Card& c : hand.top) {
-    os << CardUtils::cardToString(c) << " ";
+    os << CardUtils::cardToString(c);
   }
-  if (hand.top.empty())
-    os << "x";
-  os << endl;
+
+  os << "-";
 
   for (const Card& c : hand.middle) {
-    os << CardUtils::cardToString(c) << " ";
+    os << CardUtils::cardToString(c);
   }
-  if (hand.middle.empty())
-    os << "x";
-  os << endl;
+
+  os << "-";
 
   for (const Card& c : hand.bottom) {
-    os << CardUtils::cardToString(c) << " ";
+    os << CardUtils::cardToString(c);
   }
-  if (hand.bottom.empty())
-    os << "x";
 
   return os;
 }

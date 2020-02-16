@@ -87,8 +87,9 @@ vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(const vector<Decisio
 
   // Create a random seed per AdvancedSolver instance
   vector<uint32_t> seeds;
+  uint32_t val = rd();
   for (int i = 0; i < all_decisions.size(); ++i) {
-    seeds.push_back(rd());
+    seeds.push_back(val);
   }
 
   for (int i = 0; i < all_decisions.size(); ++i) {
@@ -132,12 +133,20 @@ Decision AdvancedDecisionFinder::stageTwoEvaluation(const vector<Decision>& all_
   vector<pair<double, Decision>> ev_to_decision;
   int split = 8;
 
+#ifdef RESEARCH
+  split = 1;
+#endif
+
   Deck initial_deck(game_state);
 
   // Create a random seed per AdvancedSolver instance
   vector<uint32_t> seeds;
+  uint32_t val = rd();
+#ifdef RESEARCH
+  val = 1234;
+#endif
   for (int i = 0; i < all_decisions.size(); ++i) {
-    seeds.push_back(rd());
+    seeds.push_back(val);
   }
 
   for (int i = 0; i < all_decisions.size(); ++i) {

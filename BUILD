@@ -3,7 +3,8 @@ cc_binary(
     srcs = ["server/server.cc"],
     copts = [
         "-Isolver/include/",
-        "-O3"
+        "-O3",
+        "-DRESEARCH",
         ],
     deps = [
         "//solver:solver",

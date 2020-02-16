@@ -4,7 +4,8 @@ cc_library(
     hdrs = glob(["include/*.h"]),
     copts = [
         "-Isolver/include/",
-        "-O3"
+        "-O3",
+        "-DRESEARCH",
         ],
     deps = [
         "@com_google_absl//absl/strings",
