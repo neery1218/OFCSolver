@@ -5,6 +5,7 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #define DIAMONDS 1
 #define CLUBS 2
@@ -23,6 +24,5 @@ namespace CardUtils {
 Card parseCard(std::string card_str);
 std::vector<Card> parseCards(std::string cards);
 std::string cardToString(Card c);
-
 }
 #endif

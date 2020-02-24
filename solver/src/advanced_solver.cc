@@ -12,8 +12,8 @@
 using namespace std;
 
 AdvancedSolver::AdvancedSolver(const FastPokerHandEvaluator* t_evaluator, uint32_t seed)
-    : evaluator { t_evaluator }
-    , rng { seed }
+    : evaluator{ t_evaluator }
+    , rng{ seed }
 {
 }
 
@@ -29,13 +29,13 @@ double AdvancedSolver::solve(int iterations, const GameState& game_state, const 
 
     Deck sim_deck(initial_deck);
     while (hands.top().size() < search_level) {
-      Pull pull = Pull { sim_deck.select(3, &rng) };
+      Pull pull = Pull{ sim_deck.select(3, &rng) };
       sim_deck.remove(pull.cards);
 
       dead_cards.insert(dead_cards.end(), pull.cards.begin(), pull.cards.end());
 
-      GameState new_state { hands.top(), vector<Hand>(), pull, dead_cards };
-      Decision d = DecisionFinder(evaluator, &rng).findBestDecision(new_state, 5);
+      GameState new_state{ hands.top(), vector<Hand>(), pull, dead_cards };
+      Decision d = DecisionFinder(evaluator, &rng).findBestDecision(new_state, 50);
       hands.push(hands.top().applyDecision(d));
     }
     total += Solver(evaluator, &rng).solve(10, hands.top(), Pull(), game_state.other_hands, dead_cards);
