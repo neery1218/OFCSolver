@@ -5,6 +5,7 @@ cc_binary(
         "-Isolver/include/",
         "-O3",
         "-DRESEARCH",
+        "-std=c++17",
         ],
     deps = [
         "//solver:solver",

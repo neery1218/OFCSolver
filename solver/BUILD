@@ -6,6 +6,7 @@ cc_library(
         "-Isolver/include/",
         "-O3",
         "-DRESEARCH",
+        "-std=c++17",
         ],
     deps = [
         "@com_google_absl//absl/strings",
@@ -13,33 +14,33 @@ cc_library(
     visibility = ["//:__pkg__"],
     )
 
-# profile targets
-cc_library(
-    name = "profile_solver_lib",
-    srcs = glob(["src/*.cc"]),
-    hdrs = glob(["include/*.h"]),
-    copts = [
-        "-Isolver/include/",
-        "-O3", "-fno-omit-frame-pointer"
-        ],
-    deps = [
-        "@com_google_absl//absl/strings"
-        ]
-    )
+# # profile targets
+# cc_library(
+#     name = "profile_solver_lib",
+#     srcs = glob(["src/*.cc"]),
+#     hdrs = glob(["include/*.h"]),
+#     copts = [
+#         "-Isolver/include/",
+#         "-O3", "-fno-omit-frame-pointer"
+#         ],
+#     deps = [
+#         "@com_google_absl//absl/strings"
+#         ]
+#     )
 
-cc_binary(
-    name = "profile_solver",
-    srcs = ["profile/profile_solver.cc"],
-    deps = [
-        "profile_solver_lib",
-        "@com_google_absl//absl/strings",
-        ],
-    copts = [
-        "-Isolver/include/",
-        "-O3",
-        "-fno-omit-frame-pointer",
-        ],
-    )
+# cc_binary(
+#     name = "profile_solver",
+#     srcs = ["profile/profile_solver.cc"],
+#     deps = [
+#         "profile_solver_lib",
+#         "@com_google_absl//absl/strings",
+#         ],
+#     copts = [
+#         "-Isolver/include/",
+#         "-O3",
+#         "-fno-omit-frame-pointer",
+#         ],
+#     )
 
 # benchmarking
 cc_test(

@@ -1,60 +1,48 @@
 #include "hand.h"
-#include "completed_hand.h"
+
 #include <iostream>
+
+#include "completed_hand.h"
 
 using namespace std;
 
 Hand::Hand(vector<Card> _top, vector<Card> _middle, vector<Card> _bottom)
-    : top { _top }
-    , middle { _middle }
-    , bottom { _bottom }
-{
+    : top{_top}, middle{_middle}, bottom{_bottom} {
   _size = _top.size() + _middle.size() + _bottom.size();
 }
 
-Hand::Hand(const Hand& obj)
-{
+Hand::Hand(const Hand &obj) {
   top = obj.top;
   middle = obj.middle;
   bottom = obj.bottom;
   _size = obj._size;
 }
 
-Hand::Hand()
-{
-  _size = 0;
-}
+Hand::Hand() { _size = 0; }
 
-void Hand::addTop(Card card)
-{
+void Hand::addTop(Card card) {
   assert(top.size() < 3);
   top.push_back(card);
   _size++;
 }
 
-void Hand::addMiddle(Card card)
-{
+void Hand::addMiddle(Card card) {
   assert(middle.size() < 5);
   middle.push_back(card);
   _size++;
 }
 
-void Hand::addBottom(Card card)
-{
+void Hand::addBottom(Card card) {
   assert(bottom.size() < 5);
   bottom.push_back(card);
   _size++;
 }
 
-int Hand::size() const
-{
-  return _size;
-}
+int Hand::size() const { return _size; }
 
-Hand Hand::applyDecision(Decision decision) const
-{
+Hand Hand::applyDecision(Decision decision) const {
   Hand newHand(*this);
-  for (auto& placement : decision.placements) {
+  for (auto &placement : decision.placements) {
     if (placement.position == Position::top) {
       newHand.addTop(placement.card);
     } else if (placement.position == Position::middle) {
@@ -67,21 +55,20 @@ Hand Hand::applyDecision(Decision decision) const
   return newHand;
 }
 
-ostream& operator<<(ostream& os, const Hand& hand)
-{
-  for (const Card& c : hand.top) {
+ostream &operator<<(ostream &os, const Hand &hand) {
+  for (const Card &c : hand.top) {
     os << CardUtils::cardToString(c);
   }
 
   os << "-";
 
-  for (const Card& c : hand.middle) {
+  for (const Card &c : hand.middle) {
     os << CardUtils::cardToString(c);
   }
 
   os << "-";
 
-  for (const Card& c : hand.bottom) {
+  for (const Card &c : hand.bottom) {
     os << CardUtils::cardToString(c);
   }
 
