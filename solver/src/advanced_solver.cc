@@ -105,12 +105,12 @@ double AdvancedSolver::solve(int iterations, const GameState &game_state,
         Solver(evaluator, &rng)
             .solve(10, hands.top(), Pull(), game_state.other_hands, dead_cards);
     for (int i = 0; i < 10; ++i) {
-      boost::format ev_key("ev_%1%");
+      boost::format ev_key("solver_ev_%1%");
       ev_key % i;
       row[ev_key.str()] = std::to_string(evs[i]);
     }
     double ev = std::accumulate(evs.begin(), evs.end(), 0) / evs.size();
-    row["ev"] = std::to_string(ev);
+    row["solver_ev_avg"] = std::to_string(ev);
     total += ev;
 
 #else
