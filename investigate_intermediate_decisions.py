@@ -2,6 +2,7 @@ import click
 import pandas
 import requests
 import logging
+import json
 
 
 def format_hand(hand):
@@ -34,6 +35,7 @@ def main(filename, solver_ip):
             for i in range(0, 3):
                 # element is (decision: string, ev: float)
                 resolved_decisions = []
+                evs = []
                 if not (f"Pull_{i}" in df):
                     break
 
@@ -58,14 +60,19 @@ def main(filename, solver_ip):
                         }
                     )
 
-                    resolved_decision = resp.text.strip()
-                    decision = getattr(row, f"Decision_{i}").strip()
+                    json_resp = json.loads(resp.text)
+                    best_decision = json_resp['best']
+                    best_decision_ev = json_resp[best_decision]
 
-                    # TODO: need to return ev, and check ev tolerance
-                    # with the ev, i can somewhat judge how bad the mistake was
-                    resolved_decisions.append(resolved_decision)
+                    # find our decision, compare evs
+                    decision = getattr(row, f"Decision_{i}").strip()
+                    our_decision_ev = json_resp[decision]
+
+                    resolved_decisions.append(best_decision)
+                    evs.append(best_decision_ev - our_decision_ev)
 
                 df[f"ResolvedDecision_{i}"] = resolved_decisions
+                df[f"ResolvedDecision_ev_{i}"] = evs
 
             df.to_csv('resolved-data/resolved-' + sim_file.strip())
             print("Done {}".format(sim_file))
