@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <future>
 #include <unordered_set>
 #include <utility>
 
@@ -10,9 +9,13 @@
 #include "advanced_solver.h"
 #include "solver.h"
 
+#ifndef NUM_THREADS
+#define NUM_THREADS 3
+#endif
+
 AdvancedDecisionFinder::AdvancedDecisionFinder(
     const FastPokerHandEvaluator *t_evaluator)
-    : evaluator{t_evaluator} {}
+    : evaluator{t_evaluator}, pool{NUM_THREADS} {}
 
 SolverParams AdvancedDecisionFinder::getSolverParams(
     const GameState &game_state) const {
@@ -73,8 +76,9 @@ AdvancedDecisionFinder::findBestDecision(const GameState &game_state) {
 std::vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(
     const std::vector<Decision> &all_decisions, unsigned int n,
     const GameState &game_state, const SolverParams &solver_params) {
-  std::vector<std::future<double>> futures;
   std::vector<std::pair<double, Decision>> ev_to_decision;
+  std::vector<double> ev_from_threads(all_decisions.size(),
+                                      std::numeric_limits<double>::min());
 
   std::vector<Card> dead_cards(game_state.dead_cards);
   for (auto &h : game_state.other_hands) {
@@ -95,23 +99,27 @@ std::vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(
 
   for (int i = 0; i < all_decisions.size(); ++i) {
     const FastPokerHandEvaluator *local_eval = evaluator;
-    futures.push_back(async(
-        std::launch::async,
-        [all_decisions, local_eval, solver_params, game_state, &initial_deck,
-         dead_cards, seeds, i]() {
+    boost::asio::post(
+        pool, [all_decisions, local_eval, solver_params, game_state,
+               &initial_deck, dead_cards, seeds, i, &ev_from_threads]() {
           GameState new_state{
               game_state.my_hand.applyDecision(all_decisions[i]),
               std::vector<Hand>(),
               // game_state.other_hands, // TODO: experiment with removing this.
               game_state.my_pull, dead_cards};
-          return AdvancedSolver(local_eval, seeds[i])
-              .solve(solver_params.stage_one_iterations, new_state,
-                     initial_deck, solver_params.search_level);
-        }));
+
+          // write result to ev_from_threads
+          ev_from_threads[i] =
+              AdvancedSolver(local_eval, seeds[i])
+                  .solve(solver_params.stage_one_iterations, new_state,
+                         initial_deck, solver_params.search_level);
+        });
   }
 
-  for (unsigned int i = 0; i < futures.size(); ++i) {
-    ev_to_decision.emplace_back(futures[i].get(), all_decisions[i]);
+  pool.join();
+
+  for (unsigned int i = 0; i < ev_from_threads.size(); ++i) {
+    ev_to_decision.emplace_back(ev_from_threads[i], all_decisions[i]);
   }
 
   std::sort(ev_to_decision.begin(), ev_to_decision.end(),
@@ -131,13 +139,15 @@ std::vector<std::pair<double, Decision>>
 AdvancedDecisionFinder::stageTwoEvaluation(
     const std::vector<Decision> &all_decisions, const GameState &game_state,
     const SolverParams &solver_params) {
-  std::vector<std::future<double>> futures;
   std::vector<std::pair<double, Decision>> ev_to_decision;
   int split = 8;
+  boost::asio::thread_pool new_pool(NUM_THREADS);
 
 #ifdef RESEARCH
   split = 1;
 #endif
+  std::vector<double> ev_from_threads(all_decisions.size() * split,
+                                      std::numeric_limits<double>::min());
 
   Deck initial_deck(game_state);
 
@@ -155,24 +165,27 @@ AdvancedDecisionFinder::stageTwoEvaluation(
     for (int j = 0; j < split; ++j) {
       const FastPokerHandEvaluator *local_eval = evaluator;
       int num_iterations_split = solver_params.stage_two_iterations / split;
-      futures.push_back(async(std::launch::async, [all_decisions, local_eval,
-                                                   num_iterations_split,
-                                                   game_state, &initial_deck,
-                                                   solver_params, seeds, i]() {
+      boost::asio::post(new_pool, [all_decisions, local_eval,
+                                   num_iterations_split, game_state,
+                                   &initial_deck, solver_params, seeds, i, j,
+                                   &ev_from_threads, split]() {
         GameState new_state{game_state.my_hand.applyDecision(all_decisions[i]),
                             game_state.other_hands, game_state.my_pull,
                             game_state.dead_cards};
-        return AdvancedSolver(local_eval, seeds[i])
-            .solve(num_iterations_split, new_state, initial_deck,
-                   solver_params.search_level);
-      }));
+        double ev = AdvancedSolver(local_eval, seeds[i])
+                        .solve(num_iterations_split, new_state, initial_deck,
+                               solver_params.search_level);
+        ev_from_threads[i * split + j] = ev;
+      });
     }
   }
+
+  new_pool.join();
 
   for (unsigned int i = 0; i < all_decisions.size(); ++i) {
     double total = 0;
     for (int j = 0; j < split; ++j) {
-      total += futures[split * i + j].get();
+      total += ev_from_threads[split * i + j];
     }
     ev_to_decision.emplace_back(total / split, all_decisions[i]);
   }

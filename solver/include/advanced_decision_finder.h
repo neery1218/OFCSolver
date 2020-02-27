@@ -1,6 +1,7 @@
 #ifndef _ADVANCED_DECISION_FINDER
 #define _ADVANCED_DECISION_FINDER
 
+#include <boost/asio.hpp>
 #include <vector>
 
 #include "advanced_solver.h"
@@ -16,6 +17,7 @@
 class AdvancedDecisionFinder {
   const FastPokerHandEvaluator *evaluator;
   std::random_device rd;
+  boost::asio::thread_pool pool;
 
  public:
   AdvancedDecisionFinder(const FastPokerHandEvaluator *evaluator);

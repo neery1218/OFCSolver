@@ -8,6 +8,10 @@ cc_library(
         "-DRESEARCH",
         "-std=c++17",
         ],
+    linkopts = [
+        "-lpthread",
+        "-lboost_system",
+        ],
     deps = [
         "@com_google_absl//absl/strings",
         ],
