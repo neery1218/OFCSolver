@@ -15,8 +15,11 @@ struct Decision {
 };
 
 inline std::ostream &operator<<(std::ostream &os, const Decision &d) {
-  for (auto &p : d.placements) {
-    os << p << " ";
+  for (int i = 0; i < d.placements.size(); ++i) {
+    os << d.placements[i];
+    if (i < d.placements.size() - 1) {
+      os << " ";
+    }
   }
   return os;
 }

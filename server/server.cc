@@ -20,6 +20,7 @@
 #include "placement.h"
 #include "position.h"
 #include "pull.h"
+#include "server/include/single_include/nlohmann/json.hpp"
 #include "solver.h"
 
 Hand parseHand(std::string hand_str) {
@@ -44,6 +45,7 @@ Hand parseHand(std::string hand_str) {
 
 int main(int argc, char *argv[]) {
   using namespace httplib;
+  using json = nlohmann::json;
 
   Server svr;
   FastPokerHandEvaluator *eval_progressive =
@@ -96,14 +98,22 @@ int main(int argc, char *argv[]) {
       std::cout << dead_cards.size() << "dead cards. \n";
 
       GameState game_state{my_hand, other_hands, my_pull, dead_cards};
-      Decision d = AdvancedDecisionFinder(eval).findBestDecision(game_state);
+      auto decisions =
+          AdvancedDecisionFinder(eval).findBestDecision(game_state);
 
-      std::stringstream ss;
-      std::string out;
-      ss << d;
-      out = ss.str();
-      res.set_content(out, "text/plain");
-      std::cout << "Best decision is: " << d << "\n";
+      json output;
+      {
+        std::stringstream ss;
+        ss << decisions[0].second;
+        output["best"] = ss.str();
+      }
+      for (const auto &p : decisions) {
+        std::stringstream ss;
+        ss << p.second;
+        output[ss.str()] = p.first;
+      }
+
+      res.set_content(output.dump(), "text/plain");
     } catch (const std::exception &e) {
       std::cout << e.what() << "\n";
     }
