@@ -16,7 +16,7 @@ Solver::Solver(const FastPokerHandEvaluator *_evaluator, std::mt19937 *rng)
 unsigned int Solver::findCardsNeeded(const Hand &h) const {
   if (h.size() == 5) return 9;  // not a typo
   if (h.size() == 7)
-    return 7;  // TODO: try 6? 7 is leading to some high variance decisions
+    return 6;  // TODO: try 6? 7 is leading to some high variance decisions
   if (h.size() == 9) return 5;
   if (h.size() == 11) return 3;
   if (h.size() == 13) return 1;
