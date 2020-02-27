@@ -66,10 +66,12 @@ def main(filename, solver_ip):
 
                     # find our decision, compare evs
                     decision = getattr(row, f"Decision_{i}").strip()
-                    our_decision_ev = json_resp[decision]
+                    our_decision_ev = json_resp.get(decision, 0)
 
                     resolved_decisions.append(best_decision)
                     evs.append(best_decision_ev - our_decision_ev)
+                    print("Our decision: {}, Correct decision: {}, ev diff {}".format(
+                        decision, best_decision, best_decision_ev - our_decision_ev))
 
                 df[f"ResolvedDecision_{i}"] = resolved_decisions
                 df[f"ResolvedDecision_ev_{i}"] = evs
