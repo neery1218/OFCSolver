@@ -37,10 +37,14 @@ unsigned int convertHandStr(std::string hand)
 }
 
 FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type)
-    : game_type { _game_type }
+    : game_type{ _game_type }
 {
-  // std::ifstream f("/root/src/solver/src/no_suit_hand_strength.csv");
+// std::ifstream f("/root/src/solver/src/no_suit_hand_strength.csv");
+#ifdef STUDENTCS
+  std::ifstream f("/u1/n8sritharan/OFCSolver/solver/src/no_suit_hand_strength.csv");
+#else
   std::ifstream f("/home/neerajen/Projects/OFCSolver/solver/src/no_suit_hand_strength.csv");
+#endif
 
   if (!f.is_open()) {
     std::cout << "File doesn't exist!. set the value as an environment variable." << std::endl;

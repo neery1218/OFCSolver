@@ -8,7 +8,7 @@ cc_binary(
         "-Isolver/include/",
         "-Iserver/include/",
         "-O3",
-        "-DRESEARCH",
+        # "-DRESEARCH",
         "-std=c++17",
         ],
     # hdrs = ["server/include/single_include/nlohmann/json.hpp"],

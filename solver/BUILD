@@ -4,16 +4,22 @@ cc_library(
     hdrs = glob(["include/*.h"]),
     copts = [
         "-Isolver/include/",
+        # "-I ../include/",
+        # "-I ../../include/",
         "-O3",
         "-DRESEARCH",
+        "-DSTUDENTCS",
         "-std=c++17",
         ],
     linkopts = [
         "-lpthread",
-        "-lboost_system",
         ],
     deps = [
         "@com_google_absl//absl/strings",
+        "@boost//:algorithm",
+        "@boost//:pool",
+        "@boost//:system",
+        "@boost//:asio",
         ],
     visibility = ["//:__pkg__"],
     )

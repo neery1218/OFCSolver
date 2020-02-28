@@ -23,3 +23,19 @@ http_archive(
     strip_prefix = "benchmark-16703ff83c1ae6d53e5155df3bb3ab0bc96083be",
     sha256 = "59f918c8ccd4d74b6ac43484467b500f1d64b40cc1010daa055375b322a43ba3",
 )
+
+# new_local_repository(
+#     name = "boost",
+#     build_file = "external/boost.BUILD",
+#     path = "/u1/n8sritharan/",
+# )
+
+git_repository(
+    name = "com_github_nelhage_rules_boost",
+    commit = "9f9fb8b2f0213989247c9d5c0e814a8451d18d7f",
+    remote = "https://github.com/nelhage/rules_boost",
+    shallow_since = "1570056263 -0700",
+)
+
+load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_deps")
+boost_deps()

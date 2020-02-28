@@ -23,7 +23,8 @@ def format_hand(hand):
 @click.command()
 @click.option('--filename', default='sims.txt', help='file which contains list of all sims')
 @click.option('--solver-ip', default='localhost', help='IP address of ofcsolver')
-def main(filename, solver_ip):
+@click.option('--port', default='9001', help='port of ofcsolver')
+def main(filename, solver_ip, port):
     # requests_log = logging.getLogger("requests.packages.urllib3")
     # requests_log.setLevel(logging.DEBUG)
     # requests_log.propagate = True
@@ -52,7 +53,7 @@ def main(filename, solver_ip):
                     print("Pull: {}".format(pull))
 
                     resp = requests.get(
-                        "http://" + solver_ip + ":8080/eval",
+                        "http://" + solver_ip + ":" + port + "/eval",
                         params={
                             'type': 'ultimate',
                             'pull': pull,
