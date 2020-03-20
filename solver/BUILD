@@ -8,7 +8,7 @@ cc_library(
         # "-I ../../include/",
         "-O3",
         "-DRESEARCH",
-        "-DSTUDENTCS",
+        # "-DSTUDENTCS",
         "-std=c++17",
         ],
     linkopts = [

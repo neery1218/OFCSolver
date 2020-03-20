@@ -23,8 +23,7 @@
 #include "server/include/single_include/nlohmann/json.hpp"
 #include "solver.h"
 
-Hand parseHand(std::string hand_str)
-{
+Hand parseHand(std::string hand_str) {
   std::vector<std::string> tokens;
   boost::split(tokens, hand_str, boost::is_any_of("/"));
   std::cout << "hand_str" << std::endl;
@@ -32,34 +31,36 @@ Hand parseHand(std::string hand_str)
     throw std::runtime_error("Must be exactly 2 forward slashes in hand");
 
   std::vector<Card> top = (tokens[0].size() > 0)
-      ? CardUtils::parseCards(tokens[0])
-      : std::vector<Card>();
+                              ? CardUtils::parseCards(tokens[0])
+                              : std::vector<Card>();
   std::vector<Card> mid = (tokens[1].size() > 0)
-      ? CardUtils::parseCards(tokens[1])
-      : std::vector<Card>();
+                              ? CardUtils::parseCards(tokens[1])
+                              : std::vector<Card>();
   std::vector<Card> bot = (tokens[2].size() > 0)
-      ? CardUtils::parseCards(tokens[2])
-      : std::vector<Card>();
+                              ? CardUtils::parseCards(tokens[2])
+                              : std::vector<Card>();
 
-  return Hand{ top, mid, bot };
+  return Hand{top, mid, bot};
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   using namespace httplib;
   using json = nlohmann::json;
 
   Server svr;
-  FastPokerHandEvaluator* eval_progressive = new FastPokerHandEvaluator(GameType::Progressive);
-  FastPokerHandEvaluator* eval_regular = new FastPokerHandEvaluator(GameType::Regular);
-  FastPokerHandEvaluator* eval_ultimate = new FastPokerHandEvaluator(GameType::Ultimate);
+  FastPokerHandEvaluator *eval_progressive =
+      new FastPokerHandEvaluator(GameType::Progressive);
+  FastPokerHandEvaluator *eval_regular =
+      new FastPokerHandEvaluator(GameType::Regular);
+  FastPokerHandEvaluator *eval_ultimate =
+      new FastPokerHandEvaluator(GameType::Ultimate);
   std::cout << "Ready!\n\n";
 
   svr.Get("/eval", [eval_regular, eval_progressive, eval_ultimate](
-                       const Request& req, Response& res) {
+                       const Request &req, Response &res) {
     try {
       std::string eval_type = req.params.find("type")->second;
-      FastPokerHandEvaluator* eval = eval_regular;
+      FastPokerHandEvaluator *eval = eval_regular;
 
       if (eval_type == "progressive") {
         eval = eval_progressive;
@@ -69,7 +70,8 @@ int main(int argc, char* argv[])
         std::cout << "Ultimate\n";
       }
 
-      Pull my_pull = Pull{ CardUtils::parseCards(req.params.find("pull")->second) };
+      Pull my_pull =
+          Pull{CardUtils::parseCards(req.params.find("pull")->second)};
       std::cout << "Pull: " << my_pull << "\n";
 
       std::string my_hand_str = req.params.find("my_hand")->second;
@@ -87,6 +89,14 @@ int main(int argc, char* argv[])
         }
       }
 
+      std::string n_solves_str = req.params.find("n_solves")->second;
+      std::string n_decision_solves_str =
+          req.params.find("n_decision_solves")->second;
+      int n_solves = std::stoi(n_solves_str);
+      int n_decision_solves = std::stoi(n_decision_solves_str);
+      std::cout << "High level solves:" << n_solves << std::endl;
+      std::cout << "Intermediate solves:" << n_decision_solves << std::endl;
+
       std::vector<Card> dead_cards;
       auto it = req.params.find("dead_cards");
       if (it != req.params.end()) {
@@ -95,8 +105,10 @@ int main(int argc, char* argv[])
       }
       std::cout << dead_cards.size() << "dead cards. \n";
 
-      GameState game_state{ my_hand, other_hands, my_pull, dead_cards };
-      auto decisions = AdvancedDecisionFinder(eval).findBestDecision(game_state);
+      GameState game_state{my_hand,    other_hands, my_pull,
+                           dead_cards, n_solves,    n_decision_solves};
+      auto decisions =
+          AdvancedDecisionFinder(eval).findBestDecision(game_state);
 
       json output;
       {
@@ -104,14 +116,14 @@ int main(int argc, char* argv[])
         ss << decisions[0].second;
         output["best"] = ss.str();
       }
-      for (const auto& p : decisions) {
+      for (const auto &p : decisions) {
         std::stringstream ss;
         ss << p.second;
         output[ss.str()] = p.first;
       }
 
       res.set_content(output.dump(), "text/plain");
-    } catch (const std::exception& e) {
+    } catch (const std::exception &e) {
       std::cout << e.what() << "\n";
     }
   });
