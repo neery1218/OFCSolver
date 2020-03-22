@@ -12,23 +12,23 @@ unsigned int convertHandStr(std::string hand)
   for (const char& c : hand) {
     unsigned int val = 0;
     switch (c) {
-    case 'A':
-      val = 12;
-      break;
-    case 'K':
-      val = 11;
-      break;
-    case 'Q':
-      val = 10;
-      break;
-    case 'J':
-      val = 9;
-      break;
-    case 'T':
-      val = 8;
-      break;
-    default:
-      val = c - '2';
+      case 'A':
+        val = 12;
+        break;
+      case 'K':
+        val = 11;
+        break;
+      case 'Q':
+        val = 10;
+        break;
+      case 'J':
+        val = 9;
+        break;
+      case 'T':
+        val = 8;
+        break;
+      default:
+        val = c - '2';
     }
     index = index * 13 + val;
   }
@@ -37,11 +37,11 @@ unsigned int convertHandStr(std::string hand)
 }
 
 FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type)
-    : game_type{ _game_type }
+  : game_type{ _game_type }
 {
-// std::ifstream f("/root/src/solver/src/no_suit_hand_strength.csv");
+  // std::ifstream f("/root/src/solver/src/no_suit_hand_strength.csv");
 #ifdef STUDENTCS
-  std::ifstream f("/u1/n8sritharan/OFCSolver/solver/src/no_suit_hand_strength.csv");
+  std::ifstream f("/users/n8sritha/OFCSolver/solver/src/no_suit_hand_strength.csv");
 #else
   std::ifstream f("/home/neerajen/Projects/OFCSolver/solver/src/no_suit_hand_strength.csv");
 #endif
@@ -54,12 +54,12 @@ FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type)
   std::string line;
 
   /*
-  top_eval_info.reserve(2197);
-  middle_eval_info.reserve(371293);
-  bottom_eval_info.reserve(371293);
-  flush_middle_eval_info.reserve(371293);
-  flush_bottom_eval_info.reserve(371293);
-  */
+     top_eval_info.reserve(2197);
+     middle_eval_info.reserve(371293);
+     bottom_eval_info.reserve(371293);
+     flush_middle_eval_info.reserve(371293);
+     flush_bottom_eval_info.reserve(371293);
+     */
 
   std::cout << "Starting FastPokerHandEvaluator..." << std::endl;
 
