@@ -110,7 +110,7 @@ int main(int argc, char* argv[]) {
                            dead_cards, n_solves,    n_decision_solves};
       // fantasy solver
       if (my_pull.cards.size() > 13) {
-        Decision d = FantasySolver().solve(eval, my_pull.cards);
+        Decision d = FantasySolver().solve(eval_fantasy, my_pull.cards);
         std::stringstream ss;
         json output;
         ss << d;
@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
         res.set_content(output.dump(), "text/plain");
       } else {
         auto decisions =
-            AdvancedDecisionFinder(eval_fantasy).findBestDecision(game_state);
+            AdvancedDecisionFinder(eval).findBestDecision(game_state);
 
         json output;
         {
