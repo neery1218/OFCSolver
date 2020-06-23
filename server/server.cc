@@ -15,6 +15,7 @@
 #include "card.h"
 #include "decision.h"
 #include "decision_finder.h"
+#include "fantasy_solver.h"
 #include "gametype.h"
 #include "hand.h"
 #include "placement.h"
@@ -43,24 +44,26 @@ Hand parseHand(std::string hand_str) {
   return Hand{top, mid, bot};
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   using namespace httplib;
   using json = nlohmann::json;
 
   Server svr;
-  FastPokerHandEvaluator *eval_progressive =
+  FastPokerHandEvaluator* eval_progressive =
       new FastPokerHandEvaluator(GameType::Progressive);
-  FastPokerHandEvaluator *eval_regular =
+  FastPokerHandEvaluator* eval_regular =
       new FastPokerHandEvaluator(GameType::Regular);
-  FastPokerHandEvaluator *eval_ultimate =
+  FastPokerHandEvaluator* eval_ultimate =
       new FastPokerHandEvaluator(GameType::Ultimate);
+  FastPokerHandEvaluator* eval_fantasy =
+      new FastPokerHandEvaluator(GameType::Fantasy);
   std::cout << "Ready!\n\n";
 
-  svr.Get("/eval", [eval_regular, eval_progressive, eval_ultimate](
-                       const Request &req, Response &res) {
+  svr.Get("/eval", [eval_regular, eval_progressive, eval_ultimate,
+                    eval_fantasy](const Request& req, Response& res) {
     try {
       std::string eval_type = req.params.find("type")->second;
-      FastPokerHandEvaluator *eval = eval_regular;
+      FastPokerHandEvaluator* eval = eval_regular;
 
       if (eval_type == "progressive") {
         eval = eval_progressive;
@@ -107,23 +110,33 @@ int main(int argc, char *argv[]) {
 
       GameState game_state{my_hand,    other_hands, my_pull,
                            dead_cards, n_solves,    n_decision_solves};
-      auto decisions =
-          AdvancedDecisionFinder(eval).findBestDecision(game_state);
-
-      json output;
-      {
+      // fantasy solver
+      if (my_pull.cards.size() > 13) {
+        Decision d = FantasySolver().solve(eval, my_pull.cards);
         std::stringstream ss;
-        ss << decisions[0].second;
+        json output;
+        ss << d;
         output["best"] = ss.str();
-      }
-      for (const auto &p : decisions) {
-        std::stringstream ss;
-        ss << p.second;
-        output[ss.str()] = p.first;
-      }
+        res.set_content(output.dump(), "text/plain");
+      } else {
+        auto decisions =
+            AdvancedDecisionFinder(eval_fantasy).findBestDecision(game_state);
 
-      res.set_content(output.dump(), "text/plain");
-    } catch (const std::exception &e) {
+        json output;
+        {
+          std::stringstream ss;
+          ss << decisions[0].second;
+          output["best"] = ss.str();
+        }
+        for (const auto& p : decisions) {
+          std::stringstream ss;
+          ss << p.second;
+          output[ss.str()] = p.first;
+        }
+
+        res.set_content(output.dump(), "text/plain");
+      }
+    } catch (const std::exception& e) {
       std::cout << e.what() << "\n";
     }
   });
