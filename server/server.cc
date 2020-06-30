@@ -27,7 +27,6 @@
 Hand parseHand(std::string hand_str) {
   std::vector<std::string> tokens;
   boost::split(tokens, hand_str, boost::is_any_of("/"));
-  std::cout << "hand_str" << std::endl;
   if (tokens.size() != 3)
     throw std::runtime_error("Must be exactly 2 forward slashes in hand");
 
@@ -84,7 +83,6 @@ int main(int argc, char* argv[]) {
       std::vector<Hand> other_hands;
       auto ret = req.params.equal_range("other_hand");
       for (auto it = ret.first; it != ret.second; it++) {
-        std::cout << "candidate: " << it->second;
         Hand other_hand = parseHand(it->second);
         if (other_hand.size() > 0) {
           other_hands.push_back(other_hand);

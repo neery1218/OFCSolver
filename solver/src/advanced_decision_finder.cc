@@ -10,7 +10,7 @@
 #include "solver.h"
 
 #ifndef NUM_THREADS
-#define NUM_THREADS 64
+#define NUM_THREADS 96
 #endif
 
 AdvancedDecisionFinder::AdvancedDecisionFinder(

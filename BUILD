@@ -8,6 +8,7 @@ cc_binary(
         "-Isolver/include/",
         "-Iserver/include/",
         "-O3",
+	"-DGCP",
         # "-DRESEARCH",
         "-std=c++17",
         ],

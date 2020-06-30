@@ -5,7 +5,7 @@ cc_library(
         copts = [
         "-Isolver/include/",
         "-O3",
-        "-DLOCAL",
+        "-DGCP",
         "-std=c++17",
         ],
         linkopts = [
