@@ -36,4 +36,5 @@ RUN touch /root/.ssh/known_hosts
 RUN ssh-keyscan github.com  >> /root/.ssh/known_hosts
 
 RUN git clone -b research git@github.com:neery1218/OFCSolver.git
+RUN cd /OFCSolver && bazel build :server
 
