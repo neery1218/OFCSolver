@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install \
     openjdk-8-jdk \
     linux-tools-common \
     linux-tools-generic \
+    git \
     cmake  --yes
 
 RUN apt-get install curl --yes
@@ -26,7 +27,13 @@ RUN apt-get update \
   && apt-get install -y bazel \
   && rm -rf /var/lib/apt/lists/*
 
-VOLUME ["/root/src"]
+RUN mkdir /root/.ssh/
+ADD docker-deploy /root/.ssh/id_rsa
 
-# make sure to start commands in the src folder
-WORKDIR /root/src
+# Create known_hosts
+RUN touch /root/.ssh/known_hosts
+# Add bitbuckets key
+RUN ssh-keyscan github.com  >> /root/.ssh/known_hosts
+
+RUN git clone -b research git@github.com:neery1218/OFCSolver.git
+
