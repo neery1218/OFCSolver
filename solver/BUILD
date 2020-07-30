@@ -17,6 +17,7 @@ cc_library(
         "@boost//:pool",
         "@boost//:system",
         "@boost//:asio",
+        "@boost//:format",
         ],
         visibility = ["//:__pkg__"],
 )
