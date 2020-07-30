@@ -47,15 +47,23 @@ int main(int argc, char* argv[]) {
   using namespace httplib;
   using json = nlohmann::json;
 
+  if (argc != 2) {
+    std::cout << "Pass in path to hand strength file! Exiting..." << std::endl;
+    return 0;
+  }
+
+  char* filename = argv[1];
+  std::cout << "Filename is : " << filename << std::endl;
+
   Server svr;
   FastPokerHandEvaluator* eval_progressive =
-      new FastPokerHandEvaluator(GameType::Progressive);
+      new FastPokerHandEvaluator(GameType::Progressive, filename);
   FastPokerHandEvaluator* eval_regular =
-      new FastPokerHandEvaluator(GameType::Regular);
+      new FastPokerHandEvaluator(GameType::Regular, filename);
   FastPokerHandEvaluator* eval_ultimate =
-      new FastPokerHandEvaluator(GameType::Ultimate);
+      new FastPokerHandEvaluator(GameType::Ultimate, filename);
   FastPokerHandEvaluator* eval_fantasy =
-      new FastPokerHandEvaluator(GameType::Fantasy);
+      new FastPokerHandEvaluator(GameType::Fantasy, filename);
   std::cout << "Ready!\n\n";
 
   svr.Get("/eval", [eval_regular, eval_progressive, eval_ultimate,

@@ -1,21 +1,25 @@
 #ifndef _FAST_POKER_HAND_EVALUATOR_
 #define _FAST_POKER_HAND_EVALUATOR_
 
+#include <array>
+#include <vector>
+
 #include "card.h"
 #include "gametype.h"
 #include "poker_hand_info.h"
 #include "position.h"
-#include <array>
-#include <vector>
 
 class FastPokerHandEvaluator {
   GameType game_type;
+  char* filename;
 
-  public:
-  FastPokerHandEvaluator(GameType type);
+ public:
+  FastPokerHandEvaluator(GameType type, char* filename);
 
-  FastPokerHandEvaluator(const FastPokerHandEvaluator&) = delete;      // explicit delete
-  FastPokerHandEvaluator& operator=(FastPokerHandEvaluator&) = delete; // explicit delete
+  FastPokerHandEvaluator(const FastPokerHandEvaluator&) =
+      delete;  // explicit delete
+  FastPokerHandEvaluator& operator=(FastPokerHandEvaluator&) =
+      delete;  // explicit delete
 
   ~FastPokerHandEvaluator();
 
@@ -24,7 +28,7 @@ class FastPokerHandEvaluator {
   PokerHandInfo evalMiddle(const std::vector<Card>& completed_row) const;
   PokerHandInfo evalBottom(const std::vector<Card>& completed_row) const;
 
-  private:
+ private:
   unsigned int calculateFantasyBonus(unsigned int overallRank) const;
 
   std::array<PokerHandInfo, 2197> top_eval_info;

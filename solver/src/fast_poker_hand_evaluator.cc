@@ -36,15 +36,10 @@ unsigned int convertHandStr(std::string hand) {
   return index;
 }
 
-FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type)
-    : game_type{_game_type} {
-  // std::ifstream f("/root/src/solver/src/no_suit_hand_strength.csv");
-#ifdef GCP
-  std::ifstream f("/OFCSolver/solver/src/no_suit_hand_strength.csv");
-#else
-  std::ifstream f(
-      "/home/neerajen/Projects/OFCSolver/solver/src/no_suit_hand_strength.csv");
-#endif
+FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type,
+                                               char* filename)
+    : game_type{_game_type}, filename{filename} {
+  std::ifstream f(filename);
 
   if (!f.is_open()) {
     std::cout
