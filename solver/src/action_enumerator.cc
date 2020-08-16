@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <unordered_set>
 
+#include "completed_hand.h"
+
 using namespace std;
 
 vector<Decision> ActionEnumerator::findAllSetDecisionsHelper(
@@ -72,7 +74,7 @@ vector<Decision> ActionEnumerator::findAllSetDecisions(
 }
 
 vector<Decision> ActionEnumerator::findAllDrawDecisions(
-    const GameState& game_state) {
+    const GameState& game_state, const FastPokerHandEvaluator* evaluator) {
   if (game_state.my_pull.cards.size() != 3) {
     throw std::runtime_error("My pull cards size != 3!");
   }
@@ -151,6 +153,25 @@ vector<Decision> ActionEnumerator::findAllDrawDecisions(
       }
       ++botCardsMissing;
     }
+  }
+
+  // special case: if the hand has 11 cards, never consider a fouled decision.
+  if (game_state.my_hand.size() == 11) {
+    std::vector<Decision> final_decisions;
+    for (auto decision : decisions) {
+      Hand h = game_state.my_hand.applyDecision(decision);
+      CompletedHand ch(h, evaluator);
+      if (!ch.is_fouled) {
+        final_decisions.push_back(decision);
+      }
+    }
+
+    if (final_decisions.size() == 0) {
+      std::cout << "All decisions are fouled!\n";
+      return decisions;
+    }
+
+    return final_decisions;
   }
 
   return decisions;

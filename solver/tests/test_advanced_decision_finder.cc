@@ -52,6 +52,20 @@ TEST_F(AdvancedDecisionFinderTest, SecondLastDraw) {
   std::cout << "best decision is: " << d;
 }
 
+TEST_F(AdvancedDecisionFinderTest, DontIntentionallyFoul) {
+  Hand my_hand(CardUtils::parseCards("Ks Th"),
+               CardUtils::parseCards("Js 6h 4h 4c 2d"),
+               CardUtils::parseCards("9d 8s 7d 5c"));
+
+  std::vector<Hand> other_hands;
+
+  Pull my_pull = {CardUtils::parseCards("Qh 9h 2s")};
+  GameState game_state{my_hand, other_hands, my_pull, std::vector<Card>()};
+  Decision d =
+      AdvancedDecisionFinder(evaluator).findBestDecision(game_state)[0].second;
+  std::cout << "best decision is: " << d;
+}
+
 /*
 TEST_F(AdvancedDecisionFinderTest, GreatSet) {
   Hand my_hand;

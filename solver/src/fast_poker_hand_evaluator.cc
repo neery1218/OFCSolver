@@ -37,7 +37,7 @@ unsigned int convertHandStr(std::string hand) {
 }
 
 FastPokerHandEvaluator::FastPokerHandEvaluator(GameType _game_type,
-                                               char* filename)
+                                               std::string filename)
     : game_type{_game_type}, filename{filename} {
   std::ifstream f(filename);
 

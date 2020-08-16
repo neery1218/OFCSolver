@@ -11,10 +11,13 @@
 
 class FastPokerHandEvaluator {
   GameType game_type;
-  char* filename;
+  std::string filename;
 
  public:
-  FastPokerHandEvaluator(GameType type, char* filename);
+  FastPokerHandEvaluator(GameType type,
+                         std::string filename =
+                             "/home/neerajen/Projects/OFCSolver/solver/src/"
+                             "no_suit_hand_strength.csv");
 
   FastPokerHandEvaluator(const FastPokerHandEvaluator&) =
       delete;  // explicit delete

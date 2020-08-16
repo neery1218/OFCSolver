@@ -9,6 +9,7 @@ struct CompletedHand {
   PokerHandInfo middleInfo;
   PokerHandInfo bottomInfo;
   Hand* h;  // only used for fantasy solving
+  bool is_fouled;
 
   CompletedHand(){};
   CompletedHand(const Hand& h, const FastPokerHandEvaluator* evaluator);

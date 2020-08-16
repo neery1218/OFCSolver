@@ -1,4 +1,5 @@
 #include <benchmark/benchmark.h>
+
 #include <iostream>
 #include <set>
 #include <vector>
@@ -11,11 +12,12 @@
 #include "pull.h"
 #include "solver.h"
 
-static FastPokerHandEvaluator evaluator(GameType::Regular);
-static std::mt19937 rng { 1234 };
+static FastPokerHandEvaluator evaluator(
+    GameType::Regular,
+    "/home/neerajen/Projects/OFCSolver/solver/src/no_suit_hand_strength.csv");
+static std::mt19937 rng{1234};
 
-static void FastPokerHandEvaluator(benchmark::State& state)
-{
+static void FastPokerHandEvaluator(benchmark::State& state) {
   // Perform setup here
   std::vector<Card> cards_1 = CardUtils::parseCards("Ah Kh Qh Jh Th");
   std::vector<Card> cards_2 = CardUtils::parseCards("As Kh Qh Jh Th");
@@ -32,51 +34,51 @@ static void FastPokerHandEvaluator(benchmark::State& state)
   }
 }
 
-static void Solver_2(benchmark::State& state)
-{
-  Hand hand(
-      CardUtils::parseCards("Ac"),
-      CardUtils::parseCards("2c 2d"),
-      CardUtils::parseCards("9h 9d"));
+static void Solver_2(benchmark::State& state) {
+  Hand hand(CardUtils::parseCards("Ac"), CardUtils::parseCards("2c 2d"),
+            CardUtils::parseCards("9h 9d"));
 
-  Pull pull { CardUtils::parseCards("Ac 4c 4d") };
+  Pull pull{CardUtils::parseCards("Ac 4c 4d")};
   for (auto _ : state) {
-    double ev = Solver(&evaluator, &rng).solve(state.range(0), hand, pull, std::vector<Hand>(), std::vector<Card>());
+    double ev = Solver(&evaluator, &rng)
+                    .solve(state.range(0), hand, pull, std::vector<Hand>(),
+                           std::vector<Card>());
   }
 }
 
-static void Solver_3(benchmark::State& state)
-{
-  Hand hand(
-      CardUtils::parseCards("Ac"),
-      CardUtils::parseCards("2c 2d 3d"),
-      CardUtils::parseCards("9h 9d 9c"));
+static void Solver_3(benchmark::State& state) {
+  Hand hand(CardUtils::parseCards("Ac"), CardUtils::parseCards("2c 2d 3d"),
+            CardUtils::parseCards("9h 9d 9c"));
 
-  Pull pull { CardUtils::parseCards("Ac 4c 4d") };
+  Pull pull{CardUtils::parseCards("Ac 4c 4d")};
   for (auto _ : state) {
-    double ev = Solver(&evaluator, &rng).solve(state.range(0), hand, pull, std::vector<Hand>(), std::vector<Card>());
+    double ev = Solver(&evaluator, &rng)
+                    .solve(state.range(0), hand, pull, std::vector<Hand>(),
+                           std::vector<Card>());
   }
 }
 
-static void Solver_4(benchmark::State& state)
-{
-  Hand hand(
-      CardUtils::parseCards("Ac"),
-      CardUtils::parseCards("2c 2d 3d 4s"),
-      CardUtils::parseCards("9h 9d 9c 9s"));
+static void Solver_4(benchmark::State& state) {
+  Hand hand(CardUtils::parseCards("Ac"), CardUtils::parseCards("2c 2d 3d 4s"),
+            CardUtils::parseCards("9h 9d 9c 9s"));
 
-  Pull pull { CardUtils::parseCards("Ac 4c 4d") };
+  Pull pull{CardUtils::parseCards("Ac 4c 4d")};
   for (auto _ : state) {
-    double ev = Solver(&evaluator, &rng).solve(state.range(0), hand, pull, std::vector<Hand>(), std::vector<Card>());
+    double ev = Solver(&evaluator, &rng)
+                    .solve(state.range(0), hand, pull, std::vector<Hand>(),
+                           std::vector<Card>());
   }
 }
 
 // Register the function as a benchmark
 // BENCHMARK(FastPokerHandEvaluator)->Unit(benchmark::kMicrosecond);
 
-BENCHMARK(Solver_4)->RangeMultiplier(4)->Range(8, 15000)->Unit(benchmark::kMicrosecond);
-BENCHMARK(Solver_3)->RangeMultiplier(4)->Range(8, 15000)->Unit(benchmark::kMicrosecond);
-BENCHMARK(Solver_2)->RangeMultiplier(4)->Range(8, 15000)->Unit(benchmark::kMicrosecond);
+BENCHMARK(Solver_4)->RangeMultiplier(4)->Range(8, 15000)->Unit(
+    benchmark::kMicrosecond);
+BENCHMARK(Solver_3)->RangeMultiplier(4)->Range(8, 15000)->Unit(
+    benchmark::kMicrosecond);
+BENCHMARK(Solver_2)->RangeMultiplier(4)->Range(8, 15000)->Unit(
+    benchmark::kMicrosecond);
 
 // Run the benchmark
 BENCHMARK_MAIN();

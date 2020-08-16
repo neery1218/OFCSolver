@@ -19,7 +19,7 @@ Decision DecisionFinder::findBestDecision(const GameState &game_state,
                                           int iterations) {
   vector<Decision> all_decisions =
       (game_state.my_hand.size() > 0)
-          ? ActionEnumerator::findAllDrawDecisions(game_state)
+          ? ActionEnumerator::findAllDrawDecisions(game_state, evaluator)
           : ActionEnumerator::findAllSetDecisions(game_state);
 
   vector<pair<double, Decision>> ev_to_decision;
