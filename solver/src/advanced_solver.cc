@@ -46,6 +46,7 @@ DecisionStats AdvancedSolver::solve(int iterations, const GameState &game_state,
 #endif
 
   double total = 0;
+  DecisionStats dS = {0, 0, 0, 0};
   std::vector<double> evs;
   for (int i = 0; i < iterations; ++i) {
     stack<Hand> hands;
@@ -122,11 +123,15 @@ DecisionStats AdvancedSolver::solve(int iterations, const GameState &game_state,
     total += ev;
 
 #else
-    double ev =
+    DecisionStats solverStats =
         Solver(evaluator, &rng)
             .solve(10, hands.top(), Pull(), game_state.other_hands, dead_cards);
-    total += ev;
-    evs.push_back(ev);
+
+    dS.mean += solverStats.mean;
+    dS.queens_fantasy_pct += solverStats.queens_fantasy_pct;
+    dS.kings_fantasy_pct += solverStats.kings_fantasy_pct;
+    dS.aces_fantasy_pct += solverStats.aces_fantasy_pct;
+    evs.push_back(solverStats.mean);
 #endif
 
 #ifdef RESEARCH
@@ -154,13 +159,17 @@ DecisionStats AdvancedSolver::solve(int iterations, const GameState &game_state,
 #endif
   }
 
-  double mean = total / iterations;
+  dS.mean /= iterations;
+  dS.queens_fantasy_pct /= iterations;
+  dS.kings_fantasy_pct /= iterations;
+  dS.aces_fantasy_pct /= iterations;
+
   double sum = 0;
   // calculate variance
   for (double ev : evs) {
-    sum += pow((ev - mean), 2);
+    sum += pow((ev - dS.mean), 2);
   }
-  double variance = sum / evs.size();
+  dS.variance = sum / evs.size();
 
-  return DecisionStats{mean, variance, 0, 0, 0};
+  return dS;
 }

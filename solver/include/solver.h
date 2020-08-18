@@ -10,6 +10,7 @@
 
 #include "card.h"
 #include "decision.h"
+#include "decision_stats.h"
 #include "deck.h"
 #include "gametype.h"
 #include "hand.h"
@@ -32,9 +33,9 @@ class Solver {
                             const std::vector<Hand> &other_hands,
                             const std::vector<Card> &dead_cards);
 #else
-  double solve(int numIterations, const Hand &my_hand, const Pull &my_pull,
-               const std::vector<Hand> &other_hands,
-               const std::vector<Card> &dead_cards);
+  DecisionStats solve(int numIterations, const Hand &my_hand,
+                      const Pull &my_pull, const std::vector<Hand> &other_hands,
+                      const std::vector<Card> &dead_cards);
 #endif
   Solver(const Solver &) = delete;
   Solver &operator=(Solver &) = delete;

@@ -41,26 +41,24 @@ const int RANK_TYPE_SHIFT = 8;
 
 const int ROYALTY_MASK = 0x000000FF;
 const int HAND_TYPE_MASK = 0xFF000000;
-const int OVERALL_RANK_MASK = 0xFFFFFF00;
+const int OVERALL_RANK_MASK = 0x00FFFF00;
 
-constexpr PokerHandInfo createPokerHandInfo(int rank, int hand_type, int royalties)
-{
-  return 0 | (rank << RANK_TYPE_SHIFT) | (hand_type << HAND_TYPE_SHIFT) | (royalties << ROYALTY_TYPE_SHIFT);
+constexpr PokerHandInfo createPokerHandInfo(int rank, int hand_type,
+                                            int royalties) {
+  return 0 | (rank << RANK_TYPE_SHIFT) | (hand_type << HAND_TYPE_SHIFT) |
+         (royalties << ROYALTY_TYPE_SHIFT);
 }
 
-constexpr unsigned int getRoyalties(PokerHandInfo info)
-{
+constexpr unsigned int getRoyalties(PokerHandInfo info) {
   return (info & ROYALTY_MASK) >> ROYALTY_TYPE_SHIFT;
 }
 
-constexpr unsigned int getHandType(PokerHandInfo info)
-{
+constexpr unsigned int getHandType(PokerHandInfo info) {
   return (info & HAND_TYPE_MASK) >> HAND_TYPE_SHIFT;
 }
 
-constexpr unsigned int getOverallRank(PokerHandInfo info)
-{
+constexpr unsigned int getOverallRank(PokerHandInfo info) {
   return (info & OVERALL_RANK_MASK) >> RANK_TYPE_SHIFT;
 }
-}
+}  // namespace PokerHandUtils
 #endif

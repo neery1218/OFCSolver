@@ -36,7 +36,8 @@ Decision DecisionFinder::findBestDecision(const GameState &game_state,
     double ev = Solver(evaluator, rng)
                     .solve(iterations, game_state.my_hand.applyDecision(d),
                            game_state.my_pull, game_state.other_hands,
-                           game_state.dead_cards);
+                           game_state.dead_cards)
+                    .mean;
 #endif
     ev_to_decision.emplace_back(ev, d);
   }

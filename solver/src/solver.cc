@@ -27,9 +27,9 @@ vector<double> Solver::solve(int numIterations, const Hand &myHand,
                              const Pull &myPull, const vector<Hand> &otherHands,
                              const vector<Card> &deadCards) {
 #else
-double Solver::solve(int numIterations, const Hand &myHand, const Pull &myPull,
-                     const vector<Hand> &otherHands,
-                     const vector<Card> &deadCards) {
+DecisionStats Solver::solve(int numIterations, const Hand &myHand,
+                            const Pull &myPull, const vector<Hand> &otherHands,
+                            const vector<Card> &deadCards) {
 #endif
 
   // Create deck, and remove known cards.
@@ -79,12 +79,22 @@ double Solver::solve(int numIterations, const Hand &myHand, const Pull &myPull,
 #ifdef RESEARCH
   vector<double> evs;
 #endif
+  DecisionStats dS = {0, 0, 0, 0, 0};
   for (int it = 0; it < numIterations; ++it) {
     // sample cards from deck
     vector<Card> my_draw = deck.select(cardsNeeded[0], rng);
     std::sort(my_draw.begin(), my_draw.end());
     CompletedHand myOptimalHand =
         OptimalHand::constructOptimalHand(myHand, my_draw, evaluator);
+    if (myOptimalHand.fantasyType != FantasyType::NONE) {
+      if (myOptimalHand.fantasyType == FantasyType::QUEENS) {
+        dS.queens_fantasy_pct += 1;
+      } else if (myOptimalHand.fantasyType == FantasyType::KINGS) {
+        dS.kings_fantasy_pct += 1;
+      } else if (myOptimalHand.fantasyType == FantasyType::ACES) {
+        dS.aces_fantasy_pct += 1;
+      }
+    }
 
     if (allHands.size() == 1) {
       double ev = myOptimalHand.calculatePoints();
@@ -111,6 +121,11 @@ double Solver::solve(int numIterations, const Hand &myHand, const Pull &myPull,
 #ifdef RESEARCH
   return evs;
 #else
-  return total * 1.0 / numIterations;
+  dS.queens_fantasy_pct /= numIterations;
+  dS.kings_fantasy_pct /= numIterations;
+  dS.aces_fantasy_pct /= numIterations;
+  dS.mean = total * 1.0 / numIterations;
+  // std::cout << numIterations << " " << dS << std::endl;
+  return dS;
 #endif
 }
