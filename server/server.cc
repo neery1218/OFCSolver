@@ -1,6 +1,7 @@
 #include <httplib.h>
 
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -137,7 +138,8 @@ int main(int argc, char* argv[]) {
         for (const auto& p : decisions) {
           std::stringstream ss;
           ss << p.second;
-          output[ss.str()] = p.first;
+          output[ss.str()]["mean"] = p.first.mean;
+          output[ss.str()]["stddev"] = sqrt(p.first.variance);
         }
 
         res.set_content(output.dump(), "text/plain");

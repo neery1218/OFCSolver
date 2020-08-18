@@ -7,6 +7,7 @@
 
 #include "action_enumerator.h"
 #include "advanced_solver.h"
+#include "decision_stats.h"
 #include "solver.h"
 
 #ifndef NUM_THREADS
@@ -55,7 +56,7 @@ SolverParams AdvancedDecisionFinder::getSolverParams(
    }
    */
 
-std::vector<std::pair<double, Decision> >
+std::vector<std::pair<DecisionStats, Decision> >
 AdvancedDecisionFinder::findBestDecision(const GameState &game_state) {
   std::vector<Decision> all_decisions =
       (game_state.my_hand.size() > 0)
@@ -77,9 +78,7 @@ std::vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(
     const std::vector<Decision> &all_decisions, unsigned int n,
     const GameState &game_state, const SolverParams &solver_params) {
   std::vector<std::pair<double, Decision> > ev_to_decision;
-  std::vector<double> ev_from_threads(all_decisions.size(),
-                                      std::numeric_limits<double>::min());
-
+  std::vector<DecisionStats> ev_from_threads(all_decisions.size());
   std::vector<Card> dead_cards(game_state.dead_cards);
   for (auto &h : game_state.other_hands) {
     dead_cards.insert(dead_cards.end(), h.top.begin(), h.top.end());
@@ -120,7 +119,7 @@ std::vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(
   pool.join();
 
   for (unsigned int i = 0; i < ev_from_threads.size(); ++i) {
-    ev_to_decision.emplace_back(ev_from_threads[i], all_decisions[i]);
+    ev_to_decision.emplace_back(ev_from_threads[i].mean, all_decisions[i]);
   }
 
   std::sort(ev_to_decision.begin(), ev_to_decision.end(),
@@ -136,20 +135,18 @@ std::vector<Decision> AdvancedDecisionFinder::stageOneEvaluation(
 
   return top_n_decisions;
 }
-std::vector<std::pair<double, Decision> >
+std::vector<std::pair<DecisionStats, Decision> >
 AdvancedDecisionFinder::stageTwoEvaluation(
     const std::vector<Decision> &all_decisions, const GameState &game_state,
     const SolverParams &solver_params) {
-  std::vector<std::pair<double, Decision> > ev_to_decision;
+  std::vector<std::pair<DecisionStats, Decision> > ev_to_decision;
   int split = 8;
   boost::asio::thread_pool new_pool(NUM_THREADS);
 
 #ifdef RESEARCH
   split = 1;
 #endif
-  std::vector<double> ev_from_threads(all_decisions.size() * split,
-                                      std::numeric_limits<double>::min());
-
+  std::vector<DecisionStats> ev_from_threads(all_decisions.size() * split);
   Deck initial_deck(game_state);
 
   // Create a random seed per AdvancedSolver instance
@@ -176,9 +173,9 @@ AdvancedDecisionFinder::stageTwoEvaluation(
                             game_state.dead_cards,
                             game_state.n_solves,
                             game_state.n_decision_solves};
-        double ev = AdvancedSolver(local_eval, seeds[i])
-                        .solve(num_iterations_split, new_state, initial_deck,
-                               solver_params.search_level);
+        DecisionStats ev = AdvancedSolver(local_eval, seeds[i])
+                               .solve(num_iterations_split, new_state,
+                                      initial_deck, solver_params.search_level);
         ev_from_threads[i * split + j] = ev;
       });
     }
@@ -187,15 +184,31 @@ AdvancedDecisionFinder::stageTwoEvaluation(
   new_pool.join();
 
   for (unsigned int i = 0; i < all_decisions.size(); ++i) {
-    double total = 0;
+    DecisionStats finalDS = {0, 0, 0, 0};
     for (int j = 0; j < split; ++j) {
-      total += ev_from_threads[split * i + j];
+      finalDS.mean += ev_from_threads[split * i + j].mean;
+      finalDS.variance += ev_from_threads[split * i + j].variance;
+      finalDS.aces_fantasy_pct +=
+          ev_from_threads[split * i + j].aces_fantasy_pct;
+      finalDS.kings_fantasy_pct +=
+          ev_from_threads[split * i + j].kings_fantasy_pct;
+      finalDS.queens_fantasy_pct +=
+          ev_from_threads[split * i + j].queens_fantasy_pct;
     }
-    ev_to_decision.emplace_back(total / split, all_decisions[i]);
+
+    finalDS.mean /= split;
+    finalDS.variance /= split;
+    finalDS.aces_fantasy_pct /= split;
+    finalDS.kings_fantasy_pct /= split;
+    finalDS.queens_fantasy_pct /= split;
+
+    ev_to_decision.emplace_back(finalDS, all_decisions[i]);
   }
 
   std::sort(ev_to_decision.begin(), ev_to_decision.end(),
-            [](auto &left, auto &right) { return right.first < left.first; });
+            [](auto &left, auto &right) {
+              return right.first.mean < left.first.mean;
+            });
 
   std::cout << "Stage two (Advanced): \n";
   for (unsigned int i = 0; i < ev_to_decision.size(); ++i) {

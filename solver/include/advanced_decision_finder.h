@@ -7,6 +7,7 @@
 #include "advanced_solver.h"
 #include "card.h"
 #include "decision.h"
+#include "decision_stats.h"
 #include "fast_poker_hand_evaluator.h"
 #include "game_state.h"
 #include "gametype.h"
@@ -24,7 +25,7 @@ class AdvancedDecisionFinder {
   AdvancedDecisionFinder(const AdvancedDecisionFinder &) = delete;
   AdvancedDecisionFinder &operator=(AdvancedDecisionFinder &) = delete;
 
-  std::vector<std::pair<double, Decision>> findBestDecision(
+  std::vector<std::pair<DecisionStats, Decision>> findBestDecision(
       const GameState &game_state);
 
  private:
@@ -32,7 +33,7 @@ class AdvancedDecisionFinder {
   std::vector<Decision> stageOneEvaluation(
       const std::vector<Decision> &all_decisions, unsigned int n,
       const GameState &game_state, const SolverParams &solver_params);
-  std::vector<std::pair<double, Decision>> stageTwoEvaluation(
+  std::vector<std::pair<DecisionStats, Decision>> stageTwoEvaluation(
       const std::vector<Decision> &all_decisions, const GameState &game_state,
       const SolverParams &solver_params);
 };
