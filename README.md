@@ -1,2 +1,2 @@
 # OFCSolver
-GPU powered OFC Solver. Uses C++ CUDA
+OFC Solver. Uses many many cores to solve for the correct solution.
